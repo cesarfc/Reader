@@ -65,6 +65,17 @@ and the 3rd grader both get fair fights from the same bosses.
 - **Daily quests** — three missions a day with coin/gem rewards, plus Reader
   XP levels (Lv 1–50 with titles) so there's always near-term progress.
 - **Badges** — 22 collectible badges for books, mastery, streaks, and bosses.
+- **Sticker album** — every 2-star-or-better round opens a sticker pack: 48
+  collectible emoji stickers in four packs, with rare ✨shiny✨ versions;
+  duplicates convert to coins.
+- **Built for pre-readers** — a giant ▶ PLAY button picks the smartest next
+  activity automatically (open quests first, then whatever has the most
+  unmastered words); voice guidance speaks instructions for K–1 profiles; the
+  Journey meter is a rocket flying to the moon; quests use progress dots; the
+  equipped pet rides along on screen and reacts to right/wrong answers.
+- **Living world** — the sky tints to match your current adventure stage, and
+  results screens play a celebration sequence (stars → coins counting up →
+  bonuses → sticker pack peel).
 - **Family goal** — grown-ups set a weekly shared star target ("50 ⭐ →
   movie night"); everyone's stars count together.
 - **Grown-up corner** (math-gated) — per-kid dashboard: journey breakdown,
@@ -115,11 +126,12 @@ The folder is a fully static site, so any static host works:
 
 Then "Add to Home Screen" works from anywhere, no Mac required.
 
-### Want a real App Store app later?
+### Native iPad/iPhone app
 
-Wrap this same code with [Capacitor](https://capacitorjs.com): `npx cap add ios`
-gives you an Xcode project with this web app inside, ready for TestFlight/App
-Store. Nothing about the game code has to change.
+A ready-made, dependency-free Xcode project lives in [ios/](ios/) — a Swift
+WKWebView shell with the game bundled inside (~550 KB, fully offline).
+See [ios/README-IOS.md](ios/README-IOS.md) for the 5-minute "put it on the
+iPad" steps. After changing the game, run `./ios-sync.sh` and hit Run in Xcode.
 
 ## Customizing (the fun part)
 
