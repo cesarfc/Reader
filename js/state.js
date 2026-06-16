@@ -28,6 +28,10 @@ RR.state = (function () {
     p.quests = p.quests || null;     /* today's quests, see progress.js */
     p.celebrated = p.celebrated || {}; /* grades graduated, e.g. {K:1} */
     p.stickers = p.stickers || {};   /* sticker id -> 1 normal | 2 shiny */
+    p.diff = p.diff || (p.grade === 'K' ? 'chill' : 'normal');
+    p.diffMode = p.diffMode || 'auto'; /* 'auto' or 'locked' */
+    p.consecHigh = p.consecHigh || 0;
+    p.consecLow = p.consecLow || 0;
     return p;
   }
 
@@ -165,7 +169,12 @@ RR.state = (function () {
       }
     }
 
-    const coinsEarned = earn(profile, result.coins || 0);
+    /* difficulty: harder tiers pay a reward multiplier and auto-adapt */
+    const rewardMul = RR.progress.diffCfg(profile).reward;
+    const roundAcc = result.total ? (result.correct || 0) / result.total : null;
+    const diffBump = roundAcc != null ? RR.progress.tuneDifficulty(profile, roundAcc) : null;
+
+    const coinsEarned = earn(profile, Math.round((result.coins || 0) * rewardMul));
 
     /* gems: 1 for a 3-star round, +1 more for a perfect round */
     let gemsEarned = 0;
@@ -176,7 +185,7 @@ RR.state = (function () {
 
     /* Reader XP (same base as coins, but never spent) */
     const before = RR.progress.levelOf(profile.xp).level;
-    const xpGained = (result.coins || 0) + 8;
+    const xpGained = Math.round(((result.coins || 0) + 8) * rewardMul);
     profile.xp += xpGained;
     const after = RR.progress.levelOf(profile.xp).level;
 
@@ -198,7 +207,7 @@ RR.state = (function () {
     save();
     return {
       coinsEarned, gemsEarned, bossJustReady, newlyMastered, questsDone, sticker,
-      xpGained,
+      xpGained, diffBump, rewardMul,
       levelUp: after > before ? after : null,
       graduate: RR.progress.readyToGraduate(profile)
     };

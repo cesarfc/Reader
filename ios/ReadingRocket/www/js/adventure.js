@@ -165,13 +165,19 @@ RR.nav = RR.nav || {};
     const boss = stage.boss;
     const u = U();
 
-    const maxHearts = S.hearts(p);
-    let bossHp = boss.hp;
+    const dcfg = RR.progress.diffCfg(p);
+    const maxHearts = Math.max(1, S.hearts(p) + dcfg.hearts);
+    const bossMaxHp = Math.round(boss.hp * dcfg.hp);
+    let bossHp = bossMaxHp;
     let heartsLeft = maxHearts;
     let correctCount = 0;
     let qShownAt = 0;
     let over = false;
     let finishFlashed = false;
+    let enragedFlag = false;
+    let combo = 0;
+    let qTimer = null;
+    let lastChoices = null, lastGetCorrect = null;
     const timers = [];
     const after = (ms, fn) => timers.push(setTimeout(() => { if (!over || fn.allow) fn(); }, ms));
 
@@ -200,6 +206,7 @@ RR.nav = RR.nav || {};
             <div class="fname">${boss.name}</div>
           </div>
         </div>
+        <div class="qtimer" id="qtimer" hidden><i></i></div>
         <div class="battleq" id="battleq"></div>
       </section>`;
 
@@ -222,8 +229,9 @@ RR.nav = RR.nav || {};
     battleq.innerHTML = `
       <div class="card intro">
         <p class="bosstaunt">“${boss.taunt}”</p>
-        <p class="muted">⚔️ Right answers attack the boss${weapon ? ` (+${weapon.power} ${weapon.name})` : ''} ·
-        💔 wrong answers cost a heart${armor ? ` (+${armor.power} from ${armor.name})` : ''}</p>
+        <p class="difftag">${dcfg.e} ${dcfg.label} mode · ❤️ ${maxHearts} hearts${dcfg.timer ? ` · ⏱️ ${dcfg.timer}s per question` : ''}</p>
+        <p class="muted">⚔️ Right answers attack${weapon ? ` (+${weapon.power} ${weapon.name})` : ''} ·
+        🔥 answer fast for combos &amp; crits · 💔 wrong or too slow costs a heart</p>
         <div class="introbtns"><button class="btn big" data-act="fight">⚔️ FIGHT!</button></div>
       </div>`;
     A.speak(`${boss.name} says: ${boss.taunt}`);
@@ -246,6 +254,39 @@ RR.nav = RR.nav || {};
       ti++;
       makeQ[type]();
       qShownAt = Date.now();
+      startTimer();
+    }
+
+    /* Per-question countdown (Challenge/Expert only). Enrage shrinks it. */
+    function startTimer() {
+      clearInterval(qTimer);
+      const bar = $('#qtimer');
+      if (!bar) return;
+      if (!dcfg.timer) { bar.hidden = true; return; }
+      const enraged = bossHp <= bossMaxHp * 0.3;
+      const dur = (enraged ? dcfg.timer * 0.6 : dcfg.timer) * 1000;
+      const fill = bar.querySelector('i');
+      bar.hidden = false;
+      bar.classList.toggle('enraged', enraged);
+      const t0 = Date.now();
+      fill.style.width = '100%';
+      qTimer = setInterval(() => {
+        if (over) { clearInterval(qTimer); return; }
+        const left = Math.max(0, 1 - (Date.now() - t0) / dur);
+        fill.style.width = (left * 100) + '%';
+        if (left <= 0) { clearInterval(qTimer); onTimeout(); }
+      }, 80);
+      timers.push(qTimer);
+    }
+
+    function onTimeout() {
+      if (over) return;
+      const qs = battleq.querySelectorAll('.choice');
+      qs.forEach(x => x.disabled = true);
+      if (lastGetCorrect) qs.forEach(x => { if (lastGetCorrect(lastChoices[+x.dataset.i])) x.classList.add('correct'); });
+      combo = 0;
+      floatText($('.bossside'), '⏰ Too slow!', '');
+      bossStrike();
     }
 
     function choiceButtons(items, render) {
@@ -253,9 +294,12 @@ RR.nav = RR.nav || {};
     }
 
     function wire(choices, getCorrect, masteryKey) {
+      lastChoices = choices;
+      lastGetCorrect = getCorrect;
       battleq.querySelectorAll('.choice').forEach(btn => {
         btn.addEventListener('click', () => {
           if (over || btn.disabled) return;
+          clearInterval(qTimer);
           const c = choices[+btn.dataset.i];
           const correct = getCorrect(c);
           if (masteryKey) S.bump(p, masteryKey, correct);
@@ -265,6 +309,7 @@ RR.nav = RR.nav || {};
             heroStrike();
           } else {
             btn.classList.add('wrong');
+            combo = 0;
             /* show the right answer so it's still a learning moment */
             battleq.querySelectorAll('.choice').forEach(x => {
               if (getCorrect(choices[+x.dataset.i])) x.classList.add('correct');
@@ -284,7 +329,7 @@ RR.nav = RR.nav || {};
         for (const w of wordPool) {
           if (w.t[0] !== firstTile.l && w.s[0] !== firstTile.s) others.push({ l: w.t[0], s: w.s[0] });
         }
-        const choices = u.withDistractors(firstTile, others, 3, x => x.l);
+        const choices = u.withDistractors(firstTile, others, dcfg.choices, x => x.l, dcfg.hard ? u.letterSim : null);
         battleq.innerHTML = `
           <div class="bq" data-qtype="first">
             <div class="bqprompt"><button class="bigpic small" data-act="say" aria-label="${target.w}">${target.e}</button>
@@ -302,7 +347,7 @@ RR.nav = RR.nav || {};
       /* Hear the word, find it written. */
       match() {
         const target = u.smartSample(p, wordPool, 1, w => 'w:' + w.w)[0];
-        const choices = u.withDistractors(target, wordPool, 3, x => x.w);
+        const choices = u.withDistractors(target, wordPool, dcfg.choices, x => x.w, dcfg.hard ? u.wordSim : null);
         battleq.innerHTML = `
           <div class="bq" data-qtype="match">
             <div class="bqprompt"><button class="bigpic small" data-act="say" aria-label="${target.w}">${target.e}</button>
@@ -320,7 +365,7 @@ RR.nav = RR.nav || {};
       /* Blend the sounds, pick the picture. */
       blend() {
         const target = u.smartSample(p, wordPool, 1, w => 'w:' + w.w)[0];
-        const choices = u.withDistractors(target, wordPool, 3, x => x.w);
+        const choices = u.withDistractors(target, wordPool, dcfg.choices, x => x.w, dcfg.hard ? u.wordSim : null);
         battleq.innerHTML = `
           <div class="bq" data-qtype="blend">
             <div class="bqprompt">
@@ -352,7 +397,7 @@ RR.nav = RR.nav || {};
         const rime = u.rimeOf(target.w);
         const partner = u.sample(families[rime].filter(w => w.w !== target.w), 1)[0];
         const nonRhyming = rhymePool.filter(w => u.rimeOf(w.w) !== rime);
-        const choices = u.withDistractors(partner, nonRhyming, 3, x => x.w);
+        const choices = u.withDistractors(partner, nonRhyming, dcfg.choices, x => x.w, dcfg.hard ? u.wordSim : null);
         battleq.innerHTML = `
           <div class="bq" data-qtype="rhyme">
             <div class="bqprompt">
@@ -381,17 +426,21 @@ RR.nav = RR.nav || {};
     }
 
     function heroStrike() {
-      const crit = Date.now() - qShownAt < 5000;
-      const dmg = Math.round(S.attack(p) * (crit ? 1.5 : 1));
-      bossHp = Math.max(0, bossHp - dmg);
+      combo++;
       correctCount++;
+      const comboMul = combo >= 5 ? 2 : combo >= 3 ? 1.5 : combo >= 2 ? 1.25 : 1;
+      const crit = Date.now() - qShownAt < 5000;
+      const dmg = Math.round(S.attack(p) * comboMul * (crit ? 1.5 : 1));
+      bossHp = Math.max(0, bossHp - dmg);
       $('#hero-emoji').classList.add('lunge');
       after(180, () => {
         const bossSide = $('.bossside');
         $('#boss-emoji').classList.add('hit');
-        floatText(bossSide, (crit ? '⚡CRIT! ' : '') + '-' + dmg, crit ? 'crit' : '');
-        $('#boss-hp').style.width = (bossHp / boss.hp * 100) + '%';
-        if (crit) {
+        const tag = (crit ? '⚡CRIT! ' : '') + '-' + dmg;
+        floatText(bossSide, tag, crit ? 'crit' : '');
+        if (combo >= 2) floatText($('.fighter.hero'), '🔥 x' + combo, 'combo');
+        $('#boss-hp').style.width = (bossHp / bossMaxHp * 100) + '%';
+        if (crit || comboMul >= 1.5) {
           A.sfx.crit();
           buzz([40, 40, 90]);
           const field = $('.battlefield');
@@ -400,6 +449,12 @@ RR.nav = RR.nav || {};
         } else {
           A.sfx.hit();
           buzz(50);
+        }
+        /* boss enrages at low HP — questions get faster */
+        if (!enragedFlag && bossHp > 0 && bossHp <= bossMaxHp * 0.3) {
+          enragedFlag = true;
+          $('#boss-emoji').classList.add('enraged');
+          floatText(bossSide, '😡 ENRAGED!', 'crit');
         }
       });
       after(700, () => {
@@ -447,7 +502,7 @@ RR.nav = RR.nav || {};
       RR.confetti.burst(200);
       buzz([60, 60, 60, 60, 160]);
       const base = (rematch ? Math.floor(boss.reward / 2) : boss.reward) + correctCount * 2;
-      const earned = S.earn(p, base);
+      const earned = S.earn(p, Math.round(base * dcfg.reward));
       const advanced = !rematch && stageIdx === p.stage;
       let gems = 0;
       if (advanced) {

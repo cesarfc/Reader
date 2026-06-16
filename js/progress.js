@@ -254,6 +254,43 @@ RR.progress = (function () {
     return { kind: 'game', id: trainingPick() };
   }
 
+  /* ---------------- Difficulty ---------------- */
+  function diffId(p) {
+    return (p.diff && D().DIFF[p.diff]) ? p.diff : 'normal';
+  }
+  function diffCfg(p) { return D().DIFF[diffId(p)]; }
+
+  /* Update rolling accuracy and, in auto mode, nudge the tier:
+     3 strong rounds bump up, 2 weak rounds bump down. Returns a bump
+     descriptor for a celebration toast, or null. */
+  function tuneDifficulty(p, roundAcc) {
+    p.acc = (p.acc == null) ? roundAcc : (p.acc * 0.6 + roundAcc * 0.4);
+    if (p.diffMode === 'locked') return null;
+    if (roundAcc >= 0.85) { p.consecHigh = (p.consecHigh || 0) + 1; p.consecLow = 0; }
+    else if (roundAcc <= 0.5) { p.consecLow = (p.consecLow || 0) + 1; p.consecHigh = 0; }
+    else { p.consecHigh = 0; p.consecLow = 0; }
+
+    const order = D().DIFF_ORDER;
+    let i = order.indexOf(diffId(p));
+    if ((p.consecHigh || 0) >= 3 && i < order.length - 1) {
+      p.diff = order[i + 1]; p.consecHigh = 0;
+      return { dir: 'up', id: p.diff, cfg: D().DIFF[p.diff] };
+    }
+    if ((p.consecLow || 0) >= 2 && i > 0) {
+      p.diff = order[i - 1]; p.consecLow = 0;
+      return { dir: 'down', id: p.diff, cfg: D().DIFF[p.diff] };
+    }
+    return null;
+  }
+
+  function confusablesOf(token) {
+    const out = [];
+    for (const grp of D().CONFUSE) {
+      if (grp.includes(token)) for (const t of grp) if (t !== token) out.push(t);
+    }
+    return out;
+  }
+
   return {
     MASTER_AT, localDate, weekKey,
     rec, isMastered, countMastered, troubleWords,
@@ -261,6 +298,7 @@ RR.progress = (function () {
     levelOf, titleOf,
     ensureQuests, questDef, applyEvent,
     badges,
-    stickerCount, stickerTotal, rollSticker, nextActivity
+    stickerCount, stickerTotal, rollSticker, nextActivity,
+    diffId, diffCfg, tuneDifficulty, confusablesOf
   };
 })();

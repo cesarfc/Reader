@@ -22,16 +22,46 @@ window.RR = window.RR || {};
   }
   const sample = (arr, n) => shuffle(arr).slice(0, n);
 
-  /* correct item + (n-1) distractors from pool, distinct by keyFn, shuffled. */
-  function withDistractors(correct, pool, n, keyFn) {
+  /* correct item + (n-1) distractors from pool, distinct by keyFn, shuffled.
+     When sim() is supplied (Challenge/Expert), distractors are chosen to be
+     maximally CONFUSABLE with the correct answer instead of random. */
+  function withDistractors(correct, pool, n, keyFn, sim) {
     const seen = new Set([keyFn(correct)]);
+    let cands = pool.filter(x => !seen.has(keyFn(x)));
+    if (sim) {
+      cands = cands.slice().sort((a, b) => sim(correct, b) - sim(correct, a));
+      /* keep top confusables but with a little randomness among them */
+      const pick = Math.max((n - 1) * 2, 4);
+      cands = shuffle(cands.slice(0, pick)).concat(cands.slice(pick));
+    } else {
+      cands = shuffle(cands);
+    }
     const out = [correct];
-    for (const item of shuffle(pool)) {
+    for (const item of cands) {
       if (out.length >= n) break;
       const k = keyFn(item);
       if (!seen.has(k)) { seen.add(k); out.push(item); }
     }
     return shuffle(out);
+  }
+
+  /* similarity scorers for mean distractors */
+  function wordSim(a, b) {
+    let s = 0;
+    if (rimeOf(a.w) === rimeOf(b.w)) s += 4;       /* rhymes — very confusable */
+    if (a.w.length === b.w.length) s += 1;
+    if (a.w[0] === b.w[0]) s += 1;
+    if (a.w[a.w.length - 1] === b.w[b.w.length - 1]) s += 1;
+    return s;
+  }
+  function letterSim(a, b) {
+    const conf = RR.progress.confusablesOf(a.l);
+    return conf.includes(b.l) ? 4 : 0;
+  }
+  /* choice count + whether to use mean distractors, from the kid's tier */
+  function diffChoices(ctx) {
+    const c = RR.progress.diffCfg(ctx.profile);
+    return { n: c.choices, hard: c.hard };
   }
 
   function el(html) {
@@ -177,7 +207,8 @@ window.RR = window.RR || {};
       /* Type A: hear sound -> pick the letter */
       function askLetterForSound() {
         const target = smartSample(ctx.profile, pool, 1, x => 'l:' + x.l)[0];
-        const choices = withDistractors(target, pool, 3, x => x.s);
+        const dc = diffChoices(ctx);
+        const choices = withDistractors(target, pool, dc.n, x => x.s, dc.hard ? letterSim : null);
         let firstTry = true;
         shell.area.innerHTML = `
           <div class="prompt">
@@ -220,7 +251,8 @@ window.RR = window.RR || {};
         const target = smartSample(ctx.profile, words, 1, w => 'l:' + w.t[0])[0];
         const first = { l: target.t[0], s: target.s[0] };
         const others = pool.filter(p => p.s !== first.s);
-        const choices = withDistractors(first, others, 3, x => x.l);
+        const dc = diffChoices(ctx);
+        const choices = withDistractors(first, others, dc.n, x => x.l, dc.hard ? letterSim : null);
         let firstTry = true;
         shell.area.innerHTML = `
           <div class="prompt">
@@ -291,7 +323,8 @@ window.RR = window.RR || {};
       }
 
       function ask(target) {
-        const choices = withDistractors(target, words, 3, x => x.w);
+        const dc = diffChoices(ctx);
+        const choices = withDistractors(target, words, dc.n, x => x.w, dc.hard ? wordSim : null);
         let firstTry = true;
         let answered = false;
         shell.area.innerHTML = `
@@ -393,7 +426,7 @@ window.RR = window.RR || {};
         for (const w of words) for (const t of w.t) {
           if (!target.t.includes(t) && !otherTiles.includes(t)) otherTiles.push(t);
         }
-        const decoys = sample(otherTiles, 2);
+        const decoys = sample(otherTiles, RR.progress.diffCfg(ctx.profile).hard ? 4 : 2);
         const bank = shuffle(target.t.map((t, i) => ({ t, s: target.s[i], id: i })) /* real tiles */
           .concat(decoys.map((t, i) => ({ t, s: null, id: 100 + i }))));
 
@@ -501,7 +534,8 @@ window.RR = window.RR || {};
         const rime = rimeOf(target.w);
         const partner = sample(families[rime].filter(w => w.w !== target.w), 1)[0];
         const nonRhyming = pool.filter(w => rimeOf(w.w) !== rime);
-        const choices = withDistractors(partner, nonRhyming, 3, x => x.w);
+        const dc = diffChoices(ctx);
+        const choices = withDistractors(partner, nonRhyming, dc.n, x => x.w, dc.hard ? wordSim : null);
         let firstTry = true;
         let answered = false;
 
@@ -890,5 +924,5 @@ window.RR = window.RR || {};
   RR.gameOrder = ['books', 'sounds', 'blend', 'build', 'rhyme', 'sight', 'flash'];
 
   /* Shared helpers for the adventure module. */
-  RR.util = { shuffle, sample, smartSample, withDistractors, el, rimeOf, rhymePoolFor };
+  RR.util = { shuffle, sample, smartSample, withDistractors, el, rimeOf, rhymePoolFor, wordSim, letterSim };
 })();

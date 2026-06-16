@@ -639,6 +639,14 @@ RR.nav = RR.nav || {};
                 <div class="troublerow"><span class="muted">Tricky words:</span>
                   ${trouble.map(w => `<button class="trickyword" data-w="${esc(w)}">🔊 ${esc(w)}</button>`).join('')}
                 </div>` : '<div class="pstatsrow muted">No stuck words right now 🎉</div>'}
+              <div class="diffctl">
+                <div class="mlabel">Difficulty <span class="diffnow">now: ${D.DIFF[P.diffId(p)].e} ${D.DIFF[P.diffId(p)].label}${p.diffMode === 'auto' ? ' (auto)' : ' (locked)'}</span></div>
+                <div class="diffrow">
+                  <button class="diffopt ${p.diffMode === 'auto' ? 'on' : ''}" data-pid="${p.id}" data-d="auto">🤖 Auto</button>
+                  ${D.DIFF_ORDER.map(id => `<button class="diffopt ${p.diffMode === 'locked' && p.diff === id ? 'on' : ''}" data-pid="${p.id}" data-d="${id}">${D.DIFF[id].e} ${D.DIFF[id].label}</button>`).join('')}
+                </div>
+                <div class="muted diffhelp">Auto raises the challenge when they're acing it, eases off when they struggle.</div>
+              </div>
             </div>`;
         }).join('')}
 
@@ -667,6 +675,16 @@ RR.nav = RR.nav || {};
     app.querySelector('[data-act="back"]').addEventListener('click', renderHome);
     app.querySelectorAll('.trickyword').forEach(btn =>
       btn.addEventListener('click', () => A.speak(btn.dataset.w, { rate: 0.75 })));
+    app.querySelectorAll('.diffopt').forEach(b =>
+      b.addEventListener('click', () => {
+        const prof = S.profiles.find(x => x.id === b.dataset.pid);
+        if (!prof) return;
+        if (b.dataset.d === 'auto') prof.diffMode = 'auto';
+        else { prof.diffMode = 'locked'; prof.diff = b.dataset.d; }
+        S.save();
+        A.sfx.pop();
+        renderParent();
+      }));
     let target = goal ? goal.target : 50;
     app.querySelectorAll('.famtargets .gradepill').forEach(b =>
       b.addEventListener('click', () => {
@@ -722,6 +740,8 @@ RR.nav = RR.nav || {};
         ${r.line2 ? `<p class="resline">${r.line2}</p>` : ''}
         <p class="coinwin"><span id="coincount">+0 🪙</span><span class="seq" id="bonuschips">${meta.gemsEarned ? ` <span class="gemwin">+${meta.gemsEarned} 💎</span>` : ''} <span class="xpwin">+${meta.xpGained} XP</span></span></p>
         ${meta.levelUp ? `<p class="levelup seq">⬆️ LEVEL ${meta.levelUp} — ${P.titleOf(meta.levelUp)}!</p>` : ''}
+        ${meta.diffBump ? `<p class="difftoast seq">${meta.diffBump.dir === 'up' ? `${meta.diffBump.cfg.e} Difficulty UP — ${meta.diffBump.cfg.label}!` : `${meta.diffBump.cfg.e} Eased to ${meta.diffBump.cfg.label}`}</p>` : ''}
+        ${meta.rewardMul > 1 ? `<p class="gemhint seq">⚡ ${P.diffCfg(p).label} bonus ×${meta.rewardMul}</p>` : ''}
         ${!meta.gemsEarned && r.stars < 3 ? '<p class="gemhint seq">💎 Get 3 stars to win a gem!</p>' : ''}
         ${meta.newlyMastered && meta.newlyMastered.length ? `
           <div class="masteredrow seq">⭐ Mastered: ${meta.newlyMastered.map(w => `<span class="masterychip">${esc(w)}</span>`).join('')}</div>` : ''}
@@ -765,6 +785,7 @@ RR.nav = RR.nav || {};
       t += 320;
     });
     if (meta.levelUp) setTimeout(() => { A.sfx.victory(); RR.confetti.burst(80); }, 2000);
+    if (meta.diffBump && meta.diffBump.dir === 'up') setTimeout(() => { A.sfx.fanfare(); RR.confetti.burst(90); A.speak(`${meta.diffBump.cfg.label} mode unlocked!`); }, 2200);
     const praise = D.PRAISE[(Math.random() * D.PRAISE.length) | 0];
     setTimeout(() => A.speak(`${praise}, ${p.name}!`), 600);
 

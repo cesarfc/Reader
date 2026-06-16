@@ -179,7 +179,13 @@ RR.DATA = {
       { w: 'sunflower',    e: '🌻', t: ['sun','flow','er'],        s: ['sun','flow','er'] },
       { w: 'camera',       e: '📷', t: ['cam','er','a'],           s: ['kam','er','uh'] },
       { w: 'piano',        e: '🎹', t: ['pi','an','o'],            s: ['pee','an','oh'] },
-      { w: 'potato',       e: '🥔', t: ['po','ta','to'],           s: ['puh','tay','toe'] }
+      { w: 'potato',       e: '🥔', t: ['po','ta','to'],           s: ['puh','tay','toe'] },
+      { w: 'peacock',      e: '🦚', t: ['pea','cock'],             s: ['pee','kok'] },
+      { w: 'lobster',      e: '🦞', t: ['lob','ster'],             s: ['lob','ster'] },
+      { w: 'cactus',       e: '🌵', t: ['cac','tus'],              s: ['kak','tus'] },
+      { w: 'trophy',       e: '🏆', t: ['tro','phy'],              s: ['tro','fee'] },
+      { w: 'compass',      e: '🧭', t: ['com','pass'],             s: ['kum','pass'] },
+      { w: 'anchor',       e: '⚓', t: ['an','chor'],              s: ['ang','ker'] }
     ],
 
     5: [
@@ -208,7 +214,13 @@ RR.DATA = {
       { w: 'tarantula',    e: '🕷️', t: ['ta','ran','tu','la'],     s: ['tuh','ran','chuh','luh'] },
       { w: 'temperature',  e: '🌡️', t: ['tem','per','a','ture'],   s: ['tem','per','uh','cher'] },
       { w: 'violin',       e: '🎻', t: ['vi','o','lin'],           s: ['vy','uh','lin'] },
-      { w: 'adventure',    e: '🗺️', t: ['ad','ven','ture'],        s: ['ad','ven','cher'] }
+      { w: 'adventure',    e: '🗺️', t: ['ad','ven','ture'],        s: ['ad','ven','cher'] },
+      { w: 'magnet',       e: '🧲', t: ['mag','net'],              s: ['mag','net'] },
+      { w: 'lantern',      e: '🏮', t: ['lan','tern'],             s: ['lan','tern'] },
+      { w: 'blossom',      e: '🌸', t: ['blos','som'],             s: ['bloss','um'] },
+      { w: 'fountain',     e: '⛲', t: ['foun','tain'],            s: ['fown','tin'] },
+      { w: 'trumpet',      e: '🎺', t: ['trum','pet'],             s: ['trum','pet'] },
+      { w: 'mountain',     e: '⛰️', t: ['moun','tain'],            s: ['mown','tin'] }
     ]
   },
 
@@ -388,11 +400,38 @@ RR.DATA = {
               taunt: 'Zorp! Your words cannot reach space!' } },
     { name: 'Star Galaxy',      e: '🌌', wins: 6, colors: ['#ede9fe', '#c4b5fd'],
       boss: { name: 'Star Titan', e: '👹', hp: 175, reward: 350,
-              taunt: 'I have never lost to a reader. Ever.' } }
+              taunt: 'I have never lost to a reader. Ever.' } },
+    { name: 'Rainbow Rift',     e: '🌈', wins: 6, colors: ['#fce7f3', '#fbcfe8'],
+      boss: { name: 'Prism Phantom', e: '👻', hp: 210, reward: 420,
+              taunt: 'Boo! Your words fade in my fog!' } },
+    { name: 'Cosmic Core',      e: '🌠', wins: 7, colors: ['#e0e7ff', '#818cf8'],
+      boss: { name: 'The Final Word', e: '🛸', hp: 260, reward: 550,
+              taunt: 'I am the last boss. No reader passes me!' } }
   ],
 
   HERO_BASE_ATTACK: 10,
   HERO_BASE_HEARTS: 3,
+
+  /* ---------- Difficulty tiers ----------
+     Auto-adapts from a kid's rolling accuracy, or a grown-up locks one.
+     hp/hearts/timer/choices reshape boss battles; hard = near-miss
+     distractors; reward multiplies coins/gems/XP (nobody is penalized —
+     harder just pays more). */
+  DIFF: {
+    chill:     { label: 'Chill',     e: '🐢', hp: 0.8, hearts: 1,  timer: 0,  hard: false, choices: 3, reward: 1.0, order: 0 },
+    normal:    { label: 'Normal',    e: '😎', hp: 1.0, hearts: 0,  timer: 0,  hard: false, choices: 3, reward: 1.0, order: 1 },
+    challenge: { label: 'Challenge', e: '⚡', hp: 1.5, hearts: 0,  timer: 10, hard: true,  choices: 4, reward: 1.3, order: 2 },
+    expert:    { label: 'Expert',    e: '🔥', hp: 2.0, hearts: -1, timer: 7,  hard: true,  choices: 4, reward: 1.6, order: 3 }
+  },
+  DIFF_ORDER: ['chill', 'normal', 'challenge', 'expert'],
+
+  /* Letters/sounds kids commonly confuse — used to build mean distractors
+     at Challenge/Expert so recognition stops being automatic. */
+  CONFUSE: [
+    ['b', 'd', 'p', 'q'], ['m', 'n'], ['f', 'v'], ['i', 'j', 'l'],
+    ['u', 'v', 'w'], ['c', 'k'], ['g', 'j'], ['s', 'z'], ['a', 'e', 'o'],
+    ['sh', 'ch'], ['th', 'wh'], ['ck', 'k'], ['ll', 'l']
+  ],
 
   /* ---------- Sticker album ----------
      Rounds with 2+ stars award one random sticker. 5% are ✨shiny.

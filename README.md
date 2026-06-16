@@ -59,6 +59,15 @@ and the 3rd grader both get fair fights from the same bosses.
 - **Grade Journey meter** — an honest progress bar per grade built from words
   mastered + sight words + books finished + best reading speed. Tap it for the
   breakdown.
+- **Adaptive difficulty** — four tiers (🐢 Chill · 😎 Normal · ⚡ Challenge ·
+  🔥 Expert) that **auto-adjust** to each kid (raises the challenge after a few
+  strong rounds, eases off when they struggle) or can be **locked** by a
+  grown-up in the Grown-up Corner. Higher tiers add per-question timers in boss
+  battles, fewer hearts, tougher boss HP, look-alike/sound-alike distractors,
+  and pay a coin/gem/XP **reward multiplier** — so strong readers get pushed
+  and paid, while younger ones stay comfortable. Boss fights gain a countdown
+  timer, an attack **combo multiplier**, ⚡ critical hits, and a boss **enrage**
+  at low HP.
 - **Graduation** — at 80% journey progress the kid gets a full graduation
   ceremony (+10 💎) and the grade advances automatically. No grinding one easy
   game can fake it.
@@ -151,6 +160,16 @@ All the learning content lives in [js/data.js](js/data.js):
 
 Speech uses the device's built-in text-to-speech (Web Speech API), so there are
 no audio files to record. Sound effects are synthesized with WebAudio.
+
+### Pictures (OpenMoji)
+
+Word pictures and icons are illustrated with [OpenMoji](https://openmoji.org)
+(CC BY-SA 4.0) — consistent, ink-outlined art that looks identical on every
+device, bundled in `img/openmoji/`. To add a word with a new picture, just use
+any emoji in `js/data.js` and run `node tools/fetch-images.js` — it downloads
+the matching illustration and updates the lookup. Missing ones fall back to the
+system emoji. To use your own custom artwork instead, drop files in
+`img/openmoji/` and edit `js/imgmap.js` — nothing else changes.
 
 ## Notes for grown-ups
 

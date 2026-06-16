@@ -1257,3 +1257,112 @@ body[class^="stage-"] { background-attachment: fixed; }
   .playbig { font-size: 26px; }
   #petbuddy { font-size: 36px; }
 }
+
+/* ============================================================
+   ILLUSTRATED IMAGES (OpenMoji) — replace system emoji app-wide.
+   Sized to the surrounding font-size (1em) so every old emoji slot
+   keeps its dimensions; pointer-transparent so taps pass through.
+   ============================================================ */
+.emj {
+  width: 1em;
+  height: 1em;
+  display: inline-block;
+  vertical-align: -0.16em;
+  object-fit: contain;
+  pointer-events: none;
+  -webkit-user-select: none;
+  user-select: none;
+}
+.txtemj { pointer-events: none; }
+/* big picture slots get a touch of breathing room between multi-emoji art */
+.bookart .emj { margin: 0 2px; }
+.fgear .emj, .herogear .emj { vertical-align: -0.18em; }
+
+/* ============================================================
+   DIFFICULTY + COMBAT TEETH
+   ============================================================ */
+.emj-done { pointer-events: none; }
+
+/* per-question countdown bar (Challenge/Expert) */
+.qtimer {
+  height: 14px;
+  margin: 4px auto 10px;
+  max-width: 460px;
+  background: #fff;
+  border: 2.5px solid var(--outline);
+  border-radius: 999px;
+  overflow: hidden;
+}
+.qtimer i {
+  display: block;
+  height: 100%;
+  width: 100%;
+  background: linear-gradient(90deg, #22c55e, #eab308 60%, #ef4444);
+  border-radius: 999px;
+}
+.qtimer.enraged { border-color: #b91c1c; animation: pulse 0.5s infinite; }
+.qtimer.enraged i { background: #ef4444; }
+
+.difftag {
+  font-weight: 800;
+  font-size: 15px;
+  color: var(--ink);
+  background: var(--sky-soft);
+  border: 2.5px solid var(--outline);
+  border-radius: 999px;
+  padding: 5px 14px;
+  display: inline-block;
+  margin: 4px 0;
+}
+
+/* combo float on the hero side */
+.dmgfloat.combo {
+  color: #ea580c;
+  font-size: 22px;
+  left: 50%;
+}
+
+/* enraged boss */
+.femoji.enraged { animation: enrage 0.6s ease-in-out infinite; }
+@keyframes enrage {
+  0%, 100% { filter: none; transform: scale(1); }
+  50% { filter: sepia(1) saturate(8) hue-rotate(-30deg) brightness(1.1); transform: scale(1.08); }
+}
+
+/* difficulty chip + picker */
+.diffchip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-weight: 800;
+  font-size: 13px;
+  border: 2.5px solid var(--outline);
+  border-radius: 999px;
+  padding: 3px 11px;
+  background: #fff;
+}
+.diff-chill     { background: #dcfce7; }
+.diff-normal    { background: #e0f2fe; }
+.diff-challenge { background: #fef3c7; }
+.diff-expert    { background: #fee2e2; }
+.diffrow { display: flex; gap: 7px; flex-wrap: wrap; }
+.diffopt {
+  border: 2.5px solid var(--outline);
+  cursor: pointer;
+  font: inherit;
+  font-weight: 800;
+  font-size: 14px;
+  padding: 8px 12px;
+  border-radius: 14px;
+  background: #fff;
+  color: var(--ink);
+  box-shadow: 0 3px 0 var(--edge);
+}
+.diffopt.on { background: var(--ink); color: #fff; box-shadow: 0 3px 0 #06243d; }
+.difftoast {
+  font-size: 21px;
+  font-weight: 800;
+  color: #b45309;
+  margin: 6px 0;
+  animation: pip 0.5s;
+}

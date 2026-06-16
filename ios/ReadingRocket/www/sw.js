@@ -4,7 +4,7 @@
    voice code). Network-first means every online load gets fresh, consistent
    files; the cache only steps in when offline. */
 
-const CACHE = 'reading-rocket-v8';
+const CACHE = 'reading-rocket-v9';
 const CORE = [
   './',
   'index.html',
@@ -14,6 +14,8 @@ const CORE = [
   'js/confetti.js',
   'js/state.js',
   'js/progress.js',
+  'js/imgmap.js',
+  'js/img.js',
   'js/games.js',
   'js/adventure.js',
   'js/app.js',

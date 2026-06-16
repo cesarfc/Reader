@@ -6,7 +6,7 @@ DEST="ios/ReadingRocket/www"
 mkdir -p "$DEST"
 rsync -a --delete \
   index.html manifest.webmanifest sw.js \
-  css js icons fonts \
+  css js icons fonts img \
   "$DEST/"
 echo "✅ Web app synced to $DEST"
 echo "   Now build & run in Xcode (or: open ios/ReadingRocket.xcodeproj)"
