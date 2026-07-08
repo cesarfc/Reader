@@ -1698,3 +1698,77 @@ body.tabs-on #petbuddy { bottom: calc(env(safe-area-inset-bottom) + 84px); }
   }
   .jrocket, .seq { transition-duration: 0.01ms !important; }
 }
+
+/* ---------- new games: silly / riddle / factory / twins / chains / nonsense / scramble ---------- */
+.sillycard { width: 100%; min-height: 140px; margin-top: 8px; }
+.bigjudge { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 18px; }
+.bigjudge .btn { min-height: 64px; font-size: 17px; }
+.btn.sillybtn { background: var(--lav-strong); }
+
+.riddlecard {
+  background: var(--surface);
+  border: 1px solid var(--hairline);
+  border-radius: var(--r-lg);
+  box-shadow: var(--sh-md);
+  padding: 22px 18px;
+  font-size: 21px;
+  line-height: 1.6;
+  font-weight: 600;
+  margin: 6px 0 12px;
+  text-align: left;
+}
+
+.morpheq { font-size: 23px; font-weight: 700; text-align: center; margin: 12px 0 0; color: var(--teal-strong); animation: pip 0.5s; }
+.choices.meanings { grid-template-columns: 1fr; }
+.choice.meaningpick { font-size: 16px; font-weight: 600; padding: 16px 14px; text-align: center; }
+
+.chainhint { font-size: 16px; color: var(--ink-soft); font-weight: 600; }
+
+.scramlist { display: flex; flex-direction: column; gap: 10px; margin-top: 14px; }
+.scramrow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border: 1px solid var(--hairline);
+  cursor: pointer;
+  font: inherit;
+  font-weight: 500;
+  font-size: 16.5px;
+  line-height: 1.4;
+  text-align: left;
+  color: var(--ink);
+  background: var(--surface);
+  border-radius: var(--r-md);
+  box-shadow: var(--sh-sm);
+  padding: 12px 14px;
+}
+.scramrow.locked { background: var(--teal-tint); pointer-events: none; }
+.scramnum {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: var(--teal-strong);
+  color: #fff;
+  font-weight: 700;
+  font-size: 15px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+}
+.scramnum.empty { background: var(--surface-2); color: var(--ink-faint); }
+
+.gamecard[data-game="silly"]    { --gc: var(--yellow-tint); }
+.gamecard[data-game="riddle"]   { --gc: var(--sky-tint); }
+.gamecard[data-game="morph"]    { --gc: var(--coral-tint); }
+.gamecard[data-game="twins"]    { --gc: var(--lav-tint); }
+.gamecard[data-game="chains"]   { --gc: var(--teal-tint); }
+.gamecard[data-game="nonsense"] { --gc: var(--lav-tint); }
+.gamecard[data-game="scramble"] { --gc: var(--rose-tint); }
+
+@media (max-width: 420px) {
+  .bigjudge { gap: 8px; }
+  .bigjudge .btn { font-size: 15px; min-height: 58px; padding: 10px 8px; }
+  .riddlecard { font-size: 18px; }
+  .scramrow { font-size: 14.5px; }
+}

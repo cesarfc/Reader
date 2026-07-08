@@ -324,6 +324,357 @@ RR.DATA = {
     ]
   },
 
+  /* ===================================================================
+     Comprehension & word-study games (added block).
+     SILLY   — Silly or Sensible?  (reading for meaning)
+     RIDDLES — Riddle Time         (inference)
+     MORPH   — Word Factory        (morphology, grades 2-5)
+     PAIRS   — Opposites & Twins   (antonyms / synonyms)
+     CHAINS  — Word Chains         (phoneme manipulation, grades K-2)
+     NONSENSE— Real or Nonsense?   (decoding discrimination)
+     Reading levels are matched to each grade's WORDS/SENTENCES above.
+     =================================================================== */
+
+  /* ---------- Silly or Sensible? ----------
+     16 per grade: 8 silly (funny-absurd) + 8 sensible (true-to-life),
+     shuffled. silly:true means the sentence does not make sense. */
+  SILLY: {
+    K: [
+      { t: 'The cat drove the bus.', silly: true },
+      { t: 'The dog ran to me.', silly: false },
+      { t: 'A pig can fly.', silly: true },
+      { t: 'I see a red hat.', silly: false },
+      { t: 'My hat had lunch.', silly: true },
+      { t: 'The cat naps in the sun.', silly: false },
+      { t: 'We go to bed at night.', silly: false },
+      { t: 'The dog sang a song.', silly: true },
+      { t: 'The fish ran to bed.', silly: true },
+      { t: 'The hen sat on an egg.', silly: false },
+      { t: 'A cow sat on my lap.', silly: true },
+      { t: 'Mom can hug me.', silly: false },
+      { t: 'I like to play with you.', silly: false },
+      { t: 'The bug drives a red van.', silly: true },
+      { t: 'The bus is big.', silly: false },
+      { t: 'My cup ran up the hill.', silly: true }
+    ],
+    1: [
+      { t: 'The frog drives a big red truck.', silly: true },
+      { t: 'The frog can swim fast.', silly: false },
+      { t: 'I see a fish in the pond.', silly: false },
+      { t: 'My shoes ran to school without me.', silly: true },
+      { t: 'The duck sat on the nest.', silly: false },
+      { t: 'The fish sat on a bike.', silly: true },
+      { t: 'A duck can read the news.', silly: true },
+      { t: 'My sock is red and blue.', silly: false },
+      { t: 'We ride the bus to school.', silly: false },
+      { t: 'The clock ate my lunch.', silly: true },
+      { t: 'The rain fell on the grass.', silly: false },
+      { t: 'My milk sang a song.', silly: true },
+      { t: 'The crab flew up to the moon.', silly: true },
+      { t: 'Dad cooks eggs for lunch.', silly: false },
+      { t: 'The dog ran to get the ball.', silly: false },
+      { t: 'The bug can lift a truck.', silly: true }
+    ],
+    2: [
+      { t: 'The goat drove a train to the moon.', silly: true },
+      { t: 'The goat ate green grass by the gate.', silly: false },
+      { t: 'A mouse ran into the little house.', silly: false },
+      { t: 'My pet snail can run as fast as a car.', silly: true },
+      { t: 'The sheep like to sleep under the tree.', silly: false },
+      { t: 'The sheep read a bedtime story to the owl.', silly: true },
+      { t: 'A green bean jumped out of my bowl and danced.', silly: true },
+      { t: 'We took the boat out on the lake.', silly: false },
+      { t: 'The rain made the road wet and shiny.', silly: false },
+      { t: 'The moon came down to eat my ice cream.', silly: true },
+      { t: 'My kite flew high up in the sky.', silly: false },
+      { t: 'My bike grew wings and flew over the trees.', silly: true },
+      { t: 'The shark baked a cake for the whale’s party.', silly: true },
+      { t: 'The bee landed on a bright red flower.', silly: false },
+      { t: 'I read a book before I went to sleep.', silly: false },
+      { t: 'A cloud sat down at our table for lunch.', silly: true }
+    ],
+    3: [
+      { t: 'The clever monkey drove a taxi around the busy city.', silly: true },
+      { t: 'The rocket blasted off into the dark night sky.', silly: false },
+      { t: 'My little sister found a turtle near the pond.', silly: false },
+      { t: 'My little sister taught our goldfish how to ride a skateboard.', silly: true },
+      { t: 'We watched the dolphins jump out of the waves.', silly: false },
+      { t: 'The spider knitted a cozy sweater for the hungry dragon.', silly: true },
+      { t: 'A giant tomato rolled down the street asking for directions.', silly: true },
+      { t: 'The spider spun a giant web behind the door.', silly: false },
+      { t: 'Thunder boomed as the storm rolled over the hills.', silly: false },
+      { t: 'The elephant squeezed inside a teacup to take a nap.', silly: true },
+      { t: 'The kangaroo hopped across the dusty red road.', silly: false },
+      { t: 'Our teacher floated up to the ceiling and taught the lesson upside down.', silly: true },
+      { t: 'The rocket stopped at a gas station to buy some snacks.', silly: true },
+      { t: 'A cold wind blew the leaves off the tall trees.', silly: false },
+      { t: 'The team cheered when they scored the winning goal.', silly: false },
+      { t: 'My shoes complained that they were tired of walking.', silly: true }
+    ],
+    4: [
+      { t: 'The brave astronaut parked her rocket in the school parking lot.', silly: true },
+      { t: 'The brave astronaut floated above the glowing blue planet.', silly: false },
+      { t: 'My little brother practiced the piano until the song was perfect.', silly: false },
+      { t: 'A curious gorilla borrowed my phone to call his grandmother.', silly: true },
+      { t: 'A curious gorilla watched the visitors from behind the bamboo.', silly: false },
+      { t: 'The sunflowers in our garden started singing opera at sunrise.', silly: true },
+      { t: 'My little brother trained a swarm of bees to do his chores.', silly: true },
+      { t: 'We planted sunflowers along the fence in early spring.', silly: false },
+      { t: 'Lightning flickered over the mountains long before the thunder.', silly: false },
+      { t: 'The motorcycle grew four legs and galloped across the bridge.', silly: true },
+      { t: 'The motorcycle roared across the bridge and into the tunnel.', silly: false },
+      { t: 'Grandma’s spaghetti crawled off the plate and slithered under the couch.', silly: true },
+      { t: 'The flamingo checked into a hotel and ordered room service.', silly: true },
+      { t: 'The flamingo stood on one leg at the edge of the pond.', silly: false },
+      { t: 'Our class built a parachute for an egg out of paper and tape.', silly: false },
+      { t: 'A thundercloud knocked politely on our front door and asked to come in.', silly: true }
+    ],
+    5: [
+      { t: 'The detective interviewed a suspicious pigeon about the missing sandwich.', silly: true },
+      { t: 'The detective examined the muddy footprints before the rain washed them away.', silly: false },
+      { t: 'Electricity hummed through the wires as the city lights blinked on.', silly: false },
+      { t: 'Electricity got bored of the wires and decided to take the bus instead.', silly: true },
+      { t: 'The ballerina rehearsed the difficult routine until her ankles ached.', silly: false },
+      { t: 'The ballerina spun so fast that she drilled a hole straight through the stage.', silly: true },
+      { t: 'A hurricane politely apologized and promised to clean up all the mess.', silly: true },
+      { t: 'A hurricane gathered strength slowly over the warm ocean.', silly: false },
+      { t: 'The scientists cheered when the satellite sent its first signal home.', silly: false },
+      { t: 'The satellite sent home a selfie and asked for more snacks.', silly: true },
+      { t: 'My neighbor collects ancient coins from faraway countries.', silly: false },
+      { t: 'My neighbor’s ancient coins hopped out of the jar to go shopping.', silly: true },
+      { t: 'The chimpanzee solved the puzzle, then filed his taxes before lunch.', silly: true },
+      { t: 'The chimpanzee solved the puzzle faster than the students expected.', silly: false },
+      { t: 'The young violinist raised her bow as the room fell silent.', silly: false },
+      { t: 'The young violinist played a note so high that the moon asked her to stop.', silly: true }
+    ]
+  },
+
+  /* ---------- Riddle Time ----------
+     10 per grade. Three choices with fitting emoji; a = correct index.
+     Every riddle is solvable from its own clues. */
+  RIDDLES: {
+    K: [
+      { q: 'I have four legs. I say moo. What am I?', choices: [ { t: 'a cow', e: '🐮' }, { t: 'a cat', e: '🐱' }, { t: 'a bus', e: '🚌' } ], a: 0 },
+      { q: 'I am up in the day. I am hot. What am I?', choices: [ { t: 'the moon', e: '🌙' }, { t: 'the sun', e: '☀️' }, { t: 'a cup', e: '☕' } ], a: 1 },
+      { q: 'I hop a lot. I am green. What am I?', choices: [ { t: 'a dog', e: '🐶' }, { t: 'a bird', e: '🐦' }, { t: 'a frog', e: '🐸' } ], a: 2 },
+      { q: 'I say woof. I like to run and play. What am I?', choices: [ { t: 'a dog', e: '🐶' }, { t: 'a fish', e: '🐟' }, { t: 'a hen', e: '🐔' } ], a: 0 },
+      { q: 'I have wings. I fly and go tweet. What am I?', choices: [ { t: 'a pig', e: '🐷' }, { t: 'a bird', e: '🐦' }, { t: 'a cat', e: '🐱' } ], a: 1 },
+      { q: 'I am yellow. Monkeys love to eat me. What am I?', choices: [ { t: 'a cup', e: '☕' }, { t: 'a hat', e: '🎩' }, { t: 'a banana', e: '🍌' } ], a: 2 },
+      { q: 'I am red and round. You can eat me. What am I?', choices: [ { t: 'an apple', e: '🍎' }, { t: 'the sun', e: '☀️' }, { t: 'a ball', e: '⚽' } ], a: 0 },
+      { q: 'I swim in the water. I have fins. What am I?', choices: [ { t: 'a cat', e: '🐱' }, { t: 'a fish', e: '🐟' }, { t: 'a bug', e: '🐛' } ], a: 1 },
+      { q: 'I am big. I say roar. I have a mane. What am I?', choices: [ { t: 'a mouse', e: '🐭' }, { t: 'a pig', e: '🐷' }, { t: 'a lion', e: '🦁' } ], a: 2 },
+      { q: 'You put me on your head. I keep you warm. What am I?', choices: [ { t: 'a hat', e: '🎩' }, { t: 'a sock', e: '🧦' }, { t: 'a cup', e: '☕' } ], a: 0 }
+    ],
+    1: [
+      { q: 'I have a shell on my back. I move very slowly. What am I?', choices: [ { t: 'a turtle', e: '🐢' }, { t: 'a rabbit', e: '🐰' }, { t: 'a duck', e: '🦆' } ], a: 0 },
+      { q: 'I am white and soft. I say baa and give wool. What am I?', choices: [ { t: 'a cow', e: '🐮' }, { t: 'a sheep', e: '🐑' }, { t: 'a frog', e: '🐸' } ], a: 1 },
+      { q: 'I have a long trunk. I am big and gray. What am I?', choices: [ { t: 'a mouse', e: '🐭' }, { t: 'a snake', e: '🐍' }, { t: 'an elephant', e: '🐘' } ], a: 2 },
+      { q: 'I buzz when I fly. I make sweet honey. What am I?', choices: [ { t: 'a bee', e: '🐝' }, { t: 'an ant', e: '🐜' }, { t: 'a bird', e: '🐦' } ], a: 0 },
+      { q: 'I twinkle up high at night. You can wish on me. What am I?', choices: [ { t: 'the sun', e: '☀️' }, { t: 'a star', e: '⭐' }, { t: 'a cloud', e: '☁️' } ], a: 1 },
+      { q: 'You wear me on your feet. I keep your toes warm. What am I?', choices: [ { t: 'a hat', e: '🎩' }, { t: 'a glove', e: '🧤' }, { t: 'a sock', e: '🧦' } ], a: 2 },
+      { q: 'I have eight legs. I spin a web to catch bugs. What am I?', choices: [ { t: 'a spider', e: '🕷️' }, { t: 'a crab', e: '🦀' }, { t: 'an octopus', e: '🐙' } ], a: 0 },
+      { q: 'I am round and orange. I grow on a vine for Halloween. What am I?', choices: [ { t: 'an apple', e: '🍎' }, { t: 'a pumpkin', e: '🎃' }, { t: 'a ball', e: '⚽' } ], a: 1 },
+      { q: 'I have black and white stripes. I look like a horse. What am I?', choices: [ { t: 'a tiger', e: '🐯' }, { t: 'a cat', e: '🐱' }, { t: 'a zebra', e: '🦓' } ], a: 2 },
+      { q: 'I fall from gray clouds. Flowers drink me to grow. What am I?', choices: [ { t: 'rain', e: '🌧️' }, { t: 'snow', e: '❄️' }, { t: 'the sun', e: '☀️' } ], a: 0 }
+    ],
+    2: [
+      { q: 'I am long and yellow and curve like a smile. You peel me before you eat me. What am I?', choices: [ { t: 'a banana', e: '🍌' }, { t: 'corn', e: '🌽' }, { t: 'a lemon', e: '🍋' } ], a: 0 },
+      { q: 'I live near the sea and walk sideways. I have two sharp claws. What am I?', choices: [ { t: 'a fish', e: '🐟' }, { t: 'a crab', e: '🦀' }, { t: 'a snail', e: '🐌' } ], a: 1 },
+      { q: 'I appear after the rain. I am an arch of many colors in the sky. What am I?', choices: [ { t: 'a cloud', e: '☁️' }, { t: 'the moon', e: '🌙' }, { t: 'a rainbow', e: '🌈' } ], a: 2 },
+      { q: 'I am called the king of the jungle. I have a big fluffy mane and a loud roar. What am I?', choices: [ { t: 'a lion', e: '🦁' }, { t: 'a tiger', e: '🐯' }, { t: 'a bear', e: '🐻' } ], a: 0 },
+      { q: 'I am tall and made of wood. Birds build their nests in my branches. What am I?', choices: [ { t: 'a bush', e: '🌿' }, { t: 'a tree', e: '🌳' }, { t: 'a flower', e: '🌸' } ], a: 1 },
+      { q: 'I glow in the night sky and change my shape each week. I am not the sun. What am I?', choices: [ { t: 'a star', e: '⭐' }, { t: 'a lamp', e: '💡' }, { t: 'the moon', e: '🌙' } ], a: 2 },
+      { q: 'I have one or two humps. I can walk for days across the hot desert. What am I?', choices: [ { t: 'a camel', e: '🐫' }, { t: 'a horse', e: '🐴' }, { t: 'a cow', e: '🐮' } ], a: 0 },
+      { q: 'I am cold and white and fall in winter. You can build me into a snowman. What am I?', choices: [ { t: 'rain', e: '🌧️' }, { t: 'snow', e: '❄️' }, { t: 'sand', e: '🏖️' } ], a: 1 },
+      { q: 'I carry my house on my back. I leave a shiny, slimy trail. What am I?', choices: [ { t: 'a turtle', e: '🐢' }, { t: 'a crab', e: '🦀' }, { t: 'a snail', e: '🐌' } ], a: 2 },
+      { q: 'I am a giant ball of fire. I give light and heat to the whole day. What am I?', choices: [ { t: 'the sun', e: '☀️' }, { t: 'the moon', e: '🌙' }, { t: 'a star', e: '⭐' } ], a: 0 }
+    ],
+    3: [
+      { q: 'I have a trunk but I am not a tree. I never forget, and I am the biggest animal that walks on land. What am I?', choices: [ { t: 'an elephant', e: '🐘' }, { t: 'a hippo', e: '🦛' }, { t: 'a rhino', e: '🦏' } ], a: 0 },
+      { q: 'I open up over your head to keep off the rain. On a sunny day, I can make some shade. What am I?', choices: [ { t: 'a hat', e: '🎩' }, { t: 'an umbrella', e: '☂️' }, { t: 'a coat', e: '🧥' } ], a: 1 },
+      { q: 'I am a quiet place full of books. You can come to read or borrow one for free. What am I?', choices: [ { t: 'a kitchen', e: '🍳' }, { t: 'a garage', e: '🚗' }, { t: 'a library', e: '📚' } ], a: 2 },
+      { q: 'I have a face and two hands, but no arms at all. I tell you the time all day and night. What am I?', choices: [ { t: 'a robot', e: '🤖' }, { t: 'a clock', e: '🕐' }, { t: 'a mirror', e: '🪞' } ], a: 1 },
+      { q: 'I am frozen water. I am cold and slippery, and I melt away in the warm sun. What am I?', choices: [ { t: 'ice', e: '🧊' }, { t: 'a glass', e: '🥛' }, { t: 'a rock', e: '🪨' } ], a: 0 },
+      { q: 'I fly at night and sleep hanging upside down. I use sound, not my eyes, to find my way. What am I?', choices: [ { t: 'an owl', e: '🦉' }, { t: 'a bat', e: '🦇' }, { t: 'a moth', e: '🦋' } ], a: 1 },
+      { q: 'I have many keys but I cannot open a single door. Press my keys and I make music. What am I?', choices: [ { t: 'a door', e: '🚪' }, { t: 'a map', e: '🗺️' }, { t: 'a piano', e: '🎹' } ], a: 2 },
+      { q: 'I start out very small in the ground. With sun and water, I grow into a tall plant. What am I?', choices: [ { t: 'a seed', e: '🌱' }, { t: 'a rock', e: '🪨' }, { t: 'a coin', e: '🪙' } ], a: 0 },
+      { q: 'I am a big cat with orange fur and black stripes. I hunt in the jungle. What am I?', choices: [ { t: 'a lion', e: '🦁' }, { t: 'a cheetah', e: '🐆' }, { t: 'a tiger', e: '🐯' } ], a: 2 },
+      { q: 'I float in the sky and carry water. When I grow heavy and gray, I let the rain fall. What am I?', choices: [ { t: 'a cloud', e: '☁️' }, { t: 'a kite', e: '🪁' }, { t: 'a plane', e: '✈️' } ], a: 0 }
+    ],
+    4: [
+      { q: 'I float on the ocean and carry many people. I am much bigger than a little boat. What am I?', choices: [ { t: 'a ship', e: '🚢' }, { t: 'a car', e: '🚗' }, { t: 'a plane', e: '✈️' } ], a: 0 },
+      { q: 'I have a neck but no head, and a body but no legs. Strum my six strings and music pours out. What am I?', choices: [ { t: 'a drum', e: '🥁' }, { t: 'a guitar', e: '🎸' }, { t: 'a flute', e: '🪈' } ], a: 1 },
+      { q: 'I am a planet famous for the beautiful rings that circle all the way around me. What am I?', choices: [ { t: 'Mars', e: '🔴' }, { t: 'Earth', e: '🌍' }, { t: 'Saturn', e: '🪐' } ], a: 2 },
+      { q: 'The moon pulls me up and down. Twice a day I rise to cover the sandy beach, then slip back out. What am I?', choices: [ { t: 'the tide', e: '🌊' }, { t: 'the wind', e: '💨' }, { t: 'the rain', e: '🌧️' } ], a: 0 },
+      { q: 'I went to school to become a doctor for animals. When your pet is sick, you bring it to me. What am I?', choices: [ { t: 'a teacher', e: '👩‍🏫' }, { t: 'a vet', e: '🧑‍⚕️' }, { t: 'a chef', e: '👨‍🍳' } ], a: 1 },
+      { q: 'I have roots that no one sees, and a trunk that wears no clothes. My branches have no arms. What am I?', choices: [ { t: 'a river', e: '🏞️' }, { t: 'a tree', e: '🌳' }, { t: 'a mountain', e: '⛰️' } ], a: 1 },
+      { q: 'I am a bird, but I cannot fly. I swim well and waddle on the ice in my black-and-white coat. What am I?', choices: [ { t: 'a penguin', e: '🐧' }, { t: 'an eagle', e: '🦅' }, { t: 'a parrot', e: '🦜' } ], a: 0 },
+      { q: 'The more you take away from me, the bigger I grow. You dig me with a shovel. What am I?', choices: [ { t: 'a pile', e: '⛰️' }, { t: 'a hole', e: '🕳️' }, { t: 'a box', e: '📦' } ], a: 1 },
+      { q: 'I am a flat shape with exactly three straight sides and three pointy corners. What am I?', choices: [ { t: 'a circle', e: '⭕' }, { t: 'a square', e: '🟥' }, { t: 'a triangle', e: '🔺' } ], a: 2 },
+      { q: 'I show you roads, rivers, and whole countries, yet I am flat and fold up small in your pocket. What am I?', choices: [ { t: 'a map', e: '🗺️' }, { t: 'a book', e: '📖' }, { t: 'a clock', e: '🕐' } ], a: 0 }
+    ],
+    5: [
+      { q: 'I grow shorter every time I do my job. I leave a trail of words behind me, and a little rubber cap wipes away my mistakes. What am I?', choices: [ { t: 'a pencil', e: '✏️' }, { t: 'a brush', e: '🖌️' }, { t: 'a candle', e: '🕯️' } ], a: 0 },
+      { q: 'I have cities but no houses, forests but no trees, and rivers but no water you can drink. What am I?', choices: [ { t: 'a dream', e: '💭' }, { t: 'a painting', e: '🖼️' }, { t: 'a map', e: '🗺️' } ], a: 2 },
+      { q: 'I am not alive, but I can grow. I have no lungs, but I need air. I have no mouth, but water can kill me. What am I?', choices: [ { t: 'ice', e: '🧊' }, { t: 'a plant', e: '🌱' }, { t: 'fire', e: '🔥' } ], a: 2 },
+      { q: 'I have many keys but no locks. I have space but no room. You can press enter, but you cannot go inside. What am I?', choices: [ { t: 'a door', e: '🚪' }, { t: 'a keyboard', e: '⌨️' }, { t: 'a piano', e: '🎹' } ], a: 1 },
+      { q: 'I am full of holes, yet I can still hold plenty of water. What am I?', choices: [ { t: 'a net', e: '🥅' }, { t: 'a sponge', e: '🧽' }, { t: 'a basket', e: '🧺' } ], a: 1 },
+      { q: 'I run all day but never take a step. I have a bank but keep no money, and a bed where I never sleep. What am I?', choices: [ { t: 'a clock', e: '🕐' }, { t: 'a river', e: '🏞️' }, { t: 'a road', e: '🛣️' } ], a: 1 },
+      { q: 'A cook cracks me open for breakfast, and a baby bird must break me to be born. What am I?', choices: [ { t: 'an egg', e: '🥚' }, { t: 'a nut', e: '🥜' }, { t: 'ice', e: '🧊' } ], a: 0 },
+      { q: 'I am tall when I am young and short when I am old. Wind is my enemy, and while I live I give off light. What am I?', choices: [ { t: 'a tree', e: '🌳' }, { t: 'a mountain', e: '⛰️' }, { t: 'a candle', e: '🕯️' } ], a: 2 },
+      { q: 'I fly without any wings and cry without any eyes. Wherever I drift, the shade follows below me. What am I?', choices: [ { t: 'a bird', e: '🐦' }, { t: 'a cloud', e: '☁️' }, { t: 'a kite', e: '🪁' } ], a: 1 },
+      { q: 'I have a golden head and a golden tail, but no body in between. I am small and round, and I jingle in your pocket. What am I?', choices: [ { t: 'a coin', e: '🪙' }, { t: 'a ring', e: '💍' }, { t: 'a button', e: '🔘' } ], a: 0 }
+    ]
+  },
+
+  /* ---------- Word Factory ----------
+     Morphology, grades 2-5. Each entry adds ONE affix (pre OR suf) to a
+     base with no spelling change, so word === pre+base or base+suf.
+     meaning = the built word in kid words; foils = 2 wrong meanings
+     that misread the affix. */
+  MORPH: {
+    2: [
+      { pre: 'un', base: 'lock', word: 'unlock', e: '🔓', meaning: 'to open something that is locked', foils: ['to lock it two times', 'a very small lock'] },
+      { pre: 're', base: 'do', word: 'redo', e: '🔁', meaning: 'to do it again', foils: ['to stop doing it', 'to do it wrong'] },
+      { pre: 'un', base: 'happy', word: 'unhappy', e: '☹️', meaning: 'not happy; feeling sad', foils: ['very, very happy', 'happy once more'] },
+      { suf: 'er', base: 'help', word: 'helper', e: '🙋', meaning: 'a person who helps', foils: ['a person who needs help', 'a tiny bit of help'] },
+      { suf: 'ful', base: 'hope', word: 'hopeful', e: '🌈', meaning: 'full of hope', foils: ['with no hope at all', 'to give your hope away'] },
+      { suf: 'ness', base: 'sad', word: 'sadness', e: '😢', meaning: 'the feeling of being sad', foils: ['only a little bit sad', 'not sad at all'] },
+      { suf: 'ly', base: 'slow', word: 'slowly', e: '🐌', meaning: 'in a slow way', foils: ['not slow at all', 'very, very fast'] },
+      { pre: 're', base: 'fill', word: 'refill', e: '🥤', meaning: 'to fill it up again', foils: ['to spill it out', 'to leave it empty'] },
+      { pre: 'un', base: 'zip', word: 'unzip', e: '🧥', meaning: 'to open a zipper', foils: ['to zip it up twice', 'a broken little zipper'] },
+      { suf: 'er', base: 'teach', word: 'teacher', e: '👩‍🏫', meaning: 'a person who teaches', foils: ['a person who learns', 'a short little lesson'] },
+      { suf: 'ful', base: 'care', word: 'careful', e: '⚠️', meaning: 'full of care; watching so you stay safe', foils: ['not caring at all', 'to give care away'] },
+      { suf: 'er', base: 'paint', word: 'painter', e: '🧑‍🎨', meaning: 'a person who paints', foils: ['a person who cleans', 'a tiny little painting'] }
+    ],
+    3: [
+      { pre: 're', base: 'read', word: 'reread', e: '📖', meaning: 'to read it again', foils: ['to read it the wrong way', 'to stop reading'] },
+      { pre: 'un', base: 'kind', word: 'unkind', e: '😠', meaning: 'not kind; mean', foils: ['very kind indeed', 'kind one more time'] },
+      { pre: 'mis', base: 'place', word: 'misplace', e: '🔍', meaning: 'to put something in the wrong spot and lose it', foils: ['to place it neatly', 'to place it two times'] },
+      { pre: 'pre', base: 'heat', word: 'preheat', e: '🔥', meaning: 'to heat something before you use it', foils: ['to heat it far too much', 'to cool it right down'] },
+      { pre: 'dis', base: 'like', word: 'dislike', e: '👎', meaning: 'to not like something', foils: ['to like it a whole lot', 'to like it once more'] },
+      { suf: 'less', base: 'fear', word: 'fearless', e: '🦁', meaning: 'having no fear; very brave', foils: ['full of fear', 'a small little fear'] },
+      { suf: 'ness', base: 'kind', word: 'kindness', e: '💛', meaning: 'the act of being kind', foils: ['being a little unkind', 'not being kind'] },
+      { suf: 'ly', base: 'quick', word: 'quickly', e: '⚡', meaning: 'in a quick, fast way', foils: ['in a very slow way', 'not quick at all'] },
+      { suf: 'er', base: 'farm', word: 'farmer', e: '🧑‍🌾', meaning: 'a person who works on a farm', foils: ['a tiny little farm', 'a person who goes shopping'] },
+      { pre: 're', base: 'build', word: 'rebuild', e: '🏗️', meaning: 'to build it again', foils: ['to knock it all down', 'to build it wrong'] },
+      { suf: 'ish', base: 'child', word: 'childish', e: '🍼', meaning: 'acting like a young child', foils: ['acting all grown up', 'having lots of children'] },
+      { pre: 'un', base: 'pack', word: 'unpack', e: '🧳', meaning: 'to take things back out of a bag or box', foils: ['to pack it up twice', 'a full, heavy backpack'] }
+    ],
+    4: [
+      { pre: 'dis', base: 'agree', word: 'disagree', e: '🙅', meaning: 'to not agree; to think differently', foils: ['to agree very strongly', 'to agree all over again'] },
+      { pre: 're', base: 'arrange', word: 'rearrange', e: '🔀', meaning: 'to put things into a new order', foils: ['to leave things exactly alone', 'to arrange them badly'] },
+      { pre: 'over', base: 'cook', word: 'overcook', e: '🍳', meaning: 'to cook something too long', foils: ['to cook it just right', 'to not cook it at all'] },
+      { pre: 'under', base: 'pay', word: 'underpay', e: '💵', meaning: 'to pay someone too little', foils: ['to pay someone too much', 'to pay right on time'] },
+      { suf: 'ful', base: 'thank', word: 'thankful', e: '🙏', meaning: 'full of thanks; grateful', foils: ['with no thanks at all', 'to give your thanks away'] },
+      { suf: 'less', base: 'price', word: 'priceless', e: '💎', meaning: 'so special that no price is high enough', foils: ['worth no money at all', 'having a tiny price'] },
+      { suf: 'ness', base: 'dark', word: 'darkness', e: '🌑', meaning: 'the state of being dark', foils: ['a small bit of light', 'a tiny dark spot'] },
+      { suf: 'ly', base: 'bright', word: 'brightly', e: '☀️', meaning: 'in a bright way', foils: ['in a dim, dark way', 'not bright at all'] },
+      { suf: 'able', base: 'read', word: 'readable', e: '📗', meaning: 'easy to read', foils: ['too hard to read', 'ready to be read to you'] },
+      { pre: 'mis', base: 'count', word: 'miscount', e: '🔢', meaning: 'to count something wrong', foils: ['to count it perfectly', 'to count it once more'] },
+      { pre: 're', base: 'paint', word: 'repaint', e: '🎨', meaning: 'to paint it again', foils: ['to scrape the paint off', 'to paint it badly'] },
+      { pre: 'non', base: 'stop', word: 'nonstop', e: '🚄', meaning: 'going without stopping', foils: ['with lots of stops', 'stopping just once'] }
+    ],
+    5: [
+      { pre: 'dis', base: 'appear', word: 'disappear', e: '💨', meaning: 'to go out of sight; to vanish', foils: ['to show up once again', 'to appear very slowly'] },
+      { pre: 'over', base: 'sleep', word: 'oversleep', e: '😴', meaning: 'to sleep longer than you meant to', foils: ['to sleep far too little', 'to sleep just the right amount'] },
+      { pre: 'under', base: 'water', word: 'underwater', e: '🤿', meaning: 'below the surface of the water', foils: ['on top of the water', 'right beside the water'] },
+      { pre: 're', base: 'discover', word: 'rediscover', e: '🔭', meaning: 'to discover something again', foils: ['to hide it far away', 'to lose it forever'] },
+      { pre: 'mis', base: 'understand', word: 'misunderstand', e: '🤔', meaning: 'to understand something the wrong way', foils: ['to understand it perfectly', 'to explain it again'] },
+      { suf: 'less', base: 'thought', word: 'thoughtless', e: '😳', meaning: 'not thinking about others; careless', foils: ['full of deep thought', 'thinking very hard'] },
+      { suf: 'ful', base: 'wonder', word: 'wonderful', e: '🤩', meaning: 'full of wonder; really great', foils: ['full of worry', 'making wonder stop'] },
+      { suf: 'ment', base: 'agree', word: 'agreement', e: '🤝', meaning: 'the act of agreeing; a deal', foils: ['a big loud argument', 'the act of walking away'] },
+      { suf: 'ish', base: 'fool', word: 'foolish', e: '🤡', meaning: 'acting like a fool; silly and unwise', foils: ['very wise and clever', 'having no fool around'] },
+      { pre: 'pre', base: 'view', word: 'preview', e: '🎬', meaning: 'a peek at something before it comes out', foils: ['a look back at the past', 'the very last part'] },
+      { pre: 'non', base: 'sense', word: 'nonsense', e: '🤪', meaning: 'words or ideas that make no sense', foils: ['very wise words', 'a good, calm feeling'] },
+      { suf: 'ment', base: 'move', word: 'movement', e: '🏃', meaning: 'the act of moving', foils: ['the act of resting still', 'a comfy place to sit'] }
+    ]
+  },
+
+  /* ---------- Opposites & Twins ----------
+     8 antonym pairs + 8 synonym pairs per grade. No word repeats within
+     a grade, so pairs never become each other's answer. */
+  PAIRS: {
+    K: {
+      ant: [ ['big','small'], ['hot','cold'], ['up','down'], ['in','out'], ['day','night'], ['wet','dry'], ['fast','slow'], ['good','bad'] ],
+      syn: [ ['little','tiny'], ['glad','happy'], ['mad','angry'], ['jump','hop'], ['rock','stone'], ['kid','child'], ['yell','shout'], ['sick','ill'] ]
+    },
+    1: {
+      ant: [ ['love','hate'], ['push','pull'], ['tall','short'], ['full','empty'], ['loud','quiet'], ['clean','dirty'], ['hard','soft'], ['new','old'] ],
+      syn: [ ['big','large'], ['small','little'], ['fast','quick'], ['jump','leap'], ['shout','yell'], ['happy','cheerful'], ['cold','chilly'], ['nice','kind'] ]
+    },
+    2: {
+      ant: [ ['begin','end'], ['brave','afraid'], ['rich','poor'], ['win','lose'], ['above','below'], ['early','late'], ['light','heavy'], ['wild','tame'] ],
+      syn: [ ['small','little'], ['big','huge'], ['happy','joyful'], ['angry','mad'], ['quick','fast'], ['smart','clever'], ['quiet','silent'], ['pretty','lovely'] ]
+    },
+    3: {
+      ant: [ ['always','never'], ['buy','sell'], ['float','sink'], ['gather','scatter'], ['shout','whisper'], ['wide','narrow'], ['smooth','rough'], ['strong','weak'] ],
+      syn: [ ['happy','glad'], ['big','giant'], ['small','tiny'], ['fast','speedy'], ['angry','furious'], ['smart','clever'], ['cold','freezing'], ['quiet','peaceful'] ]
+    },
+    4: {
+      ant: [ ['brave','cowardly'], ['ancient','modern'], ['expand','shrink'], ['arrive','depart'], ['cruel','kind'], ['shallow','deep'], ['victory','defeat'], ['praise','blame'] ],
+      syn: [ ['huge','gigantic'], ['tiny','miniature'], ['happy','delighted'], ['angry','furious'], ['fast','rapid'], ['smart','intelligent'], ['scared','frightened'], ['pretty','gorgeous'] ]
+    },
+    5: {
+      ant: [ ['ancient','modern'], ['fragile','sturdy'], ['generous','selfish'], ['temporary','permanent'], ['increase','decrease'], ['praise','criticize'], ['artificial','natural'], ['humble','arrogant'] ],
+      syn: [ ['delicate','dainty'], ['enormous','immense'], ['curious','inquisitive'], ['difficult','challenging'], ['quick','rapid'], ['happy','delighted'], ['calm','peaceful'], ['brave','courageous'] ]
+    }
+  },
+
+  /* ---------- Word Chains ----------
+     Grades K-2. Each chain has 4 steps; each step changes exactly ONE
+     letter from the step before (same length throughout). */
+  CHAINS: {
+    K: [
+      { steps: ['cat','hat','hot','hop'] },
+      { steps: ['pig','pit','pat','pan'] },
+      { steps: ['bug','bag','bat','bad'] },
+      { steps: ['dog','dig','dip','dim'] },
+      { steps: ['man','mat','map','mop'] },
+      { steps: ['net','nut','cut','cup'] },
+      { steps: ['pen','pin','win','wig'] },
+      { steps: ['top','tap','tan','ten'] },
+      { steps: ['rat','ran','run','rug'] },
+      { steps: ['box','fox','fix','six'] }
+    ],
+    1: [
+      { steps: ['ship','shop','chop','chip'] },
+      { steps: ['stop','step','stem','stew'] },
+      { steps: ['flag','flap','flip','clip'] },
+      { steps: ['spin','spit','slit','slot'] },
+      { steps: ['hand','band','bend','bond'] },
+      { steps: ['desk','disk','dish','fish'] },
+      { steps: ['slip','slap','snap','swap'] },
+      { steps: ['trip','trap','tray','gray'] },
+      { steps: ['plum','plus','plug','slug'] },
+      { steps: ['club','clue','blue','glue'] }
+    ],
+    2: [
+      { steps: ['cake','cane','care','core'] },
+      { steps: ['bike','bake','lake','like'] },
+      { steps: ['rain','main','mail','mall'] },
+      { steps: ['boat','coat','cost','cast'] },
+      { steps: ['seed','feed','feet','felt'] },
+      { steps: ['moon','mood','good','gold'] },
+      { steps: ['rope','rose','nose','note'] },
+      { steps: ['tree','free','flee','flea'] },
+      { steps: ['rail','tail','tall','ball'] },
+      { steps: ['gate','late','lane','line'] }
+    ]
+  },
+
+  /* ---------- Real or Nonsense? ----------
+     20 pronounceable pseudo-words per grade that follow the grade's
+     phonics patterns. None is a real English word or in WORDS/SIGHT. */
+  NONSENSE: {
+    K: ['wug','zat','fim','vux','daf','niv','rup','vun','kib','lom','gax','zof','bof','mup','jub','hig','muv','nax','pev','zib'],
+    1: ['thrap','clest','drell','frell','snelt','plisk','brump','clont','shomp','thisk','chulf','whesk','grulp','twisk','spomp','blesk','crilt','dresp','thurn','spriv'],
+    2: ['floam','brike','sneet','braip','cheam','smide','throle','sproom','plite','greab','crade','skeeb','plome','chaim','smode','fleen','gloob','snigh','plaif','stoab'],
+    3: ['bantle','morfit','plindle','plimmer','crandle','tazzle','flumber','gribbon','snorbit','blantic','clurpin','jabbet','montil','snadgel','wobbin','yommit','plodkin','frannet','vantle','shrompet'],
+    4: ['tarnible','compestic','delantic','fentrable','gorbetil','hendrile','quandric','plemist','sundrel','varnolic','brackine','craniter','dobrint','flantom','grispatic','morlect','plostin','rambolic','septular','trelidon'],
+    5: ['quandrelic','voltimend','blantiform','crestingal','dermolic','fendricate','gonderis','holprandic','juvantic','lumendric','mandolic','nervactic','octravel','plendorate','quibberton','rendalic','sprocklem','trantible','vandriset','yarnolic']
+  },
+
   PRAISE: ['Great job', 'You did it', 'Awesome reading', 'Super star', 'Way to go', 'Out of this world', 'Fantastic'],
 
   TIPS: [

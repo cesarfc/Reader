@@ -676,6 +676,648 @@ window.RR = window.RR || {};
   };
 
   /* =========================================================
+     GAME — Silly or Sensible? (reading for meaning)
+     Read a sentence, judge it. You can't spot the silly ones
+     without actually understanding what you decoded.
+     ========================================================= */
+  const SILLY_TOTAL = 8;
+
+  const sillyGame = {
+    title: 'Silly or Sensible?',
+    icon: '🤪',
+    desc: 'Does it make sense?',
+    start(container, ctx) {
+      const shell = roundShell(container, ctx, 'Silly or Sensible?', SILLY_TOTAL);
+      const pool = (D.SILLY && D.SILLY[ctx.grade]) || [];
+      const round = sample(pool, Math.min(SILLY_TOTAL, pool.length));
+      if (!round.length) { shell.die(); ctx.quit(); return; }
+      let qi = 0;
+      let firstTryCount = 0;
+      let comboBonus = 0;
+
+      function next() {
+        if (!shell.live) return;
+        if (qi >= round.length) {
+          shell.die();
+          ctx.finish(quizResult(firstTryCount, round.length, `${firstTryCount} of ${round.length} spotted on the first try!`, comboBonus));
+          return;
+        }
+        shell.nowDot(qi);
+        ask(round[qi]);
+      }
+
+      function ask(item) {
+        let firstTry = true;
+        let answered = false;
+        shell.area.innerHTML = `
+          <div class="prompt">
+            <h2>Read it. Does it make sense?</h2>
+            <button class="flashcard sentences tappable sillycard" data-act="say">${item.t}</button>
+          </div>
+          <div class="bigjudge">
+            <button class="btn good big" data-j="0">✓ Makes sense</button>
+            <button class="btn big sillybtn" data-j="1">🤪 Silly!</button>
+          </div>`;
+        const say = () => A.speak(item.t, { rate: 0.85 });
+        shell.area.querySelector('[data-act="say"]').addEventListener('click', say);
+        shell.area.querySelectorAll('[data-j]').forEach(btn => {
+          btn.addEventListener('click', () => {
+            if (answered) return;
+            if ((btn.dataset.j === '1') === !!item.silly) {
+              answered = true;
+              A.sfx.ding();
+              haptic(true);
+              if (firstTry) { firstTryCount++; comboBonus += comboHit(shell); }
+              shell.markDot(qi);
+              qi++;
+              speakAdvance(shell, item.silly ? 'Ha! So silly!' : 'Yes! That makes sense!', next, { rate: 0.95 });
+            } else {
+              firstTry = false;
+              comboMiss(shell);
+              btn.classList.add('shake');
+              shell.after(450, () => btn.classList.remove('shake'));
+              A.sfx.buzz();
+              haptic(false);
+              say(); /* hearing it read helps them re-judge */
+            }
+          });
+        });
+      }
+
+      next();
+    }
+  };
+
+  /* =========================================================
+     GAME — Riddle Time (inference)
+     ========================================================= */
+  const RIDDLE_TOTAL = 6;
+
+  const riddleGame = {
+    title: 'Riddle Time',
+    icon: '🕵️',
+    desc: 'Read the riddle, crack it!',
+    start(container, ctx) {
+      const shell = roundShell(container, ctx, 'Riddle Time', RIDDLE_TOTAL);
+      const pool = (D.RIDDLES && D.RIDDLES[ctx.grade]) || [];
+      const round = sample(pool, Math.min(RIDDLE_TOTAL, pool.length));
+      if (!round.length) { shell.die(); ctx.quit(); return; }
+      let qi = 0;
+      let firstTryCount = 0;
+      let comboBonus = 0;
+
+      function next() {
+        if (!shell.live) return;
+        if (qi >= round.length) {
+          shell.die();
+          ctx.finish(quizResult(firstTryCount, round.length, `${firstTryCount} of ${round.length} riddles cracked on the first try!`, comboBonus));
+          return;
+        }
+        shell.nowDot(qi);
+        ask(round[qi]);
+      }
+
+      function ask(r) {
+        let firstTry = true;
+        let answered = false;
+        const choices = r.choices;
+        shell.area.innerHTML = `
+          <div class="prompt">
+            <div class="riddlecard">${r.q}</div>
+            <button class="btn ghost" data-act="say">🔊 Read it to me</button>
+          </div>
+          <div class="choices pics">
+            ${choices.map((c, i) => `
+              <button class="choice pic labeled" data-i="${i}">
+                <span class="pemoji">${c.e}</span>
+                <span class="plabel">${c.t}</span>
+              </button>`).join('')}
+          </div>`;
+        shell.area.querySelector('[data-act="say"]').addEventListener('click', () => A.speak(r.q, { rate: 0.85 }));
+        shell.area.querySelectorAll('.choice').forEach(btn => {
+          btn.addEventListener('click', () => {
+            if (answered) return;
+            if (+btn.dataset.i === r.a) {
+              answered = true;
+              btn.classList.add('correct');
+              A.sfx.ding();
+              haptic(true);
+              if (firstTry) { firstTryCount++; comboBonus += comboHit(shell); }
+              shell.markDot(qi);
+              qi++;
+              speakAdvance(shell, `${choices[r.a].t}! You cracked it!`, next, { rate: 0.95 });
+            } else {
+              firstTry = false;
+              comboMiss(shell);
+              btn.classList.add('wrong');
+              A.sfx.buzz();
+              haptic(false);
+            }
+          });
+        });
+      }
+
+      next();
+    }
+  };
+
+  /* =========================================================
+     GAME — Word Factory (morphology, grades 2-5)
+     Phase 1: build the word from its parts. Phase 2: what does
+     the built word mean? Affixes are the vocabulary engine.
+     ========================================================= */
+  const MORPH_TOTAL = 6;
+
+  const morphGame = {
+    title: 'Word Factory',
+    icon: '🏭',
+    desc: 'Build big words from parts',
+    grades: ['2', '3', '4', '5'],
+    start(container, ctx) {
+      const shell = roundShell(container, ctx, 'Word Factory', MORPH_TOTAL);
+      const pool = (D.MORPH && D.MORPH[ctx.grade]) || [];
+      const round = sample(pool, Math.min(MORPH_TOTAL, pool.length));
+      if (!round.length) { shell.die(); ctx.quit(); return; }
+      let qi = 0;
+      let firstTryCount = 0;
+      let comboBonus = 0;
+
+      function next() {
+        if (!shell.live) return;
+        if (qi >= round.length) {
+          shell.die();
+          ctx.finish(quizResult(firstTryCount, round.length, `${firstTryCount} of ${round.length} words built and understood!`, comboBonus));
+          return;
+        }
+        shell.nowDot(qi);
+        build(round[qi]);
+      }
+
+      function build(item) {
+        const affix = item.pre || item.suf;
+        const isPre = !!item.pre;
+        const others = pool.filter(x => x !== item);
+        const decoyAffix = sample(others.map(x => x.pre || x.suf).filter(a => a && a !== affix), 1)[0] || 're';
+        const decoyBase = sample(others.map(x => x.base).filter(b => b !== item.base), 1)[0] || 'play';
+        const expected = isPre ? [affix, item.base] : [item.base, affix];
+        const bank = shuffle([affix, item.base, decoyAffix, decoyBase]);
+        let placed = 0;
+        let firstTry = true;
+
+        shell.area.innerHTML = `
+          <div class="prompt">
+            <button class="bigpic small" data-act="say" aria-label="${item.word}">${item.e}</button>
+            <h2>Build the word “${item.word}”!</h2>
+            <div class="slots">
+              <div class="slot wordslot"></div><div class="slot wordslot"></div>
+            </div>
+          </div>
+          <div class="tiles bank">
+            ${bank.map((t, i) => `<button class="tile wordtile" data-i="${i}">${t}</button>`).join('')}
+          </div>`;
+        const say = () => A.speak(item.word, { rate: 0.8 });
+        shell.area.querySelector('[data-act="say"]').addEventListener('click', say);
+        shell.after(350, say);
+        const slots = shell.area.querySelectorAll('.slot');
+
+        shell.area.querySelectorAll('.tile').forEach(btn => {
+          btn.addEventListener('click', () => {
+            if (btn.disabled) return;
+            if (bank[+btn.dataset.i] === expected[placed]) {
+              A.sfx.pop();
+              slots[placed].textContent = expected[placed];
+              slots[placed].classList.add('filled');
+              btn.disabled = true;
+              btn.classList.add('used');
+              placed++;
+              if (placed === 2) {
+                A.sfx.star();
+                haptic(true);
+                const eq = document.createElement('div');
+                eq.className = 'morpheq';
+                eq.textContent = `${expected[0]} + ${expected[1]} = ${item.word}!`;
+                shell.area.appendChild(eq);
+                shell.after(500, () => speakAdvance(shell, `${expected.join('... ')}... ${item.word}!`, () => meaning(item, firstTry), { rate: 0.85 }));
+              }
+            } else {
+              firstTry = false;
+              comboMiss(shell);
+              btn.classList.add('wrong');
+              A.sfx.buzz();
+              haptic(false);
+              shell.after(450, () => btn.classList.remove('wrong'));
+            }
+          });
+        });
+      }
+
+      function meaning(item, cleanSoFar) {
+        if (!shell.live) return;
+        let firstTry = cleanSoFar;
+        let answered = false;
+        const opts = shuffle([{ t: item.meaning, ok: true }].concat(item.foils.map(f => ({ t: f, ok: false }))));
+        shell.area.innerHTML = `
+          <div class="prompt">
+            <h2>What does <b>${item.word}</b> mean?</h2>
+          </div>
+          <div class="choices meanings">
+            ${opts.map((o, i) => `<button class="choice meaningpick" data-i="${i}">${o.t}</button>`).join('')}
+          </div>`;
+        A.speak(`What does ${item.word} mean?`, { rate: 0.9 });
+        shell.area.querySelectorAll('.choice').forEach(btn => {
+          btn.addEventListener('click', () => {
+            if (answered) return;
+            if (opts[+btn.dataset.i].ok) {
+              answered = true;
+              btn.classList.add('correct');
+              A.sfx.ding();
+              haptic(true);
+              if (firstTry) { firstTryCount++; comboBonus += comboHit(shell); }
+              shell.markDot(qi);
+              qi++;
+              speakAdvance(shell, `Yes! ${item.word} means ${item.meaning}!`, next, { rate: 0.9 });
+            } else {
+              firstTry = false;
+              comboMiss(shell);
+              btn.classList.add('wrong');
+              A.sfx.buzz();
+              haptic(false);
+            }
+          });
+        });
+      }
+
+      next();
+    }
+  };
+
+  /* =========================================================
+     GAME — Opposites & Twins (synonyms / antonyms)
+     ========================================================= */
+  const TWINS_TOTAL = 8;
+
+  const twinsGame = {
+    title: 'Opposites & Twins',
+    icon: '🪞',
+    desc: 'Opposite or same — find it!',
+    start(container, ctx) {
+      const shell = roundShell(container, ctx, 'Opposites & Twins', TWINS_TOTAL);
+      const data = (D.PAIRS && D.PAIRS[ctx.grade]) || { ant: [], syn: [] };
+      const qs = shuffle(
+        sample(data.ant, Math.min(4, data.ant.length)).map(pair => ({ kind: 'ant', pair }))
+          .concat(sample(data.syn, Math.min(4, data.syn.length)).map(pair => ({ kind: 'syn', pair })))
+      );
+      if (!qs.length) { shell.die(); ctx.quit(); return; }
+      /* distractor vocabulary: every word from the grade's other pairs */
+      const allWords = data.ant.concat(data.syn).flat();
+      let qi = 0;
+      let firstTryCount = 0;
+      let comboBonus = 0;
+
+      function next() {
+        if (!shell.live) return;
+        if (qi >= qs.length) {
+          shell.die();
+          ctx.finish(quizResult(firstTryCount, qs.length, `${firstTryCount} of ${qs.length} matched on the first try!`, comboBonus));
+          return;
+        }
+        shell.nowDot(qi);
+        ask(qs[qi]);
+      }
+
+      function ask(q) {
+        const flip = Math.random() < 0.5;
+        const promptWord = flip ? q.pair[1] : q.pair[0];
+        const answer = flip ? q.pair[0] : q.pair[1];
+        const decoys = shuffle(allWords.filter(w => w !== promptWord && w !== answer)).slice(0, 2);
+        const choices = shuffle([answer].concat(decoys));
+        let firstTry = true;
+        let answered = false;
+        shell.area.innerHTML = `
+          <div class="prompt">
+            <div class="promptword">${promptWord}</div>
+            <h2>${q.kind === 'ant' ? `Which is the <b>OPPOSITE</b> of ${promptWord}?` : `Which means the <b>SAME</b> as ${promptWord}?`}</h2>
+          </div>
+          <div class="choices words">
+            ${choices.map((c, i) => `<button class="choice wordpick" data-i="${i}">${c}</button>`).join('')}
+          </div>`;
+        shell.after(350, () => A.speak(`${q.kind === 'ant' ? 'Which word is the opposite of' : 'Which word means the same as'} ${promptWord}?`, { rate: 0.9 }));
+        shell.area.querySelectorAll('.choice').forEach(btn => {
+          btn.addEventListener('click', () => {
+            if (answered) return;
+            if (choices[+btn.dataset.i] === answer) {
+              answered = true;
+              btn.classList.add('correct');
+              A.sfx.ding();
+              haptic(true);
+              if (firstTry) { firstTryCount++; comboBonus += comboHit(shell); }
+              shell.markDot(qi);
+              qi++;
+              speakAdvance(shell, `${promptWord} and ${answer}! ${q.kind === 'ant' ? 'Opposites!' : 'Twins!'}`, next, { rate: 0.9 });
+            } else {
+              firstTry = false;
+              comboMiss(shell);
+              btn.classList.add('wrong');
+              A.sfx.buzz();
+              haptic(false);
+            }
+          });
+        });
+      }
+
+      next();
+    }
+  };
+
+  /* =========================================================
+     GAME — Word Chains (phoneme manipulation, grades K-2)
+     cat → hat → hot → hop: change one letter at a time.
+     ========================================================= */
+  const chainsGame = {
+    title: 'Word Chains',
+    icon: '🔗',
+    desc: 'Change one letter, new word!',
+    grades: ['K', '1', '2'],
+    start(container, ctx) {
+      const pool = (D.CHAINS && D.CHAINS[ctx.grade]) || [];
+      const picked = sample(pool, Math.min(2, pool.length));
+      /* each chain of 4 steps = 3 letter-swap questions */
+      const steps = [];
+      picked.forEach(ch => {
+        for (let i = 0; i < ch.steps.length - 1; i++) steps.push({ from: ch.steps[i], to: ch.steps[i + 1] });
+      });
+      const shell = roundShell(container, ctx, 'Word Chains', steps.length);
+      if (!steps.length) { shell.die(); ctx.quit(); return; }
+      let qi = 0;
+      let firstTryCount = 0;
+      let comboBonus = 0;
+
+      function next() {
+        if (!shell.live) return;
+        if (qi >= steps.length) {
+          shell.die();
+          ctx.finish(quizResult(firstTryCount, steps.length, `${firstTryCount} of ${steps.length} swaps on the first try!`, comboBonus));
+          return;
+        }
+        shell.nowDot(qi);
+        ask(steps[qi]);
+      }
+
+      function ask(st) {
+        let diff = 0;
+        for (let i = 0; i < st.from.length; i++) if (st.from[i] !== st.to[i]) { diff = i; break; }
+        const correct = st.to[diff];
+        const decoys = shuffle('abcdefghijklmnopqrstuvwxyz'.split('').filter(l => l !== correct && l !== st.from[diff])).slice(0, 2);
+        const choices = shuffle([correct].concat(decoys));
+        let firstTry = true;
+        let answered = false;
+        shell.area.innerHTML = `
+          <div class="prompt">
+            <h2>Turn <b>${st.from}</b> into…</h2>
+            <button class="speaker" data-act="say" aria-label="Hear the new word">🔊</button>
+            <div class="tiles">
+              ${st.from.split('').map((l, i) => `<span class="tile gaptile ${i === diff ? 'gap' : ''}" data-t="${i}">${l}</span>`).join('')}
+            </div>
+            <h2 class="chainhint">Which letter makes the new word?</h2>
+          </div>
+          <div class="choices letters">
+            ${choices.map((c, i) => `<button class="choice letter" data-i="${i}">${c.toUpperCase()} <small>${c}</small></button>`).join('')}
+          </div>`;
+        const say = () => A.speak(`Make it say ${st.to}!`, { rate: 0.8 });
+        shell.area.querySelector('[data-act="say"]').addEventListener('click', () => A.speak(st.to, { rate: 0.75 }));
+        shell.after(350, say);
+        shell.area.querySelectorAll('.choice').forEach(btn => {
+          btn.addEventListener('click', () => {
+            if (answered) return;
+            if (choices[+btn.dataset.i] === correct) {
+              answered = true;
+              btn.classList.add('correct');
+              const tile = shell.area.querySelector(`[data-t="${diff}"]`);
+              if (tile) { tile.textContent = correct; tile.classList.add('lit'); tile.classList.remove('gap'); }
+              A.sfx.ding();
+              haptic(true);
+              if (firstTry) { firstTryCount++; comboBonus += comboHit(shell); }
+              shell.markDot(qi);
+              qi++;
+              speakAdvance(shell, `${st.from}… ${st.to}! You changed it!`, next, { rate: 0.85 });
+            } else {
+              firstTry = false;
+              comboMiss(shell);
+              btn.classList.add('wrong');
+              A.sfx.buzz();
+              haptic(false);
+            }
+          });
+        });
+      }
+
+      next();
+    }
+  };
+
+  /* =========================================================
+     GAME — Real or Nonsense? (decoding discrimination)
+     45-second lightning: pop only the real words. Pseudo-words
+     are how reading science checks true decoding — disguised
+     as an arcade round.
+     ========================================================= */
+  const NONSENSE_SECS = 45;
+  const NONSENSE_CFG = { three: 14, two: 9 };
+
+  const nonsenseGame = {
+    title: 'Real or Nonsense?',
+    icon: '👾',
+    desc: 'Spot the made-up words!',
+    start(container, ctx) {
+      const shell = roundShell(container, ctx, 'Real or Nonsense?', 1);
+      shell.dots.forEach(d => d.remove());
+      const reals = sample(D.WORDS[ctx.grade].map(w => w.w).concat(D.SIGHT[ctx.grade] || []), 20);
+      const fakes = sample((D.NONSENSE && D.NONSENSE[ctx.grade]) || [], 20);
+      const deck = shuffle(reals.map(w => ({ w, real: true })).concat(fakes.map(w => ({ w, real: false }))));
+      const wordKey = w => {
+        if (D.WORDS[ctx.grade].some(x => x.w === w)) return 'w:' + w;
+        if ((D.SIGHT[ctx.grade] || []).includes(w)) return 's:' + w;
+        return null;
+      };
+
+      introCard(shell, {
+        emoji: '👾',
+        title: 'Real or Nonsense?',
+        lines: [
+          'Some of these are REAL words. Some are totally made up!',
+          'Read each one and decide — fast!'
+        ],
+        buttonText: '🚦 Ready, set, read!',
+        onStart: run
+      });
+
+      function run() {
+        let i = 0;
+        let score = 0;
+        const outcomes = [];
+        const tEnd = Date.now() + NONSENSE_SECS * 1000;
+
+        const iv = setInterval(() => {
+          if (!shell.live) { clearInterval(iv); return; }
+          const left = Math.max(0, (tEnd - Date.now()) / 1000);
+          const bar = shell.area.querySelector('.timebar i');
+          const num = shell.area.querySelector('.timeleft');
+          if (bar) bar.style.width = (left / NONSENSE_SECS * 100) + '%';
+          if (num) num.textContent = Math.ceil(left) + 's';
+          if (left <= 0) { clearInterval(iv); finish(); }
+        }, 200);
+        shell.timers.push(iv);
+
+        function show() {
+          if (!shell.live || Date.now() >= tEnd) return;
+          const item = deck[i % deck.length];
+          shell.area.innerHTML = `
+            <div class="speedtop">
+              <span class="timeleft">${NONSENSE_SECS}s</span>
+              <div class="timebar"><i style="width:100%"></i></div>
+              <span class="scorenum">⭐ ${score}</span>
+            </div>
+            <div class="flashcard words">${item.w}</div>
+            <div class="bigjudge">
+              <button class="btn good big" data-j="1">👍 Real word</button>
+              <button class="btn big sillybtn" data-j="0">👾 Made up!</button>
+            </div>`;
+          shell.area.querySelectorAll('[data-j]').forEach(btn => {
+            btn.addEventListener('click', () => {
+              const saidReal = btn.dataset.j === '1';
+              const key = item.real ? wordKey(item.w) : null;
+              if (saidReal === item.real) {
+                score++;
+                if (key) outcomes.push({ k: key, ok: true });
+                A.sfx.tick();
+              } else {
+                if (key) outcomes.push({ k: key, ok: false });
+                A.sfx.buzz();
+                haptic(false);
+              }
+              i++;
+              show();
+            });
+          });
+        }
+
+        function finish() {
+          if (!shell.live) return;
+          const stars = score >= NONSENSE_CFG.three ? 3 : score >= NONSENSE_CFG.two ? 2 : 1;
+          shell.die();
+          ctx.finish({
+            stars,
+            score,
+            coins: score * 2 + stars * 5,
+            outcomes,
+            line1: `You judged ${score} words in ${NONSENSE_SECS} seconds!`
+          });
+        }
+
+        show();
+      }
+    }
+  };
+
+  /* =========================================================
+     GAME — Story Scramble (sequencing comprehension)
+     Put the pages of a book you've READ back in story order.
+     ========================================================= */
+  const scrambleGame = {
+    title: 'Story Scramble',
+    icon: '📜',
+    desc: 'Put the story in order',
+    start(container, ctx) {
+      const shell = roundShell(container, ctx, 'Story Scramble', 1);
+      const readBooks = (D.BOOKS[ctx.grade] || []).concat(S.customBooks())
+        .filter(b => ((ctx.profile.stats['book-' + b.id] || {}).reads || 0) >= 1 && b.pages.length >= 3);
+
+      if (!readBooks.length) {
+        shell.dots.forEach(d => d.remove());
+        introCard(shell, {
+          emoji: '📜',
+          title: 'Read a book first!',
+          lines: ['Story Scramble mixes up a book you know.', 'Read any Story Book, then come back!'],
+          buttonText: '📚 Go read a book!',
+          onStart: () => { shell.die(); RR.nav.game('books'); }
+        });
+        return;
+      }
+
+      const rounds = sample(readBooks, Math.min(2, readBooks.length));
+      /* dots = one per page-tap across all rounds */
+      const totalTaps = rounds.reduce((n, b) => n + Math.min(4, b.pages.length), 0);
+      shell.dots.forEach(d => d.remove());
+      let ri = 0;
+      let tapped = 0;
+      let firstTryCount = 0;
+      let comboBonus = 0;
+
+      function next() {
+        if (!shell.live) return;
+        if (ri >= rounds.length) {
+          shell.die();
+          ctx.finish(quizResult(firstTryCount, totalTaps, `You put ${rounds.length} ${rounds.length === 1 ? 'story' : 'stories'} back together!`, comboBonus));
+          return;
+        }
+        ask(rounds[ri]);
+      }
+
+      function ask(book) {
+        const count = Math.min(4, book.pages.length);
+        const start = (Math.random() * (book.pages.length - count + 1)) | 0;
+        const pages = book.pages.slice(start, start + count).map((pg, order) => ({ pg, order }));
+        const shown = shuffle(pages);
+        let expect = 0;
+        shell.area.innerHTML = `
+          <div class="prompt">
+            <h2>Put “${book.title}” in order!</h2>
+            <p class="muted">Tap what happens first, then next…</p>
+          </div>
+          <div class="scramlist">
+            ${shown.map((x, i) => `
+              <button class="scramrow" data-i="${i}">
+                <span class="scramnum empty">?</span>
+                <span>${x.pg.a} ${x.pg.t}</span>
+              </button>`).join('')}
+          </div>`;
+        shell.area.querySelectorAll('.scramrow').forEach(btn => {
+          let firstTry = true;
+          btn.addEventListener('click', () => {
+            const x = shown[+btn.dataset.i];
+            if (btn.classList.contains('locked')) return;
+            if (x.order === expect) {
+              expect++;
+              tapped++;
+              btn.classList.add('locked');
+              const numEl = btn.querySelector('.scramnum');
+              numEl.textContent = expect;
+              numEl.classList.remove('empty');
+              A.sfx.pop();
+              if (firstTry) { firstTryCount++; comboBonus += comboHit(shell); }
+              if (expect === count) {
+                A.sfx.star();
+                haptic(true);
+                ri++;
+                speakAdvance(shell, "That's the story! Great remembering!", next, { rate: 0.95 });
+              }
+            } else {
+              firstTry = false;
+              comboMiss(shell);
+              btn.classList.add('shake');
+              A.sfx.buzz();
+              haptic(false);
+              shell.after(450, () => btn.classList.remove('shake'));
+            }
+          });
+        });
+      }
+
+      next();
+    }
+  };
+
+  /* =========================================================
      GAME 4 — Rhyme Time (phonemic awareness)
      ========================================================= */
   function rimeOf(word) {
@@ -1564,7 +2206,15 @@ window.RR = window.RR || {};
     sight: sightGame
   };
 
-  RR.gameOrder = ['books', 'sounds', 'blend', 'build', 'spell', 'memory', 'sentence', 'rescue', 'rhyme', 'sight', 'flash'];
+  RR.games.silly = sillyGame;
+  RR.games.riddle = riddleGame;
+  RR.games.morph = morphGame;
+  RR.games.twins = twinsGame;
+  RR.games.chains = chainsGame;
+  RR.games.nonsense = nonsenseGame;
+  RR.games.scramble = scrambleGame;
+
+  RR.gameOrder = ['books', 'sounds', 'blend', 'build', 'chains', 'spell', 'memory', 'sentence', 'morph', 'twins', 'rescue', 'silly', 'riddle', 'scramble', 'rhyme', 'sight', 'flash', 'nonsense'];
 
   /* Shared helpers for the adventure module. */
   RR.util = { shuffle, sample, smartSample, withDistractors, el, rimeOf, rhymePoolFor, wordSim, letterSim, haptic, bookReader };

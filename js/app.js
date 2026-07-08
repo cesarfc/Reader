@@ -585,11 +585,36 @@ RR.nav = RR.nav || {};
     maybeDailyGift(p);
   }
 
-  /* ---------------- Play tab: grade picker + Training Grounds ---------------- */
+  /* ---------------- Play tab: grade picker + sectioned Training Grounds ---------------- */
+  const GAME_SECTIONS = [
+    { label: '🔤 Sounds & letters', ids: ['sounds', 'blend', 'build', 'chains', 'rhyme'] },
+    { label: '📝 Words & spelling', ids: ['spell', 'memory', 'morph', 'twins', 'rescue', 'sight'] },
+    { label: '🤔 Meaning & thinking', ids: ['books', 'sentence', 'silly', 'riddle', 'scramble'] },
+    { label: '⚡ Speed rounds', ids: ['flash', 'nonsense'] }
+  ];
+
   function renderPlayTab() {
     const p = S.current();
     if (!p) { renderHome(); return; }
     petHide();
+    const available = id => {
+      const g = RR.games[id];
+      return g && (!g.grades || g.grades.includes(p.grade));
+    };
+    const card = id => {
+      const g = RR.games[id];
+      const best = (p.stats[id + '-' + p.grade] || {}).best || 0;
+      return `
+        <button class="gamecard" data-game="${id}">
+          <span class="gicon">${g.icon}</span>
+          <span class="gtitle">${g.title}</span>
+          <span class="gdesc">${g.desc}</span>
+          ${starRow(best)}
+        </button>`;
+    };
+    /* games registered but missing from the section map still show up */
+    const listed = GAME_SECTIONS.flatMap(s => s.ids);
+    const extras = RR.gameOrder.filter(id => !listed.includes(id) && available(id));
     app.innerHTML = `
       <section class="screen">
         ${appBarHtml(p)}
@@ -597,22 +622,16 @@ RR.nav = RR.nav || {};
         <div class="gradepick">
           ${GRADES.map(g => `<button class="gradepill ${g === p.grade ? 'on' : ''}" data-g="${g}">${gradePill(g)}</button>`).join('')}
         </div>
-        <div class="gamegrid">
-          ${RR.gameOrder.filter(id => {
-            const g = RR.games[id];
-            return !g.grades || g.grades.includes(p.grade);
-          }).map(id => {
-            const g = RR.games[id];
-            const best = (p.stats[id + '-' + p.grade] || {}).best || 0;
-            return `
-              <button class="gamecard" data-game="${id}">
-                <span class="gicon">${g.icon}</span>
-                <span class="gtitle">${g.title}</span>
-                <span class="gdesc">${g.desc}</span>
-                ${starRow(best)}
-              </button>`;
-          }).join('')}
-        </div>
+        ${GAME_SECTIONS.map(sec => {
+          const ids = sec.ids.filter(available);
+          if (!ids.length) return '';
+          return `
+            <span class="eyebrow section">${sec.label}</span>
+            <div class="gamegrid">${ids.map(card).join('')}</div>`;
+        }).join('')}
+        ${extras.length ? `
+          <span class="eyebrow section">🎲 More games</span>
+          <div class="gamegrid">${extras.map(card).join('')}</div>` : ''}
       </section>`;
     wireAppBar();
     showTabs('play');

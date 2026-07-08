@@ -82,6 +82,13 @@ and the 3rd grader both get fair fights from the same bosses.
 | ✏️ Spell It | Real spelling | Hear a word, then type it letter by letter on a full on-screen keyboard — with a gentle hint if you get stuck. |
 | 🧠 Memory Match | Word recognition | Flip cards to pair each written word with its picture — matches feed the same mastery tracking as the other games. |
 | 🛟 Word Rescue | Personalized review | A round built from the kid's OWN tricky words (the ones they keep missing) — rescue them back to mastery. The ▶ PLAY button routes here when stuck words pile up. |
+| 🤪 Silly or Sensible? | Reading for meaning | Read a sentence and judge it: does it make sense, or is it delightfully silly? You can't spot the silly ones without understanding what you decoded. |
+| 🕵️ Riddle Time | Inference | Read a riddle, crack it from the clues — the app's first true think-about-it game. |
+| 🏭 Word Factory | Morphology (grades 2–5) | Build big words from parts (un + lock, care + ful), then pick what the new word means. Prefixes and suffixes are the vocabulary engine for older readers. |
+| 🪞 Opposites & Twins | Vocabulary | Which word is the OPPOSITE of hot? Which means the SAME as happy? Grade-leveled synonym and antonym pairs. |
+| 🔗 Word Chains | Phoneme manipulation (K–2) | Turn cat into hat into hot into hop — tap the one letter that changes. One of the strongest predictors of reading growth, played as a puzzle. |
+| 👾 Real or Nonsense? | Decoding discrimination | A 45-second lightning round judging real words vs. decodable fakes ("blorf!") — how reading science checks true decoding, disguised as an arcade game. |
+| 📜 Story Scramble | Sequencing comprehension | Put the pages of a book you've READ back in story order — works with your custom Book Maker books too. |
 | 📝 Sentence Builder | Syntax & word order | Hear a sentence, then rebuild it from shuffled word tiles. |
 | 🎵 Rhyme Time | Phonemic awareness | Which picture rhymes with the prompt word? |
 | 👀 Sight Words | Instant word recognition | Warm-up flashcards with audio, plus a 45-second Lightning Round. Tricky words are collected for practice. |
@@ -110,8 +117,8 @@ and the 3rd grader both get fair fights from the same bosses.
   game can fake it.
 - **Daily quests** — three missions a day with coin/gem rewards, plus Reader
   XP levels (Lv 1–50 with titles) so there's always near-term progress.
-- **Badges** — 32 collectible badges for books, mastery, streaks, bosses,
-  stories, duels, spelling, the pet, and the base.
+- **Badges** — 36 collectible badges for books, mastery, streaks, bosses,
+  stories, duels, spelling, riddles, the pet, and the base.
 - **Sticker album** — every 2-star-or-better round opens a sticker pack: 48
   collectible emoji stickers in four packs, with rare ✨shiny✨ versions;
   duplicates convert to coins.
