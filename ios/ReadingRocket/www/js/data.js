@@ -1173,6 +1173,36 @@ RR.DATA = {
     ]
   },
 
+  /* ---------- Syllable Drums ----------
+     Kid words with speakable syllable chunks; n of beats = syls.length. */
+  SYLLABLES: [
+    { w: 'sun', e: '☀️', syls: ['sun'] },
+    { w: 'dog', e: '🐶', syls: ['dog'] },
+    { w: 'cat', e: '🐱', syls: ['cat'] },
+    { w: 'star', e: '⭐', syls: ['star'] },
+    { w: 'fish', e: '🐟', syls: ['fish'] },
+    { w: 'apple', e: '🍎', syls: ['ap', 'ple'] },
+    { w: 'rainbow', e: '🌈', syls: ['rain', 'bow'] },
+    { w: 'robot', e: '🤖', syls: ['ro', 'bot'] },
+    { w: 'pizza', e: '🍕', syls: ['piz', 'za'] },
+    { w: 'tiger', e: '🐯', syls: ['ti', 'ger'] },
+    { w: 'cookie', e: '🍪', syls: ['cook', 'ie'] },
+    { w: 'monkey', e: '🐵', syls: ['mon', 'key'] },
+    { w: 'banana', e: '🍌', syls: ['ba', 'na', 'na'] },
+    { w: 'butterfly', e: '🦋', syls: ['but', 'ter', 'fly'] },
+    { w: 'elephant', e: '🐘', syls: ['el', 'e', 'phant'] },
+    { w: 'dinosaur', e: '🦕', syls: ['di', 'no', 'saur'] },
+    { w: 'umbrella', e: '☂️', syls: ['um', 'brel', 'la'] },
+    { w: 'kangaroo', e: '🦘', syls: ['kan', 'ga', 'roo'] },
+    { w: 'tomato', e: '🍅', syls: ['to', 'ma', 'to'] },
+    { w: 'ladybug', e: '🐞', syls: ['la', 'dy', 'bug'] },
+    { w: 'watermelon', e: '🍉', syls: ['wa', 'ter', 'mel', 'on'] },
+    { w: 'helicopter', e: '🚁', syls: ['hel', 'i', 'cop', 'ter'] },
+    { w: 'caterpillar', e: '🐛', syls: ['cat', 'er', 'pil', 'lar'] },
+    { w: 'alligator', e: '🐊', syls: ['al', 'li', 'ga', 'tor'] },
+    { w: 'avocado', e: '🥑', syls: ['av', 'o', 'ca', 'do'] }
+  ],
+
   PRAISE: ['Great job', 'You did it', 'Awesome reading', 'Super star', 'Way to go', 'Out of this world', 'Fantastic'],
 
   TIPS: [

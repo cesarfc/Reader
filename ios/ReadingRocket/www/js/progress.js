@@ -194,7 +194,9 @@ RR.progress = (function () {
     { id: 'chains10',   e: '🔗', name: 'Chain Champion', hint: 'Play Word Chains 10 times',      test: p => gamePlays(p, 'chains') >= 10 },
     { id: 'analogy10',  e: '🧭', name: 'Pattern Master', hint: 'Play Analogy Alley 10 times',    test: p => gamePlays(p, 'analogy') >= 10 },
     { id: 'fixit10',    e: '🖍️', name: 'Word Editor',    hint: 'Play Fix It 10 times',           test: p => gamePlays(p, 'fixit') >= 10 },
-    { id: 'deepdive5',  e: '🤿', name: 'Deep Diver',     hint: 'Finish 5 Deep Dives',            test: p => gamePlays(p, 'deepdive') >= 5 }
+    { id: 'deepdive5',  e: '🤿', name: 'Deep Diver',     hint: 'Finish 5 Deep Dives',            test: p => gamePlays(p, 'deepdive') >= 5 },
+    { id: 'trace10',    e: '✍️', name: 'Letter Artist',  hint: 'Play Letter Tracing 10 times',   test: p => gamePlays(p, 'trace') >= 10 },
+    { id: 'safari10',   e: '🐾', name: 'Sound Scout',    hint: 'Play Sound Safari 10 times',     test: p => gamePlays(p, 'safari') >= 10 }
   ];
 
   function badges(p) {
@@ -295,6 +297,7 @@ RR.progress = (function () {
       if (available('sounds')) cand.push({ id: 'sounds', n: unmastered(d.LETTERS, 'l:', l => l.l) });
       if (available('sight')) cand.push({ id: 'sight', n: unmastered(d.SIGHT[grade], 's:', s => s) });
       if (available('memory')) cand.push({ id: 'memory', n: unmastered(d.WORDS[grade], 'w:', w => w.w) - 2 });
+      if (available('trace')) cand.push({ id: 'trace', n: unmastered(d.LETTERS, 'l:', l => l.l) - 1 });
       if (available('rescue')) cand.push({ id: 'rescue', n: troubleWords(p, 99).length * 3 });
       if (available('spell')) cand.push({ id: 'spell', n: unmastered(d.WORDS[grade], 'w:', w => w.w) - 3 });
       cand.sort((a, b) => b.n - a.n);

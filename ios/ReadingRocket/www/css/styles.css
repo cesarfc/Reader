@@ -1818,3 +1818,78 @@ body.tabs-on #petbuddy { bottom: calc(env(safe-area-inset-bottom) + 84px); }
   .analogyrow { font-size: 20px; }
   .divetext { font-size: 16px; }
 }
+
+/* ---------- Little Learners games ---------- */
+.tracewrap { display: flex; justify-content: center; margin-top: 12px; }
+.tracecanvas {
+  background: var(--surface);
+  border: 1px solid var(--hairline);
+  border-radius: var(--r-lg);
+  box-shadow: var(--sh-md);
+  cursor: crosshair;
+}
+.safarigrid { grid-template-columns: repeat(4, 1fr); }
+.drumzone { text-align: center; margin-top: 14px; }
+.drumbtn {
+  border: 0;
+  cursor: pointer;
+  background: var(--surface);
+  border: 1px solid var(--hairline);
+  border-radius: 50%;
+  width: 128px;
+  height: 128px;
+  font-size: 64px;
+  box-shadow: var(--sh-md);
+  transition: transform 0.06s;
+}
+.drumbtn:active { transform: scale(0.92); }
+.drumbtn.boom { animation: pip 0.25s; }
+.drumdots { min-height: 34px; margin-top: 10px; font-size: 22px; letter-spacing: 4px; }
+.memcard.caseletter { font-size: 30px; font-weight: 700; text-transform: none; }
+
+/* read-along karaoke highlight */
+.word.karaoke { background: var(--yellow-tint); border-bottom-color: transparent; border-radius: 8px; transform: scale(1.06); }
+
+/* Ollie help + parent voice */
+.helpowl { font-size: 19px; }
+.recbtn.recording { background: var(--coral-tint); color: var(--coral-strong); animation: pulse 1.2s infinite; }
+.parentplay { font-weight: 700; }
+
+.gamecard[data-game="trace"]     { --gc: var(--coral-tint); }
+.gamecard[data-game="safari"]    { --gc: var(--teal-tint); }
+.gamecard[data-game="drums"]     { --gc: var(--yellow-tint); }
+.gamecard[data-game="casematch"] { --gc: var(--lav-tint); }
+
+/* ---------- Bedtime mode: cozy night theme via the token system ---------- */
+body.bedtime {
+  --bg: #26203A;
+  --bg-2: #1E1930;
+  --surface: #332B4D;
+  --surface-2: #3D3459;
+  --ink: #F3E9DA;
+  --ink-soft: #C7BBA8;
+  --ink-faint: #8E8375;
+  --hairline: rgba(255, 255, 255, 0.07);
+  --coral-tint: #4A3348;
+  --teal-tint: #28413F;
+  --yellow-tint: #4A4030;
+  --lav-tint: #3B3355;
+  --sky-tint: #2E3C52;
+  --rose-tint: #47323F;
+  --sh-sm: 0 2px 6px rgba(0, 0, 0, 0.3);
+  --sh-md: 0 10px 24px rgba(0, 0, 0, 0.35);
+  --sh-lg: 0 18px 40px rgba(0, 0, 0, 0.5);
+}
+body.bedtime::before {
+  background:
+    radial-gradient(160px 160px at 85% 6%, rgba(255, 236, 179, 0.18), transparent 70%),
+    radial-gradient(420px 340px at -10% 104%, rgba(126, 208, 193, 0.05), transparent 70%);
+}
+body.bedtime .playbig { animation: none; }
+body.bedtime .avatarbtn { background: var(--surface-2); }
+body.bedtime .minput { background: var(--surface-2); border-color: var(--bg-2); }
+
+@media (max-width: 420px) {
+  .safarigrid { grid-template-columns: repeat(3, 1fr); }
+  .drumbtn { width: 108px; height: 108px; font-size: 54px; }
+}

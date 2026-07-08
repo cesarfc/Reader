@@ -69,7 +69,7 @@ RR.audio = (function () {
 
   /* pitch defaults to 1.0 — raising it makes every voice sound more synthetic */
   function speak(text, opts = {}) {
-    const { rate = 0.85, pitch = 1.0, interrupt = true, onend = null } = opts;
+    const { rate = 0.85, pitch = 1.0, interrupt = true, onend = null, onboundary = null } = opts;
     if (muted || !('speechSynthesis' in window) || !text) {
       /* No audio, but callers waiting on speech still need their callback. */
       if (onend) setTimeout(onend, 250);
@@ -77,8 +77,15 @@ RR.audio = (function () {
     }
     const u = new SpeechSynthesisUtterance(text);
     if (voice) u.voice = voice;
-    u.rate = Math.min(1.5, Math.max(0.5, rate * rateMul));
+    /* Bedtime mode reads everything a touch slower and softer. */
+    const bed = localStorage.getItem('rr.bedtime') === '1' ? 0.88 : 1;
+    u.rate = Math.min(1.5, Math.max(0.5, rate * rateMul * bed));
     u.pitch = pitch;
+    /* Word-boundary events power read-along highlighting. Not every engine
+       fires them (some mobile voices don't) — callers must degrade quietly. */
+    if (onboundary) u.onboundary = e => {
+      if (e.charIndex != null) try { onboundary(e.charIndex); } catch (err) { /* never break speech */ }
+    };
     pending.add(u);
     let done = false;
     const fin = () => {

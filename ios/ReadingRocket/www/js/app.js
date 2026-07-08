@@ -209,7 +209,6 @@ RR.nav = RR.nav || {};
     A.stop();
     petHide();
     hideTabs();
-    document.body.className = '';
     const goal = S.familyGoal();
     app.innerHTML = `
       <section class="screen">
@@ -504,6 +503,15 @@ RR.nav = RR.nav || {};
     document.body.appendChild(overlay);
     overlay.querySelector('[data-act="close"]').addEventListener('click', () => overlay.remove());
     overlay.addEventListener('click', e => { if (e.target === overlay) overlay.remove(); });
+    /* little kids can't read the quest names — tapping a row says it out loud */
+    overlay.querySelectorAll('.questrow').forEach((row, i) => {
+      row.addEventListener('click', () => {
+        const it = p.quests.items[i];
+        if (!it) return;
+        const def = P.questDef(it.id);
+        A.speak(`${def.name}. ${it.done ? 'All done, great job!' : `You are at ${Math.min(it.progress, def.target)} of ${def.target}.`}`, { rate: 0.92 });
+      });
+    });
   }
 
   /* ---------------- Home tab: the "what do I do right now" dashboard ---------------- */
@@ -587,6 +595,7 @@ RR.nav = RR.nav || {};
 
   /* ---------------- Play tab: grade picker + sectioned Training Grounds ---------------- */
   const GAME_SECTIONS = [
+    { label: '🐣 Little Learners', ids: ['trace', 'safari', 'drums', 'casematch'] },
     { label: '🔤 Sounds & letters', ids: ['sounds', 'blend', 'build', 'chains', 'rhyme'] },
     { label: '📝 Words & spelling', ids: ['spell', 'memory', 'morph', 'twins', 'rescue', 'sight'] },
     { label: '🤔 Meaning & thinking', ids: ['books', 'sentence', 'silly', 'riddle', 'scramble'] },
@@ -867,6 +876,12 @@ RR.nav = RR.nav || {};
           <button class="gradepill ${!A.muted ? 'on' : ''}" data-m="0">🔊 On</button>
           <button class="gradepill ${A.muted ? 'on' : ''}" data-m="1">🔇 Off</button>
         </div>
+        <label class="mlabel">🌙 Bedtime mode</label>
+        <div class="gradepick modalgrades bedopts">
+          <button class="gradepill ${localStorage.getItem('rr.bedtime') === '1' ? 'on' : ''}" data-b="1">🌙 On</button>
+          <button class="gradepill ${localStorage.getItem('rr.bedtime') !== '1' ? 'on' : ''}" data-b="0">Off</button>
+        </div>
+        <p class="muted listentip">Cozy night colors and a slower, softer voice — perfect for one more story before sleep.</p>
         ${voices.length && !hasNatural ? `
           <p class="gemhint">💡 This device only has basic voices right now — the tip below
           unlocks a much more natural one (takes 2 minutes).</p>` : ''}
@@ -919,6 +934,15 @@ RR.nav = RR.nav || {};
         A.setMuted(b.dataset.m === '1');
         overlay.querySelectorAll('.soundopts .gradepill').forEach(x => x.classList.toggle('on', x === b));
         if (!A.muted) A.sfx.pop();
+      }));
+    overlay.querySelectorAll('.bedopts .gradepill').forEach(b =>
+      b.addEventListener('click', () => {
+        const on = b.dataset.b === '1';
+        localStorage.setItem('rr.bedtime', on ? '1' : '0');
+        document.body.classList.toggle('bedtime', on);
+        overlay.querySelectorAll('.bedopts .gradepill').forEach(x => x.classList.toggle('on', x === b));
+        A.sfx.pop();
+        if (on) A.speak('Bedtime mode. One cozy story, then sleep!', { rate: 0.9 });
       }));
     overlay.querySelectorAll('.listenopts .gradepill').forEach(b =>
       b.addEventListener('click', () => {
@@ -1236,6 +1260,12 @@ RR.nav = RR.nav || {};
           <label class="mlabel">Page ${i + 1}</label>
           <textarea class="minput bmptext" rows="2" placeholder="The cat sat on the mat.">${esc(pg.t)}</textarea>
           <input class="minput bmpart" type="text" maxlength="8" placeholder="🐱" value="${esc(pg.a)}">
+          ${id && RR.rec && RR.rec.supported() ? `
+            <div class="modalbtns recrow" data-i="${i}">
+              <button class="btn ghost recbtn">🎙️ Record this page</button>
+              <button class="btn ghost recplay" hidden>▶ Play</button>
+              <button class="btn ghost recdel" hidden>🗑</button>
+            </div>` : ''}
           ${pages.length > 1 ? `<div class="modalbtns"><button class="btn ghost bmpdel" data-i="${i}">✕ Remove page ${i + 1}</button></div>` : ''}
         </div>`).join('');
       pagesEl.querySelectorAll('.bmpdel').forEach(btn =>
@@ -1245,6 +1275,39 @@ RR.nav = RR.nav || {};
           renderPages();
           A.sfx.pop();
         }));
+      /* parent-voice: record your own reading of each page (saved books only —
+         clips are keyed by book id + page number) */
+      pagesEl.querySelectorAll('.recrow').forEach(rowEl => {
+        const key = id + ':' + rowEl.dataset.i;
+        const recBtn = rowEl.querySelector('.recbtn');
+        const playBtn = rowEl.querySelector('.recplay');
+        const delBtn = rowEl.querySelector('.recdel');
+        const refresh = () => RR.rec.get(key).then(b => {
+          playBtn.hidden = !b;
+          delBtn.hidden = !b;
+          playBtn.onclick = b ? () => { A.stop(); new Audio(URL.createObjectURL(b)).play(); } : null;
+        }).catch(() => {});
+        refresh();
+        let live = false;
+        recBtn.addEventListener('click', () => {
+          if (!live) {
+            RR.rec.start().then(() => {
+              live = true;
+              recBtn.textContent = '⏹ Stop & save';
+              recBtn.classList.add('recording');
+            }).catch(() => { recBtn.textContent = '🎙️ Mic not available'; });
+          } else {
+            RR.rec.stop().then(blob => {
+              live = false;
+              recBtn.textContent = '🎙️ Record this page';
+              recBtn.classList.remove('recording');
+              if (blob) RR.rec.save(key, blob).then(refresh);
+              A.sfx.coin();
+            });
+          }
+        });
+        delBtn.addEventListener('click', () => { RR.rec.remove(key).then(refresh); A.sfx.pop(); });
+      });
     }
     renderPages();
 
@@ -1288,6 +1351,7 @@ RR.nav = RR.nav || {};
     const ctx = {
       profile: p,
       grade: p.grade,
+      help: (RR.games[gameId] || {}).help || null,
       quit: renderPlayTab,
       finish(result) {
         const meta = S.recordRound(p, gameId, p.grade, result);
@@ -1492,6 +1556,9 @@ RR.nav = RR.nav || {};
         .catch(() => { /* offline support is optional */ });
     });
   }
+
+  /* Bedtime mode survives reloads; cozy colors come from a body class. */
+  if (localStorage.getItem('rr.bedtime') === '1') document.body.classList.add('bedtime');
 
   RR.nav.home = renderHome;
   RR.nav.player = renderPlayer;

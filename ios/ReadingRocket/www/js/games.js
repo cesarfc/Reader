@@ -105,12 +105,16 @@ window.RR = window.RR || {};
   }
   function comboMiss(shell) { shell.combo = 0; }
 
+  /* K and 1st get shorter rounds — a 5-year-old's attention is ~6 questions. */
+  const qCount = ctx => (ctx.grade === 'K' || ctx.grade === '1') ? 6 : 8;
+
   /* Shared round chrome: header with back button + progress dots, play area. */
   function roundShell(container, ctx, title, total) {
     container.innerHTML = `
       <header class="gamebar">
         <button class="iconbtn" data-act="back" aria-label="Back">←</button>
         <div class="gametitle">${title}</div>
+        ${ctx.help ? '<button class="iconbtn helpowl" data-act="help" aria-label="How do I play?">🦉</button>' : ''}
         <div class="dots">${Array.from({ length: total }, () => '<span class="dot"></span>').join('')}</div>
       </header>
       <main class="gamearea"></main>`;
@@ -133,6 +137,9 @@ window.RR = window.RR || {};
       shell.die();
       ctx.quit();
     });
+    /* Ollie explains the game out loud, as many times as a little kid needs */
+    const owl = container.querySelector('[data-act="help"]');
+    if (owl) owl.addEventListener('click', () => A.speak(ctx.help, { rate: 0.92 }));
     return shell;
   }
 
@@ -182,15 +189,13 @@ window.RR = window.RR || {};
      Alternates: "find the letter that says /m/" and
                  "what sound does 🐱 start with?"
      ========================================================= */
-  const TOTAL_Q = 8;
-
   const soundsGame = {
     title: 'Letter Sounds',
     icon: '🔠',
     desc: 'Hear a sound, find its letter',
     grades: ['K', '1', '2'], /* mastered by 3rd grade — hidden after that */
     start(container, ctx) {
-      const shell = roundShell(container, ctx, 'Letter Sounds', TOTAL_Q);
+      const shell = roundShell(container, ctx, 'Letter Sounds', qCount(ctx));
       const pool = ctx.grade === 'K' ? D.LETTERS : D.LETTERS.concat(D.DIGRAPHS);
       const words = D.WORDS[ctx.grade];
       let qi = 0;
@@ -200,9 +205,9 @@ window.RR = window.RR || {};
 
       function next() {
         if (!shell.live) return;
-        if (qi >= TOTAL_Q) {
+        if (qi >= qCount(ctx)) {
           shell.die();
-          const r = quizResult(firstTryCount, TOTAL_Q, `${firstTryCount} of ${TOTAL_Q} on the first try!`, comboBonus);
+          const r = quizResult(firstTryCount, qCount(ctx), `${firstTryCount} of ${qCount(ctx)} on the first try!`, comboBonus);
           r.outcomes = outcomes;
           ctx.finish(r);
           return;
@@ -313,9 +318,9 @@ window.RR = window.RR || {};
     icon: '🧩',
     desc: 'Blend the sounds, pick the picture',
     start(container, ctx) {
-      const shell = roundShell(container, ctx, 'Sound It Out', TOTAL_Q);
+      const shell = roundShell(container, ctx, 'Sound It Out', qCount(ctx));
       const words = D.WORDS[ctx.grade];
-      const round = smartSample(ctx.profile, words, TOTAL_Q, w => 'w:' + w.w);
+      const round = smartSample(ctx.profile, words, qCount(ctx), w => 'w:' + w.w);
       let qi = 0;
       let firstTryCount = 0;
       let comboBonus = 0;
@@ -323,9 +328,9 @@ window.RR = window.RR || {};
 
       function next() {
         if (!shell.live) return;
-        if (qi >= TOTAL_Q) {
+        if (qi >= qCount(ctx)) {
           shell.die();
-          const r = quizResult(firstTryCount, TOTAL_Q, `${firstTryCount} of ${TOTAL_Q} blended on the first try!`, comboBonus);
+          const r = quizResult(firstTryCount, qCount(ctx), `${firstTryCount} of ${qCount(ctx)} blended on the first try!`, comboBonus);
           r.outcomes = outcomes;
           ctx.finish(r);
           return;
@@ -413,9 +418,9 @@ window.RR = window.RR || {};
     icon: '🧱',
     desc: 'Build the word from sound tiles',
     start(container, ctx) {
-      const shell = roundShell(container, ctx, 'Word Builder', TOTAL_Q);
+      const shell = roundShell(container, ctx, 'Word Builder', qCount(ctx));
       const words = D.WORDS[ctx.grade];
-      const round = smartSample(ctx.profile, words, TOTAL_Q, w => 'w:' + w.w);
+      const round = smartSample(ctx.profile, words, qCount(ctx), w => 'w:' + w.w);
       let qi = 0;
       let firstTryCount = 0;
       let comboBonus = 0;
@@ -423,9 +428,9 @@ window.RR = window.RR || {};
 
       function next() {
         if (!shell.live) return;
-        if (qi >= TOTAL_Q) {
+        if (qi >= qCount(ctx)) {
           shell.die();
-          const r = quizResult(firstTryCount, TOTAL_Q, `${firstTryCount} of ${TOTAL_Q} words built without a slip!`, comboBonus);
+          const r = quizResult(firstTryCount, qCount(ctx), `${firstTryCount} of ${qCount(ctx)} words built without a slip!`, comboBonus);
           r.outcomes = outcomes;
           ctx.finish(r);
           return;
@@ -680,16 +685,14 @@ window.RR = window.RR || {};
      Read a sentence, judge it. You can't spot the silly ones
      without actually understanding what you decoded.
      ========================================================= */
-  const SILLY_TOTAL = 8;
-
-  const sillyGame = {
+    const sillyGame = {
     title: 'Silly or Sensible?',
     icon: '🤪',
     desc: 'Does it make sense?',
     start(container, ctx) {
-      const shell = roundShell(container, ctx, 'Silly or Sensible?', SILLY_TOTAL);
+      const shell = roundShell(container, ctx, 'Silly or Sensible?', qCount(ctx));
       const pool = (D.SILLY && D.SILLY[ctx.grade]) || [];
-      const round = sample(pool, Math.min(SILLY_TOTAL, pool.length));
+      const round = sample(pool, Math.min(qCount(ctx), pool.length));
       if (!round.length) { shell.die(); ctx.quit(); return; }
       let qi = 0;
       let firstTryCount = 0;
@@ -1770,6 +1773,412 @@ window.RR = window.RR || {};
   };
 
   /* =========================================================
+     LITTLE LEARNERS (grades K-1) — pre-reading play.
+     ========================================================= */
+
+  /* ---- Letter Tracing: draw the letter with a finger ---- */
+  const TRACE_TOTAL = 5;
+  const traceGame = {
+    title: 'Letter Tracing',
+    icon: '✍️',
+    desc: 'Draw the letter!',
+    grades: ['K', '1'],
+    start(container, ctx) {
+      const shell = roundShell(container, ctx, 'Letter Tracing', TRACE_TOTAL);
+      const round = smartSample(ctx.profile, D.LETTERS, TRACE_TOTAL, x => 'l:' + x.l);
+      let qi = 0;
+      let firstTryCount = 0;
+      const outcomes = [];
+
+      function next() {
+        if (!shell.live) return;
+        if (qi >= round.length) {
+          shell.die();
+          const r = quizResult(firstTryCount, round.length, `${firstTryCount} of ${round.length} letters traced first go!`);
+          r.outcomes = outcomes;
+          ctx.finish(r);
+          return;
+        }
+        shell.nowDot(qi);
+        ask(round[qi]);
+      }
+
+      function ask(L) {
+        let attempts = 0;
+        const UP = L.l.toUpperCase();
+        shell.area.innerHTML = `
+          <div class="prompt">
+            <h2>Trace the letter <b>${UP}</b>!</h2>
+            <p class="muted">${UP} says “${L.s}” — like ${L.w} ${L.e}</p>
+          </div>
+          <div class="tracewrap"><canvas class="tracecanvas"></canvas></div>
+          <div class="speedbtns">
+            <button class="btn ghost" data-act="clear">🧽 Start over</button>
+            <button class="btn good big" data-act="done">✓ Done!</button>
+          </div>`;
+        shell.after(300, () => A.speak(`Trace the big letter ${UP} with your finger!`, { rate: 0.92 }));
+
+        const canvas = shell.area.querySelector('.tracecanvas');
+        const wrap = shell.area.querySelector('.tracewrap');
+        const size = Math.max(220, Math.min(320, (wrap.clientWidth || 320) - 8));
+        const dpr = window.devicePixelRatio || 1;
+        canvas.width = size * dpr;
+        canvas.height = size * dpr;
+        canvas.style.width = size + 'px';
+        canvas.style.height = size + 'px';
+        canvas.style.touchAction = 'none';
+        const g = canvas.getContext('2d');
+        g.scale(dpr, dpr);
+
+        const glyph = c2 => {
+          c2.font = `700 ${Math.round(size * 0.8)}px 'Baloo 2', sans-serif`;
+          c2.textAlign = 'center';
+          c2.textBaseline = 'middle';
+          c2.fillText(UP, size / 2, size / 2 + size * 0.05);
+        };
+        /* scoring mask (1x) */
+        const mask = document.createElement('canvas');
+        mask.width = size; mask.height = size;
+        const mg = mask.getContext('2d');
+        mg.fillStyle = '#000';
+        glyph(mg);
+        const maskData = mg.getImageData(0, 0, size, size).data;
+        /* ink layer: the kid's strokes, kept separate from the guide */
+        const ink = document.createElement('canvas');
+        ink.width = size; ink.height = size;
+        const ig = ink.getContext('2d');
+        ig.lineWidth = Math.max(16, size * 0.09);
+        ig.lineCap = ig.lineJoin = 'round';
+        ig.strokeStyle = '#E4633F';
+
+        const repaint = () => {
+          g.clearRect(0, 0, size, size);
+          g.fillStyle = '#F3E6D7';
+          glyph(g);
+          g.drawImage(ink, 0, 0, size, size);
+        };
+        repaint();
+
+        let drawing = false, lx = 0, ly = 0;
+        const pos = ev => {
+          const r = canvas.getBoundingClientRect();
+          return [ev.clientX - r.left, ev.clientY - r.top];
+        };
+        canvas.addEventListener('pointerdown', ev => {
+          ev.preventDefault();
+          drawing = true;
+          [lx, ly] = pos(ev);
+          try { canvas.setPointerCapture(ev.pointerId); } catch (e) { /* older browsers */ }
+        });
+        canvas.addEventListener('pointermove', ev => {
+          if (!drawing) return;
+          const [x, y] = pos(ev);
+          ig.beginPath();
+          ig.moveTo(lx, ly);
+          ig.lineTo(x, y);
+          ig.stroke();
+          lx = x; ly = y;
+          repaint();
+        });
+        const stopDraw = () => { drawing = false; };
+        canvas.addEventListener('pointerup', stopDraw);
+        canvas.addEventListener('pointercancel', stopDraw);
+
+        shell.area.querySelector('[data-act="clear"]').addEventListener('click', () => {
+          ig.clearRect(0, 0, size, size);
+          repaint();
+          A.sfx.pop();
+        });
+        shell.area.querySelector('[data-act="done"]').addEventListener('click', () => {
+          const inkData = ig.getImageData(0, 0, size, size).data;
+          let maskPx = 0, hit = 0, inkPx = 0, stray = 0;
+          for (let i = 3; i < maskData.length; i += 4) {
+            const m = maskData[i] > 60;
+            const k = inkData[i] > 60;
+            if (m) { maskPx++; if (k) hit++; }
+            if (k) { inkPx++; if (!m) stray++; }
+          }
+          const coverage = maskPx ? hit / maskPx : 0;
+          const wild = inkPx ? stray / inkPx : 1;
+          if (inkPx > 120 && coverage >= 0.45 && wild <= 0.55) {
+            const rc = canvas.getBoundingClientRect();
+            RR.confetti.starTrail(rc.left + rc.width / 2, rc.top + rc.height / 2);
+            A.sfx.star();
+            haptic(true);
+            outcomes.push({ k: 'l:' + L.l, ok: attempts === 0 });
+            if (attempts === 0) firstTryCount++;
+            shell.markDot(qi);
+            qi++;
+            speakAdvance(shell, `That's the letter ${UP}! Beautiful writing!`, next, { rate: 0.92 });
+          } else {
+            attempts++;
+            A.sfx.buzz();
+            haptic(false);
+            A.speak(inkPx <= 120 ? 'Use your finger to draw right on the big letter!' : 'Almost! Cover the whole letter, then tap Done!', { rate: 0.92 });
+          }
+        });
+      }
+
+      next();
+    }
+  };
+
+  /* ---- Sound Safari: audio-only phonemic awareness ---- */
+  const SAFARI_TOTAL = 5;
+  const safariGame = {
+    title: 'Sound Safari',
+    icon: '🐾',
+    desc: 'Hear a sound, find the pictures',
+    grades: ['K', '1'],
+    start(container, ctx) {
+      const shell = roundShell(container, ctx, 'Sound Safari', SAFARI_TOTAL);
+      /* picture pool from K+1 words; a word "starts with" a letter only when
+         its first TILE is that single letter (ship is sh-, not s-) */
+      const seen = new Set();
+      const pool = [];
+      D.WORDS.K.concat(D.WORDS['1']).forEach(w => {
+        if (seen.has(w.w)) return;
+        seen.add(w.w);
+        pool.push({ w: w.w, e: w.e, first: w.t[0], char0: w.w[0] });
+      });
+      const letters = D.LETTERS.filter(L => pool.filter(x => x.first === L.l).length >= 3);
+      const round = smartSample(ctx.profile, letters, Math.min(SAFARI_TOTAL, letters.length), x => 'l:' + x.l);
+      let qi = 0;
+      let firstTryCount = 0;
+      let comboBonus = 0;
+      const outcomes = [];
+
+      function next() {
+        if (!shell.live) return;
+        if (qi >= round.length) {
+          shell.die();
+          const r = quizResult(firstTryCount, round.length, `${firstTryCount} of ${round.length} safaris with no wrong taps!`, comboBonus);
+          r.outcomes = outcomes;
+          ctx.finish(r);
+          return;
+        }
+        shell.nowDot(qi);
+        ask(round[qi]);
+      }
+
+      function ask(L) {
+        const goods = sample(pool.filter(x => x.first === L.l), 3);
+        const bads = sample(pool.filter(x => x.first !== L.l && x.char0 !== L.l), 5);
+        const scene = shuffle(goods.concat(bads));
+        let found = 0;
+        let firstTry = true;
+        shell.area.innerHTML = `
+          <div class="prompt">
+            <button class="speaker" data-act="say" aria-label="Hear the sound">🔊</button>
+            <h2>Find <b>3 things</b> that start with “${L.s}”!</h2>
+          </div>
+          <div class="choices pics safarigrid">
+            ${scene.map((x, i) => `<button class="choice pic" data-i="${i}" aria-label="${x.w}">${x.e}</button>`).join('')}
+          </div>`;
+        const say = () => A.speak(`I spy three things that start with ${L.s}! ${L.s}, like ${L.w}!`, { rate: 0.9 });
+        shell.area.querySelector('[data-act="say"]').addEventListener('click', say);
+        shell.after(350, say);
+        shell.area.querySelectorAll('.choice').forEach(btn => {
+          btn.addEventListener('click', () => {
+            const x = scene[+btn.dataset.i];
+            if (btn.disabled) return;
+            if (x.first === L.l) {
+              btn.classList.add('correct');
+              btn.disabled = true;
+              found++;
+              A.sfx.ding();
+              haptic(true);
+              A.speak(x.w, { rate: 0.9 });
+              if (found === 3) {
+                if (firstTry) { firstTryCount++; comboBonus += comboHit(shell); }
+                outcomes.push({ k: 'l:' + L.l, ok: firstTry });
+                shell.markDot(qi);
+                qi++;
+                speakAdvance(shell, `You found them all! ${goods.map(g2 => g2.w).join(', ')} — all start with ${L.s}!`, next, { rate: 0.92 });
+              }
+            } else {
+              firstTry = false;
+              comboMiss(shell);
+              btn.classList.add('wrong');
+              shell.after(500, () => btn.classList.remove('wrong'));
+              A.sfx.buzz();
+              haptic(false);
+              A.speak(`${x.w} starts with ${x.first}. Listen for ${L.s}!`, { rate: 0.9 });
+            }
+          });
+        });
+      }
+
+      next();
+    }
+  };
+
+  /* ---- Syllable Drums: clap the beats ---- */
+  const DRUM_TOTAL = 6;
+  const drumsGame = {
+    title: 'Syllable Drums',
+    icon: '🥁',
+    desc: 'Tap the beats in the word',
+    grades: ['K', '1', '2'],
+    start(container, ctx) {
+      const shell = roundShell(container, ctx, 'Syllable Drums', DRUM_TOTAL);
+      const pool = D.SYLLABLES || [];
+      const round = sample(pool, Math.min(DRUM_TOTAL, pool.length));
+      if (!round.length) { shell.die(); ctx.quit(); return; }
+      let qi = 0;
+      let firstTryCount = 0;
+      let comboBonus = 0;
+
+      function next() {
+        if (!shell.live) return;
+        if (qi >= round.length) {
+          shell.die();
+          ctx.finish(quizResult(firstTryCount, round.length, `${firstTryCount} of ${round.length} beat counts right first try!`, comboBonus));
+          return;
+        }
+        shell.nowDot(qi);
+        ask(round[qi]);
+      }
+
+      function ask(item) {
+        let taps = 0;
+        let firstTry = true;
+        shell.area.innerHTML = `
+          <div class="prompt">
+            <button class="bigpic small" data-act="say" aria-label="${item.w}">${item.e}</button>
+            <div class="promptword">${item.w}</div>
+            <h2>Tap the drum once for every beat!</h2>
+          </div>
+          <div class="drumzone">
+            <button class="drumbtn" data-act="drum" aria-label="Drum">🥁</button>
+            <div class="drumdots"></div>
+          </div>
+          <div class="speedbtns">
+            <button class="btn good big" data-act="check">✓ That's all the beats!</button>
+          </div>`;
+        const sayWord = () => A.speakSeq([{ text: item.w, opts: { rate: 0.8 } }].concat(item.syls.map(s => ({ text: s, opts: { rate: 0.7 } }))), 260);
+        shell.area.querySelector('[data-act="say"]').addEventListener('click', sayWord);
+        shell.after(350, sayWord);
+        const dots = shell.area.querySelector('.drumdots');
+        shell.area.querySelector('[data-act="drum"]').addEventListener('click', e => {
+          taps++;
+          A.sfx.pop();
+          haptic(true);
+          const d = document.createElement('span');
+          d.className = 'drumdot';
+          d.textContent = '🔵';
+          dots.appendChild(d);
+          e.currentTarget.classList.remove('boom');
+          void e.currentTarget.offsetWidth;
+          e.currentTarget.classList.add('boom');
+        });
+        shell.area.querySelector('[data-act="check"]').addEventListener('click', () => {
+          if (taps === item.syls.length) {
+            A.sfx.star();
+            haptic(true);
+            if (firstTry) { firstTryCount++; comboBonus += comboHit(shell); }
+            shell.markDot(qi);
+            qi++;
+            speakAdvance(shell, `${item.syls.join('… ')}! ${item.syls.length === 1 ? 'One beat' : item.syls.length + ' beats'}!`, next, { rate: 0.85 });
+          } else {
+            firstTry = false;
+            comboMiss(shell);
+            taps = 0;
+            dots.innerHTML = '';
+            A.sfx.buzz();
+            haptic(false);
+            A.speakSeq([{ text: "Let's clap it together!", opts: { rate: 0.92 } }].concat(item.syls.map(s => ({ text: s, opts: { rate: 0.65 } }))), 300);
+          }
+        });
+      }
+
+      next();
+    }
+  };
+
+  /* ---- Big & Small Letters: uppercase/lowercase memory match ---- */
+  const CASE_PAIRS = 6;
+  const casematchGame = {
+    title: 'Big & Small Letters',
+    icon: '🅰️',
+    desc: 'Match A to a!',
+    grades: ['K', '1'],
+    start(container, ctx) {
+      const shell = roundShell(container, ctx, 'Big & Small Letters', CASE_PAIRS);
+      const picks = smartSample(ctx.profile, D.LETTERS, CASE_PAIRS, x => 'l:' + x.l);
+      const cards = shuffle(
+        picks.map(L => ({ L, kind: 'up' })).concat(picks.map(L => ({ L, kind: 'low' })))
+      );
+      const missed = {};
+      const outcomes = [];
+      let matches = 0;
+      let comboBonus = 0;
+      let open = null;
+      let lock = false;
+
+      shell.area.innerHTML = `
+        <div class="prompt"><h2>Match the BIG letter to its small letter!</h2></div>
+        <div class="memgrid">
+          ${cards.map((c, i) => `<button class="memcard down caseletter" data-i="${i}" aria-label="Card ${i + 1}">❓</button>`).join('')}
+        </div>`;
+      const els = shell.area.querySelectorAll('.memcard');
+      const faceOf = c => (c.kind === 'up' ? c.L.l.toUpperCase() : c.L.l);
+
+      function flip(i, up) {
+        els[i].classList.toggle('down', !up);
+        els[i].textContent = up ? faceOf(cards[i]) : '❓';
+      }
+
+      els.forEach((card, i) => card.addEventListener('click', () => {
+        if (!shell.live || lock || i === open || card.classList.contains('matched')) return;
+        A.sfx.pop();
+        flip(i, true);
+        if (open == null) { open = i; return; }
+        const first = open;
+        const a = cards[first];
+        const b = cards[i];
+        open = null;
+        if (a.L === b.L) {
+          matches++;
+          const ok = !missed[a.L.l];
+          outcomes.push({ k: 'l:' + a.L.l, ok });
+          if (ok) comboBonus += comboHit(shell);
+          els[first].classList.add('matched');
+          card.classList.add('matched');
+          A.sfx.ding();
+          haptic(true);
+          A.speak(`Big ${a.L.l.toUpperCase()} and little ${a.L.l}! Both say ${a.L.s}!`, { rate: 0.9 });
+          shell.markDot(matches - 1);
+          if (matches >= CASE_PAIRS) {
+            shell.after(900, () => {
+              shell.die();
+              const firstTryCount = outcomes.filter(o => o.ok).length;
+              const r = quizResult(firstTryCount, CASE_PAIRS, `${firstTryCount} of ${CASE_PAIRS} letter pairs on the first try!`, comboBonus);
+              r.outcomes = outcomes;
+              ctx.finish(r);
+            });
+          }
+        } else {
+          missed[a.L.l] = missed[b.L.l] = true;
+          comboMiss(shell);
+          lock = true;
+          els[first].classList.add('miss');
+          card.classList.add('miss');
+          A.sfx.buzz();
+          haptic(false);
+          shell.after(850, () => {
+            els[first].classList.remove('miss');
+            card.classList.remove('miss');
+            flip(first, false);
+            flip(i, false);
+            lock = false;
+          });
+        }
+      }));
+    }
+  };
+
+  /* =========================================================
      GAME 4 — Rhyme Time (phonemic awareness)
      ========================================================= */
   function rimeOf(word) {
@@ -1791,22 +2200,22 @@ window.RR = window.RR || {};
     desc: 'Find the word that rhymes',
     grades: ['K', '1', '2', '3'], /* phonemic-awareness skill — too easy past 3rd */
     start(container, ctx) {
-      const shell = roundShell(container, ctx, 'Rhyme Time', TOTAL_Q);
+      const shell = roundShell(container, ctx, 'Rhyme Time', qCount(ctx));
       const pool = rhymePoolFor(ctx.grade);
       const families = {};
       for (const w of pool) (families[rimeOf(w.w)] = families[rimeOf(w.w)] || []).push(w);
       const rhymable = pool.filter(w => families[rimeOf(w.w)].length >= 2);
 
-      const round = sample(rhymable, TOTAL_Q);
+      const round = sample(rhymable, qCount(ctx));
       let qi = 0;
       let firstTryCount = 0;
       let comboBonus = 0;
 
       function next() {
         if (!shell.live) return;
-        if (qi >= TOTAL_Q) {
+        if (qi >= qCount(ctx)) {
           shell.die();
-          ctx.finish(quizResult(firstTryCount, TOTAL_Q, `${firstTryCount} of ${TOTAL_Q} rhymes on the first try!`, comboBonus));
+          ctx.finish(quizResult(firstTryCount, qCount(ctx), `${firstTryCount} of ${qCount(ctx)} rhymes on the first try!`, comboBonus));
           return;
         }
         shell.nowDot(qi);
@@ -2180,8 +2589,45 @@ window.RR = window.RR || {};
         }));
       container.querySelector('[data-act="readme"]').addEventListener('click', () => {
         pageReads++;
-        A.speak(pg.t, { rate: 0.85 });
+        /* read-along karaoke: each word lights up as it's spoken (engines
+           without word-boundary events simply read with no highlight) */
+        const wordEls = [...container.querySelectorAll('.booktext .word')];
+        const toks = pg.t.split(/\s+/);
+        const offs = [];
+        let off = 0;
+        toks.forEach(t => { offs.push(off); off += t.length + 1; });
+        let hi = -1;
+        const clear = () => { if (wordEls[hi]) wordEls[hi].classList.remove('karaoke'); };
+        A.speak(pg.t, {
+          rate: 0.85,
+          onboundary(ci) {
+            let idx = 0;
+            for (let i = 0; i < offs.length; i++) { if (offs[i] <= ci) idx = i; else break; }
+            if (idx !== hi) {
+              clear();
+              hi = idx;
+              if (wordEls[hi]) wordEls[hi].classList.add('karaoke');
+            }
+          },
+          onend: clear
+        });
       });
+      /* parent-voice: if a grown-up recorded this page, offer their voice */
+      if (RR.rec && book.custom) {
+        RR.rec.get(book.id + ':' + page).then(blob => {
+          if (!blob || !container.isConnected) return;
+          const ctrl = container.querySelector('.bookctrl');
+          if (!ctrl || ctrl.querySelector('.parentplay')) return;
+          const btn = document.createElement('button');
+          btn.className = 'btn ghost parentplay';
+          btn.textContent = '💜 Our voice';
+          btn.addEventListener('click', () => {
+            A.stop();
+            new Audio(URL.createObjectURL(blob)).play();
+          });
+          ctrl.insertBefore(btn, ctrl.querySelector('[data-act="next"]'));
+        }).catch(() => { /* no recording — TTS remains */ });
+      }
       const prev = container.querySelector('[data-act="prev"]');
       if (!prev.disabled) prev.addEventListener('click', () => { page--; A.sfx.page(); show(); });
       container.querySelector('[data-act="next"]').addEventListener('click', () => {
@@ -2666,6 +3112,10 @@ window.RR = window.RR || {};
   RR.games.nonsense = nonsenseGame;
   RR.games.scramble = scrambleGame;
 
+  RR.games.trace = traceGame;
+  RR.games.safari = safariGame;
+  RR.games.drums = drumsGame;
+  RR.games.casematch = casematchGame;
   RR.games.analogy = analogyGame;
   RR.games.cloze = clozeGame;
   RR.games.fixit = fixitGame;
@@ -2674,7 +3124,41 @@ window.RR = window.RR || {};
   RR.games.homophones = homophonesGame;
   RR.games.deepdive = deepdiveGame;
 
-  RR.gameOrder = ['books', 'sounds', 'blend', 'build', 'chains', 'spell', 'memory', 'sentence', 'morph', 'twins', 'rescue', 'silly', 'riddle', 'scramble', 'rhyme', 'sight', 'flash', 'nonsense', 'analogy', 'cloze', 'fixit', 'mainidea', 'factop', 'homophones', 'deepdive'];
+  RR.gameOrder = ['trace', 'safari', 'drums', 'casematch', 'books', 'sounds', 'blend', 'build', 'chains', 'spell', 'memory', 'sentence', 'morph', 'twins', 'rescue', 'silly', 'riddle', 'scramble', 'rhyme', 'sight', 'flash', 'nonsense', 'analogy', 'cloze', 'fixit', 'mainidea', 'factop', 'homophones', 'deepdive'];
+
+  /* Ollie's how-to-play lines — spoken on demand from the 🦉 button. */
+  const GAME_HELP = {
+    books: 'Pick a book and read it out loud. Tap any tricky word to hear it!',
+    sounds: 'Listen to the sound, then tap the letter that makes it!',
+    blend: 'Tap each tile to hear its sound. Squish the sounds together and tap the matching picture!',
+    build: 'Listen to the word, then tap the sound tiles in order to build it!',
+    chains: 'Listen for the new word. Tap the letter that changes the old word into the new one!',
+    spell: 'Listen to the word, then type it one letter at a time!',
+    memory: 'Flip two cards at a time. Match each picture with its word!',
+    sentence: 'Listen to the sentence, then tap the words in order to build it!',
+    morph: 'Build the big word from its two parts, then pick what it means!',
+    twins: 'Find the word that means the same — or the opposite!',
+    rescue: 'These are your tricky words! Listen, then tap the right one to rescue it!',
+    silly: 'Read the sentence. If it could really happen, tap Makes sense. If it could not, tap Silly!',
+    riddle: 'Read the riddle carefully. The clues tell you the answer!',
+    scramble: 'Tap what happened first, then next, until the story is back in order!',
+    rhyme: 'Tap the picture that rhymes — rhyming words end with the same sound!',
+    sight: 'Read each word as fast as you can, then tap Read it!',
+    flash: 'Read out loud as fast as you can, then tap the green check!',
+    nonsense: 'Read each word. Is it a real word, or a made-up one? Tap fast!',
+    analogy: 'See how the first two words go together. Pick the word that goes with the third one the same way!',
+    cloze: 'Read the sentence. The other words are clues — pick the word that fits the blank!',
+    fixit: 'One word in the sentence is wrong! Tap it, then pick the word that fixes it.',
+    mainidea: 'Read the little story, then pick the title that tells what the WHOLE story is about!',
+    factop: 'Could you prove it, or is it just what someone thinks? Facts can be proved!',
+    homophones: 'These words sound the same but mean different things. Pick the right one for the sentence!',
+    deepdive: 'Read the whole story carefully. Then answer the questions from memory!',
+    trace: 'Draw the big letter with your finger. Cover it all up, then tap Done!',
+    safari: 'Listen to the sound, then tap all three pictures that start with it!',
+    drums: 'Say the word out loud. Tap the drum once for every beat you hear!',
+    casematch: 'Flip cards to match each BIG letter with its small letter!'
+  };
+  Object.keys(GAME_HELP).forEach(id => { if (RR.games[id]) RR.games[id].help = GAME_HELP[id]; });
 
   /* Shared helpers for the adventure module. */
   RR.util = { shuffle, sample, smartSample, withDistractors, el, rimeOf, rhymePoolFor, wordSim, letterSim, haptic, bookReader };

@@ -87,6 +87,10 @@ and the 3rd grader both get fair fights from the same bosses.
 | 🏭 Word Factory | Morphology (grades 2–5) | Build big words from parts (un + lock, care + ful), then pick what the new word means. Prefixes and suffixes are the vocabulary engine for older readers. |
 | 🪞 Opposites & Twins | Vocabulary | Which word is the OPPOSITE of hot? Which means the SAME as happy? Grade-leveled synonym and antonym pairs. |
 | 🔗 Word Chains | Phoneme manipulation (K–2) | Turn cat into hat into hot into hop — tap the one letter that changes. One of the strongest predictors of reading growth, played as a puzzle. |
+| ✍️ Letter Tracing | Pre-writing (K–1) | Draw the big letter with a finger — forgiving scoring, sparkles on success. |
+| 🐾 Sound Safari | Phonemic awareness (K–1) | Audio-only: hear a sound, tap the three pictures that start with it. No reading required. |
+| 🥁 Syllable Drums | Phonological awareness (K–2) | Say the word, tap the drum once per beat. Syllable clapping as a drum solo. |
+| 🅰️ Big & Small Letters | Letter recognition (K–1) | Memory-match uppercase to lowercase — A finds a. |
 | 👾 Real or Nonsense? | Decoding discrimination | A 45-second lightning round judging real words vs. decodable fakes ("blorf!") — how reading science checks true decoding, disguised as an arcade game. |
 | 📜 Story Scramble | Sequencing comprehension | Put the pages of a book you've READ back in story order — works with your custom Book Maker books too. |
 | 📝 Sentence Builder | Syntax & word order | Hear a sentence, then rebuild it from shuffled word tiles. |
@@ -100,6 +104,21 @@ and the 3rd grader both get fair fights from the same bosses.
 | ⚖️ Fact or Opinion? | Critical reading (2–5) | "Dogs have four legs" vs "Dogs are the best pets" — can you prove it? |
 | 🎭 Homophone Heroes | Usage (2–5) | to/too/two, their/there/they're, weather/whether — pick the right twin for the sentence. |
 | 🤿 Deep Dive | Reading stamina (3–5) | A real 100+ word passage read against the clock, then a 4-question quiz from memory. |
+
+### For the littlest readers
+
+- **Read-along karaoke** — "Read to me" now lights up each word as it's
+  spoken, bouncing-ball style, in every book and story episode (on devices
+  whose speech engine reports word timings).
+- **Ollie's 🦉 help button** — every game has an owl in the corner that
+  re-explains how to play, out loud, as many times as needed.
+- **Bedtime mode 🌙** (⚙️ settings) — cozy night colors and a slower, softer
+  voice for one-more-story-then-sleep.
+- **Your voice in their books** — in the Book Maker, record yourself reading
+  each page of a saved custom book; a "💜 Our voice" button appears on those
+  pages so kids can hear the family voice instead of the robot.
+- **K/1 rounds are shorter** (6 questions instead of 8), and tapping any
+  daily quest reads it aloud.
 
 ## Learning at their own pace
 
@@ -124,7 +143,7 @@ and the 3rd grader both get fair fights from the same bosses.
   game can fake it.
 - **Daily quests** — three missions a day with coin/gem rewards, plus Reader
   XP levels (Lv 1–50 with titles) so there's always near-term progress.
-- **Badges** — 39 collectible badges for books, mastery, streaks, bosses,
+- **Badges** — 41 collectible badges for books, mastery, streaks, bosses,
   stories, duels, spelling, riddles, the pet, and the base.
 - **Sticker album** — every 2-star-or-better round opens a sticker pack: 48
   collectible emoji stickers in four packs, with rare ✨shiny✨ versions;
