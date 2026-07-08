@@ -675,6 +675,504 @@ RR.DATA = {
     5: ['quandrelic','voltimend','blantiform','crestingal','dermolic','fendricate','gonderis','holprandic','juvantic','lumendric','mandolic','nervactic','octravel','plendorate','quibberton','rendalic','sprocklem','trantible','vandriset','yarnolic']
   },
 
+  /* ===================================================================
+     Challenge Zone — games for older readers (grades 2-5).
+     ANALOGIES  — Analogy Alley           (verbal reasoning)
+     CLOZE      — Context Clue Detective  (vocabulary in context)
+     FIXIT      — Fix It!                 (grammar / usage editing)
+     MAINIDEA   — Main Idea Mission       (comprehension)
+     FACTOP     — Fact or Opinion?        (critical reading)
+     HOMOPHONES — Homophone Heroes        (spelling / usage)
+     DEEPDIVE   — Deep Dive               (reading stamina, grades 3-5)
+     =================================================================== */
+
+  /* ---------- Analogy Alley ----------
+     12 per grade. a:b :: c:d. foils = 2 wrong words of the same class as
+     d that break the relationship. kind = kid-readable relationship name.
+     Grade 2 concrete, grade 5 abstract. Exactly ONE defensible answer. */
+  ANALOGIES: {
+    2: [
+      { a: 'puppy', b: 'dog', c: 'kitten', d: 'cat', foils: ['fish', 'horse'], kind: 'baby & grown-up' },
+      { a: 'wheel', b: 'car', c: 'page', d: 'book', foils: ['pencil', 'library'], kind: 'part of a whole' },
+      { a: 'painter', b: 'brush', c: 'writer', d: 'pen', foils: ['spoon', 'hammer'], kind: 'worker & tool' },
+      { a: 'bird', b: 'nest', c: 'bee', d: 'hive', foils: ['barn', 'cave'], kind: 'animal & home' },
+      { a: 'hot', b: 'cold', c: 'up', d: 'down', foils: ['left', 'open'], kind: 'opposites' },
+      { a: 'red', b: 'color', c: 'dog', d: 'animal', foils: ['plant', 'food'], kind: 'example & its group' },
+      { a: 'pencil', b: 'write', c: 'scissors', d: 'cut', foils: ['draw', 'fold'], kind: 'thing & what it does' },
+      { a: 'rain', b: 'wet', c: 'fire', d: 'hot', foils: ['dark', 'loud'], kind: 'cause & what happens' },
+      { a: 'calf', b: 'cow', c: 'chick', d: 'chicken', foils: ['duck', 'goat'], kind: 'baby & grown-up' },
+      { a: 'day', b: 'night', c: 'big', d: 'small', foils: ['tall', 'round'], kind: 'opposites' },
+      { a: 'soap', b: 'wash', c: 'towel', d: 'dry', foils: ['clean', 'wet'], kind: 'thing & what it does' },
+      { a: 'cow', b: 'barn', c: 'horse', d: 'stable', foils: ['nest', 'cave'], kind: 'animal & home' }
+    ],
+    3: [
+      { a: 'cub', b: 'bear', c: 'joey', d: 'kangaroo', foils: ['camel', 'zebra'], kind: 'baby & grown-up' },
+      { a: 'petal', b: 'flower', c: 'branch', d: 'tree', foils: ['forest', 'garden'], kind: 'part of a whole' },
+      { a: 'brush', b: 'painter', c: 'hose', d: 'firefighter', foils: ['doctor', 'teacher'], kind: 'tool & who uses it' },
+      { a: 'bee', b: 'hive', c: 'spider', d: 'web', foils: ['nest', 'den'], kind: 'animal & home' },
+      { a: 'full', b: 'empty', c: 'loud', d: 'quiet', foils: ['happy', 'fast'], kind: 'opposites' },
+      { a: 'rose', b: 'flower', c: 'robin', d: 'bird', foils: ['nest', 'insect'], kind: 'example & its group' },
+      { a: 'knife', b: 'cut', c: 'broom', d: 'sweep', foils: ['dig', 'paint'], kind: 'thing & what it does' },
+      { a: 'rain', b: 'puddle', c: 'fire', d: 'ash', foils: ['snow', 'rock'], kind: 'cause & what it leaves behind' },
+      { a: 'chalk', b: 'teacher', c: 'whistle', d: 'referee', foils: ['dancer', 'pilot'], kind: 'tool & who uses it' },
+      { a: 'net', b: 'catch', c: 'key', d: 'unlock', foils: ['dig', 'tie'], kind: 'thing & what it does' },
+      { a: 'oak', b: 'tree', c: 'shark', d: 'fish', foils: ['ocean', 'whale'], kind: 'example & its group' },
+      { a: 'begin', b: 'end', c: 'open', d: 'close', foils: ['push', 'enter'], kind: 'opposites' }
+    ],
+    4: [
+      { a: 'fawn', b: 'deer', c: 'gosling', d: 'goose', foils: ['duck', 'swan'], kind: 'baby & grown-up' },
+      { a: 'engine', b: 'car', c: 'sail', d: 'boat', foils: ['ocean', 'harbor'], kind: 'part of a whole' },
+      { a: 'telescope', b: 'astronomer', c: 'paintbrush', d: 'artist', foils: ['writer', 'musician'], kind: 'tool & who uses it' },
+      { a: 'bear', b: 'cave', c: 'rabbit', d: 'burrow', foils: ['nest', 'pond'], kind: 'animal & home' },
+      { a: 'ancient', b: 'modern', c: 'victory', d: 'defeat', foils: ['army', 'war'], kind: 'opposites' },
+      { a: 'violin', b: 'instrument', c: 'maple', d: 'tree', foils: ['leaf', 'forest'], kind: 'example & its group' },
+      { a: 'microscope', b: 'magnify', c: 'freezer', d: 'freeze', foils: ['cook', 'melt'], kind: 'thing & what it does' },
+      { a: 'fire', b: 'smoke', c: 'rain', d: 'flood', foils: ['drought', 'desert'], kind: 'cause & effect' },
+      { a: 'root', b: 'tree', c: 'fin', d: 'fish', foils: ['ocean', 'net'], kind: 'part of a whole' },
+      { a: 'copper', b: 'metal', c: 'oxygen', d: 'gas', foils: ['liquid', 'solid'], kind: 'example & its group' },
+      { a: 'whistle', b: 'coach', c: 'gavel', d: 'judge', foils: ['lawyer', 'police'], kind: 'tool & who uses it' },
+      { a: 'generous', b: 'selfish', c: 'brave', d: 'cowardly', foils: ['clever', 'loyal'], kind: 'opposites' }
+    ],
+    5: [
+      { a: 'author', b: 'book', c: 'composer', d: 'song', foils: ['poem', 'painting'], kind: 'maker & what they make' },
+      { a: 'sonnet', b: 'poem', c: 'novel', d: 'book', foils: ['chapter', 'author'], kind: 'example & its group' },
+      { a: 'expand', b: 'contract', c: 'ascend', d: 'descend', foils: ['travel', 'remain'], kind: 'opposites' },
+      { a: 'stanza', b: 'poem', c: 'scene', d: 'play', foils: ['theater', 'costume'], kind: 'part of a whole' },
+      { a: 'friction', b: 'heat', c: 'sunlight', d: 'warmth', foils: ['shadow', 'winter'], kind: 'cause & effect' },
+      { a: 'choreographer', b: 'dance', c: 'playwright', d: 'play', foils: ['novel', 'song'], kind: 'maker & what they make' },
+      { a: 'whale', b: 'mammal', c: 'eagle', d: 'bird', foils: ['fish', 'reptile'], kind: 'example & its group' },
+      { a: 'abundant', b: 'scarce', c: 'temporary', d: 'permanent', foils: ['fragile', 'distant'], kind: 'opposites' },
+      { a: 'thermometer', b: 'temperature', c: 'scale', d: 'weight', foils: ['height', 'distance'], kind: 'tool & what it measures' },
+      { a: 'study', b: 'knowledge', c: 'exercise', d: 'strength', foils: ['weakness', 'rest'], kind: 'cause & effect' },
+      { a: 'chapter', b: 'novel', c: 'movement', d: 'symphony', foils: ['orchestra', 'concert'], kind: 'part of a whole' },
+      { a: 'compass', b: 'direction', c: 'clock', d: 'time', foils: ['weather', 'distance'], kind: 'tool & what it shows' }
+    ]
+  },
+
+  /* ---------- Context Clue Detective ----------
+     12 per grade. Exactly one ___ per sentence. Context makes answer best;
+     each foil is grammatically valid in the slot but contextually wrong. */
+  CLOZE: {
+    2: [
+      { t: 'The ___ dog buried the bone before anyone saw.', answer: 'sneaky', foils: ['purple', 'sleepy'] },
+      { t: 'It was so ___ that we wore our warm coats and hats.', answer: 'cold', foils: ['sunny', 'loud'] },
+      { t: 'The turtle moved so ___ that it took all day to cross.', answer: 'slowly', foils: ['quickly', 'softly'] },
+      { t: 'I was ___ when I dropped my ice cream in the sand.', answer: 'sad', foils: ['happy', 'hungry'] },
+      { t: 'We had to be ___ so the baby would not wake up.', answer: 'quiet', foils: ['silly', 'messy'] },
+      { t: 'The soup was too ___ to eat, so I let it cool down.', answer: 'hot', foils: ['cold', 'sweet'] },
+      { t: 'My backpack felt very ___ with all my books inside.', answer: 'heavy', foils: ['empty', 'tiny'] },
+      { t: 'The clown made us ___ until our cheeks hurt.', answer: 'laugh', foils: ['cry', 'sleep'] },
+      { t: 'After running the whole race, I felt so ___.', answer: 'tired', foils: ['scared', 'early'] },
+      { t: 'The bird built its ___ high up in the tree.', answer: 'nest', foils: ['boat', 'shoe'] },
+      { t: 'Please ___ your hands before you eat lunch.', answer: 'wash', foils: ['throw', 'count'] },
+      { t: 'The night was so ___ that we could see every star.', answer: 'clear', foils: ['cloudy', 'rainy'] }
+    ],
+    3: [
+      { t: 'The old floor would ___ loudly whenever we tiptoed across it.', answer: 'creak', foils: ['sparkle', 'freeze'] },
+      { t: 'She spoke in a ___ voice so no one else could hear the secret.', answer: 'quiet', foils: ['booming', 'cheerful'] },
+      { t: 'The desert was so ___ that the ground cracked into pieces.', answer: 'dry', foils: ['wet', 'crowded'] },
+      { t: 'The puppy was ___ around every new person it met.', answer: 'shy', foils: ['proud', 'asleep'] },
+      { t: 'We had to ___ our voices in the library so we would not disturb others.', answer: 'lower', foils: ['raise', 'paint'] },
+      { t: 'The knight was ___ enough to face the dragon all alone.', answer: 'brave', foils: ['afraid', 'sleepy'] },
+      { t: 'The magician made the coin ___ right before our eyes.', answer: 'vanish', foils: ['stumble', 'whisper'] },
+      { t: 'After the long hike, the cold water tasted ___.', answer: 'refreshing', foils: ['boring', 'angry'] },
+      { t: 'The stray cat was ___ and would not let anyone come close.', answer: 'nervous', foils: ['friendly', 'purple'] },
+      { t: 'The chef ___ the soup carefully so it would not spill.', answer: 'stirred', foils: ['shouted', 'painted'] },
+      { t: 'The story was so ___ that I could not put the book down.', answer: 'exciting', foils: ['dull', 'frozen'] },
+      { t: 'The path was ___ and full of sharp turns up the mountain.', answer: 'winding', foils: ['straight', 'flat'] }
+    ],
+    4: [
+      { t: 'A ___ silence filled the room right before the surprise was revealed.', answer: 'tense', foils: ['cheerful', 'sleepy'] },
+      { t: 'The ancient bridge looked too ___ to hold our weight.', answer: 'fragile', foils: ['sturdy', 'shiny'] },
+      { t: 'He gave a ___ answer, so we still were not sure what he meant.', answer: 'vague', foils: ['clear', 'loud'] },
+      { t: 'The crowd grew ___ as the game went into its final seconds.', answer: 'anxious', foils: ['sleepy', 'calm'] },
+      { t: 'The instructions were so ___ that anyone could follow them.', answer: 'simple', foils: ['confusing', 'expensive'] },
+      { t: 'She was ___ about winning, but she practiced hard just in case.', answer: 'confident', foils: ['worried', 'curious'] },
+      { t: 'The volcano had been ___ for hundreds of years before it woke up.', answer: 'quiet', foils: ['active', 'tiny'] },
+      { t: 'My grandmother told the same story so ___ that I knew it by heart.', answer: 'frequently', foils: ['rarely', 'quietly'] },
+      { t: 'The detective examined every ___ clue before naming the thief.', answer: 'tiny', foils: ['giant', 'loud'] },
+      { t: 'The lake was perfectly ___, like a giant mirror in the morning.', answer: 'still', foils: ['rough', 'crowded'] },
+      { t: 'He spoke so ___ that everyone in the back could hear each word.', answer: 'clearly', foils: ['softly', 'sadly'] },
+      { t: 'The puzzle was ___, so we needed the whole afternoon to solve it.', answer: 'difficult', foils: ['easy', 'round'] }
+    ],
+    5: [
+      { t: 'The scientist remained ___ about the strange results and ran the test again.', answer: 'curious', foils: ['bored', 'furious'] },
+      { t: 'The glass ornament was so ___ that we wrapped it in three layers of cloth.', answer: 'fragile', foils: ['sturdy', 'ordinary'] },
+      { t: 'When the alarm rang, everyone left the building ___ without stopping to talk.', answer: 'immediately', foils: ['eventually', 'cheerfully'] },
+      { t: 'The traveler felt ___ in the crowded, unfamiliar city where no one spoke her language.', answer: 'anxious', foils: ['relaxed', 'delighted'] },
+      { t: 'The melody sounded oddly ___, as if I had heard it somewhere long ago.', answer: 'familiar', foils: ['strange', 'silent'] },
+      { t: 'The ruins were ___, built by a people who vanished thousands of years ago.', answer: 'ancient', foils: ['modern', 'tiny'] },
+      { t: 'She checks the mailbox so ___ that she notices the moment a letter arrives.', answer: 'frequently', foils: ['seldom', 'loudly'] },
+      { t: 'The coach was ___ pleased with how the youngest players had improved.', answer: 'especially', foils: ['barely', 'rudely'] },
+      { t: 'The witness gave such a ___ description that the artist drew the suspect perfectly.', answer: 'detailed', foils: ['vague', 'cheerful'] },
+      { t: 'The negotiations were ___, and both sides argued late into the night.', answer: 'tense', foils: ['relaxed', 'brief'] },
+      { t: 'His handwriting was nearly ___, and no one could make out the words.', answer: 'illegible', foils: ['neat', 'colorful'] },
+      { t: 'The rumor spread ___ through the school before lunchtime was even over.', answer: 'rapidly', foils: ['slowly', 'quietly'] }
+    ]
+  },
+
+  /* ---------- Fix It! ----------
+     12 per grade. Exactly ONE word (wrong) is broken; the rest of the
+     sentence is impeccable. wrong appears once as a whole word in t.
+     foils = 2 wrong corrections. Error types rotate: verb tense,
+     subject-verb agreement, pronoun, plural, article, misused word. */
+  FIXIT: {
+    2: [
+      { t: 'The dog eated the bone.', wrong: 'eated', right: 'ate', foils: ['eating', 'eats'] },
+      { t: 'Yesterday we goed to the park.', wrong: 'goed', right: 'went', foils: ['gone', 'going'] },
+      { t: 'She run to school every morning.', wrong: 'run', right: 'runs', foils: ['running', 'runned'] },
+      { t: 'I have two foots.', wrong: 'foots', right: 'feet', foils: ['foot', 'feets'] },
+      { t: 'She ate a orange for lunch.', wrong: 'a', right: 'an', foils: ['and', 'of'] },
+      { t: 'Me and Sam played tag.', wrong: 'Me', right: 'I', foils: ['My', 'Mine'] },
+      { t: 'He runned all the way home.', wrong: 'runned', right: 'ran', foils: ['runs', 'running'] },
+      { t: 'The two dogs is barking.', wrong: 'is', right: 'are', foils: ['be', 'was'] },
+      { t: 'I saw three mouses in the barn.', wrong: 'mouses', right: 'mice', foils: ['mouse', 'mices'] },
+      { t: 'We went to the store to by milk.', wrong: 'by', right: 'buy', foils: ['bye', 'been'] },
+      { t: 'Him is my best friend.', wrong: 'Him', right: 'He', foils: ['His', 'Them'] },
+      { t: 'She bringed her lunch to school.', wrong: 'bringed', right: 'brought', foils: ['bringing', 'brings'] }
+    ],
+    3: [
+      { t: 'The children swimmed in the lake all afternoon.', wrong: 'swimmed', right: 'swam', foils: ['swimming', 'swum'] },
+      { t: 'My sister and I was late for the bus.', wrong: 'was', right: 'were', foils: ['is', 'be'] },
+      { t: 'Please give the ball to she.', wrong: 'she', right: 'her', foils: ['hers', 'they'] },
+      { t: 'The dentist checked all my tooths.', wrong: 'tooths', right: 'teeth', foils: ['tooth', 'teeths'] },
+      { t: 'We could of won the game.', wrong: 'of', right: 'have', foils: ['off', 'had'] },
+      { t: 'I have never saw a real whale.', wrong: 'saw', right: 'seen', foils: ['see', 'sawed'] },
+      { t: 'Last week she teached us a new song.', wrong: 'teached', right: 'taught', foils: ['teaching', 'teaches'] },
+      { t: 'There is many stars in the sky tonight.', wrong: 'is', right: 'are', foils: ['be', 'was'] },
+      { t: 'The farmer fed the sheeps at dawn.', wrong: 'sheeps', right: 'sheep', foils: ['sheepes', 'sheepen'] },
+      { t: 'Us kids love summer vacation.', wrong: 'Us', right: 'We', foils: ['Our', 'Them'] },
+      { t: 'This box is heavier then that one.', wrong: 'then', right: 'than', foils: ['thin', 'that'] },
+      { t: 'He catched the ball with one hand.', wrong: 'catched', right: 'caught', foils: ['catching', 'catches'] }
+    ],
+    4: [
+      { t: 'The scientists had wrote their report before the deadline.', wrong: 'wrote', right: 'written', foils: ['writed', 'writing'] },
+      { t: 'Neither of the boys were ready on time.', wrong: 'were', right: 'was', foils: ['are', 'be'] },
+      { t: 'The teacher praised Sam and I for the project.', wrong: 'I', right: 'me', foils: ['mine', 'myself'] },
+      { t: 'The chef sliced the tomatos for the salad.', wrong: 'tomatos', right: 'tomatoes', foils: ['tomatoe', 'tomato'] },
+      { t: 'The loud music had a bad affect on my focus.', wrong: 'affect', right: 'effect', foils: ['affects', 'effects'] },
+      { t: 'By noon the snow had began to melt.', wrong: 'began', right: 'begun', foils: ['beginned', 'beginning'] },
+      { t: 'Each of the players have a locker.', wrong: 'have', right: 'has', foils: ['having', 'haves'] },
+      { t: 'They saved a seat for she and her brother.', wrong: 'she', right: 'her', foils: ['hers', 'herself'] },
+      { t: 'The museum showed bones from three ancient womans.', wrong: 'womans', right: 'women', foils: ['woman', 'womens'] },
+      { t: 'The pipe had froze during the cold night.', wrong: 'froze', right: 'frozen', foils: ['freezed', 'freezing'] },
+      { t: 'There were less cars on the road today.', wrong: 'less', right: 'fewer', foils: ['lesser', 'least'] },
+      { t: 'The runners had ran three miles before sunrise.', wrong: 'ran', right: 'run', foils: ['runned', 'running'] }
+    ],
+    5: [
+      { t: 'The explorers had swam across the icy river.', wrong: 'swam', right: 'swum', foils: ['swimmed', 'swimming'] },
+      { t: 'The collection of rare stamps were worth a fortune.', wrong: 'were', right: 'was', foils: ['are', 'be'] },
+      { t: 'Between you and I, the surprise is a puppy.', wrong: 'I', right: 'me', foils: ['myself', 'mine'] },
+      { t: 'The report described several new phenomenons.', wrong: 'phenomenons', right: 'phenomena', foils: ['phenomenon', 'phenomenas'] },
+      { t: 'The choir sang really good at the concert.', wrong: 'good', right: 'well', foils: ['gooder', 'best'] },
+      { t: 'She had drank all the water before the hike ended.', wrong: 'drank', right: 'drunk', foils: ['drinked', 'drinking'] },
+      { t: 'Each of the students have finished the exam.', wrong: 'have', right: 'has', foils: ['having', 'haved'] },
+      { t: 'The award was shared between she and her partner.', wrong: 'she', right: 'her', foils: ['hers', 'herself'] },
+      { t: 'The witness could of identified the suspect easily.', wrong: 'of', right: 'have', foils: ['off', 'had'] },
+      { t: 'By dawn the campers had rose and packed their tents.', wrong: 'rose', right: 'risen', foils: ['rised', 'rising'] },
+      { t: 'The team solved two difficult crisises last week.', wrong: 'crisises', right: 'crises', foils: ['crisis', 'crisees'] },
+      { t: 'To who should I address the letter?', wrong: 'who', right: 'whom', foils: ['whose', 'whoms'] }
+    ]
+  },
+
+  /* ---------- Main Idea Mission ----------
+     8 per grade. choices = 3 titles: the best title, a too-narrow detail
+     title, and an off-topic title. a = index of the best title (varied). */
+  MAINIDEA: {
+    2: [
+      { p: 'Penguins are birds, but they cannot fly. They use their wings to swim in the cold sea. Their thick feathers keep them warm.', choices: ['How Penguins Live', 'Penguins Have Feathers', 'Why Cats Purr'], a: 0 },
+      { p: 'Bees help make our food. They fly from flower to flower to drink sweet nectar. As they go, they move pollen that helps fruit grow.', choices: ['Bees Like Nectar', 'How Bees Help Our Food', 'A Trip to the Zoo'], a: 1 },
+      { p: 'Rainbows appear after it rains. Sunlight shines through tiny drops of water in the air. The light bends and splits into many colors.', choices: ['Water Drops in the Air', 'My Favorite Color', 'How Rainbows Are Made'], a: 2 },
+      { p: 'The Sun is a giant star. It is so big that many Earths could fit inside it. The Sun gives us light and heat every day.', choices: ['The Sun, Our Star', 'The Sun Is Hot', 'Playing in the Snow'], a: 0 },
+      { p: 'Soccer is a game played with a round ball. Players run and kick the ball to score goals. They cannot use their hands, only their feet.', choices: ['Kicking a Ball', 'How to Play Soccer', 'Baking Cookies'], a: 1 },
+      { p: 'A spider makes a web from sticky silk. It spins the web to catch bugs to eat. When a bug lands, the spider feels it shake.', choices: ['Sticky Spider Silk', 'A Walk in the Park', 'How Spiders Catch Food'], a: 2 },
+      { p: 'Long ago, people had no lights at night. Then the light bulb was made. Now we can flip a switch and light up a whole room.', choices: ['The Light Bulb Changed Nights', 'Flipping a Switch', 'A Big Green Frog'], a: 0 },
+      { p: 'Apples grow on trees. In fall, they turn red or green and are ready to pick. People eat them fresh or bake them into pie.', choices: ['Red and Green', 'Apples Grow on Trees', 'A Rainy Night'], a: 1 }
+    ],
+    3: [
+      { p: 'Octopuses are amazing sea animals with eight arms. They can change color to hide from danger. If an enemy comes close, they squirt dark ink and zoom away. Each arm can even taste what it touches.', choices: ['Squirting Ink', 'The Clever Octopus', 'My Beach Vacation'], a: 1 },
+      { p: 'The Moon does not make its own light. It shines because sunlight bounces off it. As the Moon moves around Earth, we see different amounts of it lit up. That is why it seems to change shape each night.', choices: ['A Trip to the Beach', 'Sunlight on the Moon', 'Why the Moon Changes Shape'], a: 2 },
+      { p: 'Thunderstorms can be loud and bright. First, we see a flash of lightning. A few seconds later, we hear the boom of thunder. The light reaches us faster than the sound.', choices: ['How Thunderstorms Work', 'The Sound of Thunder', 'Growing Tomatoes'], a: 0 },
+      { p: 'The bicycle is a machine that helps people travel. You push the pedals with your feet to turn the wheels. Bikes do not need gas, so they are good for the Earth. Riding one is also great exercise.', choices: ['Pushing Pedals', 'Why Bikes Are Great', 'Feeding a Puppy'], a: 1 },
+      { p: 'Honey starts as nectar inside flowers. Bees drink the nectar and carry it back to the hive. Inside the hive, they turn it into thick, sweet honey. Then they store it in little wax rooms.', choices: ['Wax Rooms', 'A Snowy Morning', 'How Bees Make Honey'], a: 2 },
+      { p: 'Swimming is a sport and a useful skill. Swimmers move their arms and kick their legs to glide through water. It works almost every muscle in the body. Best of all, it helps keep people safe near water.', choices: ['Why Swimming Is Good', 'Kicking Your Legs', 'A Ride on the Bus'], a: 0 },
+      { p: 'Camels are built for life in the hot desert. Their humps store fat, which gives them energy when food is hard to find. They can go for many days without drinking water. Long lashes keep sand out of their eyes.', choices: ['Long Eyelashes', 'A Cold Winter Day', 'How Camels Survive the Desert'], a: 2 },
+      { p: 'Astronauts float when they are in space. There is very little gravity to hold them down. To eat, they use special bags so their food does not drift away. Even sleeping means strapping into a bag on the wall.', choices: ['Floating Food Bags', 'Life in Space', 'A Day at the Farm'], a: 1 }
+    ],
+    4: [
+      { p: 'The printing press changed the world in a huge way. Before it was invented, every book had to be copied slowly by hand. The press could stamp ink onto page after page quickly. Suddenly books became cheaper, and far more people learned to read.', choices: ['How the Printing Press Changed the World', 'Copying Books by Hand', 'A Walk Through the Forest'], a: 0 },
+      { p: 'Dolphins are highly intelligent ocean mammals. They talk to one another using clicks and whistles. To find food in dark water, they send out sounds and listen for the echoes. This clever trick is called echolocation.', choices: ['Clicks and Whistles', 'A Rainy Soccer Game', 'The Intelligent Dolphin'], a: 2 },
+      { p: 'Tornadoes are among the most powerful storms on Earth. They form when warm, moist air meets cold, dry air. This clash can create a spinning funnel of wind that reaches all the way to the ground. The fastest tornado winds can lift cars into the air.', choices: ['Spinning Funnels of Wind', 'How Tornadoes Form', 'Baking Fresh Bread'], a: 1 },
+      { p: 'Mars is often called the Red Planet. Its soil is full of iron, which rusts and turns a reddish color. Scientists study Mars because it may once have had rivers and lakes. Robots called rovers drive across it, taking photos and testing the ground.', choices: ['Exploring the Red Planet', 'Rusty Red Soil', 'A Trip to the Water Park'], a: 0 },
+      { p: 'Chocolate comes from the seeds of the cacao tree. Farmers pick the pods, then dry and roast the seeds inside. The roasted seeds are ground into a rich paste. Finally, sugar and milk are added to make the candy we love.', choices: ['Roasting Cacao Seeds', 'A Snowy Mountain Hike', 'How Chocolate Is Made'], a: 2 },
+      { p: 'Marathons are races that test both body and mind. A full marathon is over twenty-six miles long. Runners train for months to build the strength to finish. During the race, they must drink water often so they do not get too tired.', choices: ['Drinking Water While Running', 'What It Takes to Run a Marathon', 'Painting a Fence'], a: 1 },
+      { p: 'The Arctic fox is a master of surviving the cold. In winter, its fur turns white to blend into the snow. Thick fur even covers the bottoms of its paws to keep them warm. When food is scarce, it will follow polar bears to eat their leftovers.', choices: ['How the Arctic Fox Survives', 'White Winter Fur', 'A Busy City Street'], a: 0 },
+      { p: 'The telephone changed the way people talk to each other. Before it existed, a letter could take days or weeks to arrive. Alexander Graham Bell found a way to send voices through wires. For the first time, people far apart could speak in an instant.', choices: ['Sending Letters by Mail', 'A Quiet Camping Trip', 'How the Telephone Changed Talking'], a: 2 }
+    ],
+    5: [
+      { p: 'Black holes are among the strangest objects in the universe. They form when a giant star collapses into an incredibly small, dense point. Their gravity is so strong that not even light can escape once it gets too close. Because no light comes out, we can only find them by watching how nearby stars behave.', choices: ['The Mystery of Black Holes', 'A Collapsing Star', 'Planning a Birthday Party'], a: 0 },
+      { p: 'Honeybees live in colonies that work like one large team. Each bee has a specific job, from cleaning cells to guarding the entrance. Worker bees share the location of flowers by performing a special “waggle dance.” Through this teamwork, the whole hive stays fed and protected.', choices: ['The Waggle Dance', 'How a Bee Colony Works Together', 'A Trip to the Dentist'], a: 1 },
+      { p: 'The Internet began as a small government project in the 1960s. Scientists wanted a way for computers to share information even if one machine failed. Over time, more and more networks connected together. Today, billions of people use this web of connections every single day.', choices: ['Computers That Fail', 'A Walk on the Beach', 'The Story of the Internet'], a: 2 },
+      { p: 'Hurricanes are enormous storms that form over warm ocean water. As the warm, moist air rises, it creates an area of low pressure that pulls in even more air. The whole system begins to spin, growing stronger as it feeds on the ocean heat. When a hurricane finally reaches land, it can bring flooding rain and powerful winds.', choices: ['How Hurricanes Form and Grow', 'Warm Ocean Water', 'A Game of Chess'], a: 0 },
+      { p: 'Refrigeration is one of the most important inventions in the history of food. Before iceboxes and fridges, people had to salt or dry their food to keep it from spoiling. A refrigerator slows the growth of the tiny germs that cause food to rot. Thanks to this cooling, we can store fresh food safely for many days.', choices: ['Salting and Drying Food', 'Why Refrigeration Matters', 'A Loud Thunderstorm'], a: 1 },
+      { p: 'The ancient Olympic Games began in Greece almost three thousand years ago. Athletes competed in events like running, jumping, and wrestling to honor their gods. Winners received no money, only a simple crown made of olive leaves. Even so, an Olympic victory brought lasting fame to an athlete’s whole city.', choices: ['A Crown of Olive Leaves', 'My Favorite Board Game', 'The Ancient Olympic Games'], a: 2 },
+      { p: 'The migration of the monarch butterfly is one of nature’s great wonders. Each fall, millions of these delicate insects fly thousands of miles to warmer forests. Amazingly, no single butterfly makes the whole round trip. It takes several generations to complete the long journey each year.', choices: ['The Amazing Monarch Migration', 'Butterflies Are Delicate', 'Fixing a Flat Tire'], a: 0 },
+      { p: 'Astronauts on the space station experience sixteen sunrises every day. Because the station circles the entire Earth in about ninety minutes, the Sun appears to rise and set again and again. This constant change makes a normal sleep schedule difficult. To rest, astronauts cover the windows and follow clocks set to a single time zone.', choices: ['Sixteen Sunrises a Day', 'Life and Sleep on the Space Station', 'Cooking a Big Dinner'], a: 1 }
+    ]
+  },
+
+  /* ---------- Fact or Opinion? ----------
+     16 per grade: 8 facts + 8 opinions, shuffled with no run longer than 3.
+     fact:true means it can be checked and proven; fact:false is an opinion
+     (a judgment or taste claim). No borderline cases. */
+  FACTOP: {
+    2: [
+      { t: 'Cows give us milk.', fact: true },
+      { t: 'Puppies are the cutest animals.', fact: false },
+      { t: 'A week has seven days.', fact: true },
+      { t: 'Chocolate ice cream is the best.', fact: false },
+      { t: 'Ice is frozen water.', fact: true },
+      { t: 'Rainy days are boring.', fact: false },
+      { t: 'The sun rises in the morning.', fact: true },
+      { t: 'Fish live in water.', fact: true },
+      { t: 'Everyone should like pizza.', fact: false },
+      { t: 'Summer is better than winter.', fact: false },
+      { t: 'Bees can sting.', fact: true },
+      { t: 'Spiders are scary.', fact: false },
+      { t: 'A triangle has three sides.', fact: true },
+      { t: 'The color blue is the prettiest.', fact: false },
+      { t: 'Snow is cold.', fact: true },
+      { t: 'Recess is the most fun part of school.', fact: false }
+    ],
+    3: [
+      { t: 'Water freezes at zero degrees Celsius.', fact: true },
+      { t: 'Dogs are better pets than cats.', fact: false },
+      { t: 'Winter is the worst season.', fact: false },
+      { t: 'Spiders have eight legs.', fact: true },
+      { t: 'The heart pumps blood through the body.', fact: true },
+      { t: 'Pizza is the most delicious food.', fact: false },
+      { t: 'Bats are the only mammals that can truly fly.', fact: true },
+      { t: 'Math is the hardest subject.', fact: false },
+      { t: 'Every kid should learn to swim.', fact: false },
+      { t: 'A leap year has 366 days.', fact: true },
+      { t: 'Plants make their own food using sunlight.', fact: true },
+      { t: 'Roller coasters are too scary.', fact: false },
+      { t: 'The Pacific is the largest ocean.', fact: true },
+      { t: 'The beach is the best place to visit.', fact: false },
+      { t: 'Country music is boring.', fact: false },
+      { t: 'Honey is made by bees.', fact: true }
+    ],
+    4: [
+      { t: 'Sound travels slower than light.', fact: true },
+      { t: 'Science is the most interesting subject in school.', fact: false },
+      { t: 'The Amazon is the largest rainforest on Earth.', fact: true },
+      { t: 'Cats are lazy animals.', fact: false },
+      { t: 'Autumn is the most beautiful season.', fact: false },
+      { t: 'An adult human has 206 bones.', fact: true },
+      { t: 'Sharks are fish, not mammals.', fact: true },
+      { t: 'Homework should be banned.', fact: false },
+      { t: 'Lightning is hotter than the surface of the Sun.', fact: true },
+      { t: 'Vanilla is a boring flavor.', fact: false },
+      { t: 'Everyone ought to visit the ocean at least once.', fact: false },
+      { t: 'Water covers most of Earth’s surface.', fact: true },
+      { t: 'The Great Wall of China is thousands of miles long.', fact: true },
+      { t: 'Snakes make the best pets.', fact: false },
+      { t: 'Long car trips are miserable.', fact: false },
+      { t: 'Owls can turn their heads very far around.', fact: true }
+    ],
+    5: [
+      { t: 'The human body is made mostly of water.', fact: true },
+      { t: 'History is more important than any other subject.', fact: false },
+      { t: 'Reading is more enjoyable than watching television.', fact: false },
+      { t: 'Mount Everest is the highest mountain above sea level.', fact: true },
+      { t: 'Skyscrapers are ugly.', fact: false },
+      { t: 'Venus is the hottest planet in our solar system.', fact: true },
+      { t: 'A group of lions is called a pride.', fact: true },
+      { t: 'Sound cannot travel through empty space.', fact: true },
+      { t: 'The government should make museums free for everyone.', fact: false },
+      { t: 'Autumn leaves are the most beautiful sight in nature.', fact: false },
+      { t: 'The Nile is one of the longest rivers in the world.', fact: true },
+      { t: 'Broccoli tastes terrible.', fact: false },
+      { t: 'Gold is a metal that does not rust.', fact: true },
+      { t: 'Cities are far too crowded and noisy.', fact: false },
+      { t: 'Classical music is the greatest kind of music.', fact: false },
+      { t: 'Octopuses have three hearts.', fact: true }
+    ]
+  },
+
+  /* ---------- Homophone Heroes ----------
+     12 per grade. Exactly one ___ per sentence. options = the homophone
+     set (2 or 3 words); a = index of the one word that fits the context.
+     Easier sets in lower grades, richer sets by grade 5. */
+  HOMOPHONES: {
+    2: [
+      { t: 'We went ___ the park.', options: ['to', 'too', 'two'], a: 0 },
+      { t: 'I have ___ red apples.', options: ['to', 'too', 'two'], a: 2 },
+      { t: 'Can I come ___?', options: ['to', 'too', 'two'], a: 1 },
+      { t: 'Do you ___ my name?', options: ['no', 'know'], a: 1 },
+      { t: 'There are ___ cookies left.', options: ['no', 'know'], a: 0 },
+      { t: 'I want to ___ a new toy.', options: ['by', 'buy'], a: 1 },
+      { t: 'The cat sat ___ the door.', options: ['by', 'buy'], a: 0 },
+      { t: 'We swam in the ___.', options: ['see', 'sea'], a: 1 },
+      { t: 'I can ___ the moon.', options: ['see', 'sea'], a: 0 },
+      { t: 'Our team ___ the game!', options: ['one', 'won'], a: 1 },
+      { t: 'I ate ___ apple.', options: ['one', 'won'], a: 0 },
+      { t: 'Come ___ and sit down.', options: ['hear', 'here'], a: 1 }
+    ],
+    3: [
+      { t: 'Turn ___ at the next corner.', options: ['right', 'write'], a: 0 },
+      { t: 'I will ___ a letter to Grandma.', options: ['right', 'write'], a: 1 },
+      { t: 'The chair is made of ___.', options: ['would', 'wood'], a: 1 },
+      { t: 'I ___ love to go with you.', options: ['would', 'wood'], a: 0 },
+      { t: '___ shoes are by the door.', options: ['Their', 'There', 'They’re'], a: 0 },
+      { t: 'Please put the box over ___.', options: ['their', 'there', 'they’re'], a: 1 },
+      { t: 'I think ___ going to win.', options: ['their', 'there', 'they’re'], a: 2 },
+      { t: 'Is this ___ pencil?', options: ['your', 'you’re'], a: 0 },
+      { t: 'I think ___ very kind.', options: ['your', 'you’re'], a: 1 },
+      { t: 'A dog wagged ___ tail.', options: ['its', 'it’s'], a: 0 },
+      { t: 'I think ___ going to rain.', options: ['its', 'it’s'], a: 1 },
+      { t: 'A spider has ___ legs.', options: ['ate', 'eight'], a: 1 }
+    ],
+    4: [
+      { t: 'We need one cup of ___ for the bread.', options: ['flour', 'flower'], a: 0 },
+      { t: 'She picked a yellow ___ from the garden.', options: ['flour', 'flower'], a: 1 },
+      { t: 'The dog chased its own ___.', options: ['tail', 'tale'], a: 0 },
+      { t: 'Grandpa told us a spooky ___.', options: ['tail', 'tale'], a: 1 },
+      { t: 'The ___ landed safely at the airport.', options: ['plain', 'plane'], a: 1 },
+      { t: 'She wore a ___ white shirt.', options: ['plain', 'plane'], a: 0 },
+      { t: 'I was so ___ during the long movie.', options: ['bored', 'board'], a: 0 },
+      { t: 'He nailed the ___ to the fence.', options: ['bored', 'board'], a: 1 },
+      { t: 'A brave ___ rode up to the castle.', options: ['knight', 'night'], a: 0 },
+      { t: 'The stars come out at ___.', options: ['knight', 'night'], a: 1 },
+      { t: 'Did you ___ that strange noise?', options: ['hear', 'here'], a: 0 },
+      { t: 'There is a ___ in my sock.', options: ['whole', 'hole'], a: 1 }
+    ],
+    5: [
+      { t: 'She ___ the ball across the yard.', options: ['threw', 'through'], a: 0 },
+      { t: 'We walked ___ the dark tunnel.', options: ['threw', 'through'], a: 1 },
+      { t: 'The ___ was stormy all weekend.', options: ['weather', 'whether'], a: 0 },
+      { t: 'I cannot decide ___ to go or stay.', options: ['weather', 'whether'], a: 1 },
+      { t: 'The ___ of our school gave a speech.', options: ['principal', 'principle'], a: 0 },
+      { t: 'Honesty is an important ___ to live by.', options: ['principal', 'principle'], a: 1 },
+      { t: 'She read the poem ___ to the class.', options: ['aloud', 'allowed'], a: 0 },
+      { t: 'We are not ___ to run in the halls.', options: ['aloud', 'allowed'], a: 1 },
+      { t: 'The runner ___ three other racers.', options: ['past', 'passed'], a: 1 },
+      { t: 'We walked ___ the old library.', options: ['past', 'passed'], a: 0 },
+      { t: 'May I have a ___ of cake?', options: ['piece', 'peace'], a: 0 },
+      { t: 'The two sides finally made ___.', options: ['piece', 'peace'], a: 1 }
+    ]
+  },
+
+  /* ---------- Deep Dive ----------
+     Reading stamina, grades 3-5 only. 4 passages per grade, each ~90-130
+     words at true grade level. Every passage has a 4-question quiz (3 emoji
+     choices each, a varied): 2 recall, 1 why/sequence, 1 main-idea/inference.
+     Every question is answerable from the passage alone. */
+  DEEPDIVE: {
+    3: [
+      { title: 'The Ant Highway', e: '🐜',
+        p: 'Ants are tiny, but together they build something amazing: a highway made of scent. When a worker ant finds food, it hurries back to the nest. As it walks, it dabs the ground with a special smell called a pheromone. Soon other ants follow the smell straight to the food, adding their own scent as they go. The busiest trail gets the strongest smell, so more and more ants join it. When the food is gone, the ants stop adding scent, and the trail slowly fades away. In this clever way, a whole colony can share a meal without ever speaking a word.',
+        quiz: [
+          { q: 'What does an ant leave on the ground to mark a trail?', choices: [ { t: 'a special smell', e: '👃' }, { t: 'a pile of leaves', e: '🍃' }, { t: 'tiny footprints', e: '👣' } ], a: 0 },
+          { q: 'What is that special smell called?', choices: [ { t: 'nectar', e: '🍯' }, { t: 'a pheromone', e: '🐜' }, { t: 'honey', e: '🍯' } ], a: 1 },
+          { q: 'Why does the busiest trail get the strongest smell?', choices: [ { t: 'because the sun heats it', e: '☀️' }, { t: 'because it rains there', e: '🌧️' }, { t: 'because more ants keep adding scent to it', e: '🐜' } ], a: 2 },
+          { q: 'What is the main idea of this passage?', choices: [ { t: 'Ants work together using smell to find food', e: '🐜' }, { t: 'Ants are very tiny insects', e: '🔬' }, { t: 'Food disappears quickly outside', e: '🍽️' } ], a: 0 }
+        ] },
+      { title: 'Sleepless Sharks', e: '🦈',
+        p: 'Most animals stop to sleep, but many sharks can never fully rest. Some kinds of sharks must keep swimming their whole lives. This is because they breathe by pushing water over their gills, and the water only moves when they swim forward. If such a shark stopped, it would not get enough oxygen. To survive, these sharks let one half of their brain rest while the other half keeps them gliding along. In this way, part of the shark sleeps while the rest keeps working. It is a strange and clever trick that keeps these ocean hunters alive both day and night.',
+        quiz: [
+          { q: 'How do these sharks get oxygen?', choices: [ { t: 'by pushing water over their gills', e: '🌊' }, { t: 'by breathing air at the surface', e: '💨' }, { t: 'by resting on the sea floor', e: '🪨' } ], a: 0 },
+          { q: 'What would happen if this kind of shark stopped swimming?', choices: [ { t: 'it would fall asleep safely', e: '😴' }, { t: 'it would not get enough oxygen', e: '🫧' }, { t: 'it would swim even faster', e: '💨' } ], a: 1 },
+          { q: 'How can these sharks rest and still keep swimming?', choices: [ { t: 'they float without moving', e: '🌊' }, { t: 'other fish push them along', e: '🐟' }, { t: 'only half of the brain rests at a time', e: '🧠' } ], a: 2 },
+          { q: 'What is this passage mostly about?', choices: [ { t: 'why some sharks must keep swimming to live', e: '🦈' }, { t: 'what sharks like to eat', e: '🍽️' }, { t: 'how big sharks can grow', e: '📏' } ], a: 0 }
+        ] },
+      { title: 'The Lost Mitten', e: '🧤',
+        p: 'On the coldest morning of winter, Maya lost one of her red mittens on the way to school. She looked in her backpack, under her desk, and even inside her boots, but it was gone. All day her right hand felt cold and lonely. After the last bell, Maya trudged home along the snowy path, staring at the ground. Near a fence post, she saw a splash of red. There sat her missing mitten, propped up on the wood where someone had found it. Best of all, a tiny snowbird had decided the warm mitten made the perfect little house.',
+        quiz: [
+          { q: 'What did Maya lose?', choices: [ { t: 'her red mitten', e: '🧤' }, { t: 'her backpack', e: '🎒' }, { t: 'her boots', e: '🥾' } ], a: 0 },
+          { q: 'Where did she finally find it?', choices: [ { t: 'under her desk', e: '🪑' }, { t: 'on a fence post', e: '🪵' }, { t: 'inside her boot', e: '🥾' } ], a: 1 },
+          { q: 'What did Maya do right after the last bell?', choices: [ { t: 'she walked home along the snowy path', e: '🚶' }, { t: 'she looked in her backpack', e: '🎒' }, { t: 'she played in the snow', e: '⛄' } ], a: 0 },
+          { q: 'Why was the snowbird sitting in the mitten?', choices: [ { t: 'it was hungry', e: '🍞' }, { t: 'it was lost too', e: '🗺️' }, { t: 'the warm mitten made a cozy little house', e: '🐦' } ], a: 2 }
+        ] },
+      { title: 'Popcorn Pops', e: '🍿',
+        p: 'Have you ever wondered why popcorn pops? Every popcorn kernel holds a tiny drop of water locked inside its hard shell. When the kernel gets very hot, that water turns into steam and tries to escape. The tough shell traps the steam, so pressure builds and builds. Finally the shell cannot hold on any longer, and the kernel bursts open with a loud pop. The soft, fluffy white part you eat is really the inside of the kernel turned inside out. Not every kernel has enough water to pop, which is why a few hard ones are always left at the bottom of the bowl.',
+        quiz: [
+          { q: 'What is trapped inside each popcorn kernel?', choices: [ { t: 'a drop of water', e: '💧' }, { t: 'a bit of butter', e: '🧈' }, { t: 'a grain of salt', e: '🧂' } ], a: 0 },
+          { q: 'Why does the kernel finally burst open?', choices: [ { t: 'someone shakes the bowl', e: '🥣' }, { t: 'the steam builds up too much pressure', e: '💨' }, { t: 'the butter heats up', e: '🧈' } ], a: 1 },
+          { q: 'What is the fluffy white part you eat?', choices: [ { t: 'the shell of the kernel', e: '🌰' }, { t: 'melted butter', e: '🧈' }, { t: 'the inside of the kernel', e: '🍿' } ], a: 2 },
+          { q: 'Why are some hard kernels left at the bottom?', choices: [ { t: 'they did not have enough water to pop', e: '💧' }, { t: 'they were too salty', e: '🧂' }, { t: 'they were eaten first', e: '😋' } ], a: 0 }
+        ] }
+    ],
+    4: [
+      { title: 'The Glow of the Deep', e: '🐟',
+        p: 'Far below the ocean surface, where sunlight never reaches, the water is pitch black and freezing cold. Yet even here, life finds a way to shine. Many deep-sea creatures make their own light through a chemical reaction inside their bodies, a trick scientists call bioluminescence. The anglerfish uses a glowing lure that dangles above its mouth like a tiny lantern. Curious smaller fish swim toward the light, hoping for a meal, only to become one themselves. Other animals flash light to confuse enemies or to signal a mate. In a world of endless darkness, the ability to glow can mean the difference between eating and being eaten.',
+        quiz: [
+          { q: 'What is the ability of animals to make their own light called?', choices: [ { t: 'bioluminescence', e: '🔦' }, { t: 'photosynthesis', e: '🌱' }, { t: 'hibernation', e: '😴' } ], a: 0 },
+          { q: 'How does the anglerfish catch smaller fish?', choices: [ { t: 'it chases them at high speed', e: '💨' }, { t: 'it lures them with a glowing light', e: '💡' }, { t: 'it hides in the sand', e: '🏖️' } ], a: 1 },
+          { q: 'Why do the smaller fish swim toward the anglerfish’s light?', choices: [ { t: 'they want to stay warm', e: '🔥' }, { t: 'they are following a friend', e: '🐟' }, { t: 'they are hoping to find a meal', e: '🍽️' } ], a: 2 },
+          { q: 'What is the main idea of this passage?', choices: [ { t: 'the deep ocean is very cold', e: '🧊' }, { t: 'many deep-sea animals use light to survive', e: '🐟' }, { t: 'fish enjoy swimming in groups', e: '🐠' } ], a: 1 }
+        ] },
+      { title: 'The Pigeon Post', e: '🕊️',
+        p: 'Long before phones or email, people needed a fast way to send urgent messages. One surprising solution had feathers: the homing pigeon. These birds have a remarkable sense of direction and can find their way back to their home loft from hundreds of miles away. A sender would tie a small, rolled-up note to a pigeon’s leg and release it into the sky. The bird would fly straight home, carrying the message far faster than a person on horseback. During wars, armies used pigeons to deliver secret plans across enemy lines. Some brave pigeons even kept flying after being injured, saving many lives with the notes they carried.',
+        quiz: [
+          { q: 'What special ability makes homing pigeons useful?', choices: [ { t: 'they can find their way home from far away', e: '🧭' }, { t: 'they can talk to people', e: '🗣️' }, { t: 'they can swim underwater', e: '🌊' } ], a: 0 },
+          { q: 'How was a message sent with a pigeon?', choices: [ { t: 'it was painted on the bird’s wings', e: '🎨' }, { t: 'it was tied to the bird’s leg', e: '📜' }, { t: 'it was sung out loud', e: '🎵' } ], a: 1 },
+          { q: 'Why did armies use pigeons during wars?', choices: [ { t: 'to carry secret messages across enemy lines', e: '✉️' }, { t: 'to scare away the enemy', e: '😱' }, { t: 'to search for food', e: '🌾' } ], a: 0 },
+          { q: 'Why were some pigeons called brave?', choices: [ { t: 'they flew in bad weather', e: '🌧️' }, { t: 'they were very large', e: '📏' }, { t: 'they kept flying even after being hurt', e: '🕊️' } ], a: 2 }
+        ] },
+      { title: 'The Water Elevator', e: '🚤',
+        p: 'How can a boat travel up a hill full of water? The answer is a clever invention called a lock, which works like an elevator for boats. A lock is a chamber with heavy gates at each end. When a boat enters, the gates close behind it, sealing the water inside. Then valves let water flow in or out, slowly raising or lowering the boat to a new level. Once the water matches the level ahead, the far gates open and the boat sails onward. Some rivers have a whole staircase of locks, lifting boats higher and higher, one calm step of water at a time.',
+        quiz: [
+          { q: 'What does a lock work like?', choices: [ { t: 'an elevator for boats', e: '🛗' }, { t: 'a giant bridge', e: '🌉' }, { t: 'a fishing net', e: '🥅' } ], a: 0 },
+          { q: 'What happens right after a boat enters the lock?', choices: [ { t: 'the far gates open', e: '🚪' }, { t: 'the gates close behind it', e: '🔒' }, { t: 'the boat sinks', e: '⬇️' } ], a: 1 },
+          { q: 'What raises or lowers the boat inside the lock?', choices: [ { t: 'strong ropes', e: '🪢' }, { t: 'the wind', e: '💨' }, { t: 'water flowing in or out', e: '💧' } ], a: 2 },
+          { q: 'What is this passage mainly explaining?', choices: [ { t: 'how a lock moves boats between water levels', e: '🚤' }, { t: 'why boats are painted bright colors', e: '🎨' }, { t: 'where rivers begin', e: '⛰️' } ], a: 0 }
+        ] },
+      { title: 'The Clever Crow', e: '🐦',
+        p: 'Crows may be the brainiest birds in the world. Scientists have watched them solve puzzles that would stump many other animals. In one famous test, a crow was given a narrow tube with a treat floating on water too low to reach. The clever bird dropped stones into the tube one by one. As the stones sank, the water rose, lifting the treat within reach. Crows also remember human faces for years, and they can even use tools, bending twigs into hooks to pull insects from holes. Some city crows have learned to drop hard nuts onto roads so that passing cars will crack them open.',
+        quiz: [
+          { q: 'What did the crow drop into the tube?', choices: [ { t: 'seeds', e: '🌰' }, { t: 'stones', e: '🪨' }, { t: 'feathers', e: '🪶' } ], a: 1 },
+          { q: 'Why did dropping stones help the crow?', choices: [ { t: 'it scared other birds away', e: '🐦' }, { t: 'it made the water rise so the treat came closer', e: '💧' }, { t: 'it broke the tube', e: '💥' } ], a: 1 },
+          { q: 'How do some city crows crack hard nuts?', choices: [ { t: 'they bang them on trees', e: '🌳' }, { t: 'they soak them in water', e: '💧' }, { t: 'they drop them onto roads for cars to crush', e: '🚗' } ], a: 2 },
+          { q: 'What is the main idea of this passage?', choices: [ { t: 'crows are surprisingly intelligent', e: '🧠' }, { t: 'crows are black birds', e: '🐦' }, { t: 'crows build big nests', e: '🪺' } ], a: 0 }
+        ] }
+    ],
+    5: [
+      { title: 'The Language of Whales', e: '🐋',
+        p: 'In the vast darkness of the deep ocean, sound travels much farther than sight, and whales have turned this fact into a language all their own. The humpback whale is famous for its haunting songs, long patterns of moans, cries, and whistles that can last for hours. Remarkably, all the males in a single region sing nearly the same song, and that shared song slowly changes over the seasons as new phrases spread from whale to whale. Even more astonishing is the blue whale, whose deep calls are so powerful that they can travel across an entire ocean. Scientists still do not understand every message, but they agree the sea is far from silent. Beneath the waves stretches a hidden network of voices, carrying meaning through miles of water.',
+        quiz: [
+          { q: 'Why does sound travel farther than sight in the deep ocean?', choices: [ { t: 'the water is dark, but sound moves well through it', e: '🔊' }, { t: 'the ocean is very warm', e: '🌡️' }, { t: 'there are no other animals', e: '🐟' } ], a: 0 },
+          { q: 'What is the humpback whale famous for?', choices: [ { t: 'its enormous teeth', e: '🦷' }, { t: 'its long, haunting songs', e: '🎵' }, { t: 'its bright colors', e: '🌈' } ], a: 1 },
+          { q: 'How does a region’s whale song change over time?', choices: [ { t: 'it stays exactly the same forever', e: '🔁' }, { t: 'each whale sings a totally different tune', e: '🎶' }, { t: 'new phrases spread from whale to whale', e: '🐋' } ], a: 2 },
+          { q: 'What is the main idea of this passage?', choices: [ { t: 'whales use sound to communicate across great distances', e: '🐋' }, { t: 'the ocean is completely silent', e: '🤫' }, { t: 'blue whales are the largest animals', e: '📏' } ], a: 0 }
+        ] },
+      { title: 'How Mountains Are Born', e: '⛰️',
+        p: 'The tallest mountains on Earth were not always there, and they did not appear overnight. The planet’s hard outer shell is broken into enormous slabs of rock called tectonic plates, which drift slowly on the hot, soft layer beneath them. Although they move no faster than your fingernails grow, over millions of years these plates collide with tremendous force. When two plates push against each other, the rock at the boundary has nowhere to go but up, buckling and folding into towering peaks. The mighty Himalayas, home to Mount Everest, formed this way when one plate crashed into another and never stopped pushing. Even today those mountains creep a little higher each year, proof that the ground beneath our feet is always, quietly, on the move.',
+        quiz: [
+          { q: 'What are the giant slabs of rock called?', choices: [ { t: 'tectonic plates', e: '🪨' }, { t: 'ocean waves', e: '🌊' }, { t: 'sand dunes', e: '🏜️' } ], a: 0 },
+          { q: 'How fast do the plates move?', choices: [ { t: 'faster than a race car', e: '🏎️' }, { t: 'about as fast as fingernails grow', e: '💅' }, { t: 'at the speed of sound', e: '💨' } ], a: 1 },
+          { q: 'Why do mountains rise where two plates meet?', choices: [ { t: 'the wind piles up the rock', e: '💨' }, { t: 'rain washes soil into a heap', e: '🌧️' }, { t: 'the rock is pushed up with nowhere else to go', e: '⛰️' } ], a: 2 },
+          { q: 'What is this passage mostly about?', choices: [ { t: 'how moving plates build mountains over time', e: '⛰️' }, { t: 'how tall Mount Everest is', e: '📏' }, { t: 'why it rains in the mountains', e: '🌧️' } ], a: 0 }
+        ] },
+      { title: 'The Lighthouse Keeper’s Last Night', e: '💡',
+        p: 'For forty-two years, Elias had climbed the spiral stairs of the lighthouse every evening to light the great lamp. Tonight would be his last, for in the morning a machine would take over his work forever. The sea did not know this, of course. It heaved and crashed against the rocks the way it always had, uncaring about the old man’s feelings. As Elias reached the top, a distant ship’s horn moaned through the fog, and he lit the lamp one final time. The beam swept across the black water, steady and sure, guiding sailors he would never meet toward a harbor they had never seen. He realized then that he had spent his life speaking to strangers in a language made only of light. Smiling, he began the long walk down.',
+        quiz: [
+          { q: 'How long had Elias worked at the lighthouse?', choices: [ { t: 'forty-two years', e: '📅' }, { t: 'a single summer', e: '☀️' }, { t: 'one hundred years', e: '💯' } ], a: 0 },
+          { q: 'What would replace Elias in the morning?', choices: [ { t: 'a younger keeper', e: '🧑' }, { t: 'a machine', e: '⚙️' }, { t: 'a brand-new lamp only', e: '💡' } ], a: 1 },
+          { q: 'What did Elias do just after he reached the top?', choices: [ { t: 'he walked back down', e: '🪜' }, { t: 'he fell asleep', e: '😴' }, { t: 'he lit the lamp one final time', e: '💡' } ], a: 2 },
+          { q: 'What did Elias mean by “a language made only of light”?', choices: [ { t: 'the lighthouse beam guided sailors he never met', e: '🌟' }, { t: 'he could read books in the dark', e: '📖' }, { t: 'he sang songs to the sea', e: '🎵' } ], a: 0 }
+        ] },
+      { title: 'The Vault of Frozen Seeds', e: '🌱',
+        p: 'On a remote, frozen island near the North Pole stands one of the most important buildings you have never heard of. Deep inside a mountain of ice and rock lies a vault built to protect the future of food. This seed bank stores millions of seeds from nearly every crop on Earth. The idea is simple but powerful: if a disaster, war, or disease ever wiped out a certain plant, scientists could return here and bring it back from the saved seeds. The freezing Arctic cold keeps the seeds alive for hundreds of years, and thick walls guard them even if the machines fail. In a way, the vault is a promise from today’s world to the people of tomorrow, saying that no matter what happens, the harvest will not be lost.',
+        quiz: [
+          { q: 'What does the vault store?', choices: [ { t: 'gold and jewels', e: '💎' }, { t: 'seeds from crops around the world', e: '🌱' }, { t: 'ancient books', e: '📚' } ], a: 1 },
+          { q: 'What keeps the seeds alive for so long?', choices: [ { t: 'the freezing Arctic cold', e: '❄️' }, { t: 'bright sunlight', e: '☀️' }, { t: 'warm ocean air', e: '🌊' } ], a: 0 },
+          { q: 'Why might scientists need the seeds in the vault?', choices: [ { t: 'to sell them for money', e: '💵' }, { t: 'to plant a garden just for fun', e: '🌷' }, { t: 'to bring back a plant wiped out by disaster', e: '🌱' } ], a: 2 },
+          { q: 'What is the main idea of this passage?', choices: [ { t: 'a frozen vault protects the world’s food for the future', e: '🌍' }, { t: 'the North Pole is very cold', e: '🧊' }, { t: 'seeds are small and round', e: '🌰' } ], a: 0 }
+        ] }
+    ]
+  },
+
   PRAISE: ['Great job', 'You did it', 'Awesome reading', 'Super star', 'Way to go', 'Out of this world', 'Fantastic'],
 
   TIPS: [

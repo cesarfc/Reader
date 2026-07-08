@@ -93,6 +93,13 @@ and the 3rd grader both get fair fights from the same bosses.
 | 🎵 Rhyme Time | Phonemic awareness | Which picture rhymes with the prompt word? |
 | 👀 Sight Words | Instant word recognition | Warm-up flashcards with audio, plus a 45-second Lightning Round. Tricky words are collected for practice. |
 | ⚡ Speed Reader | Fluency | Read words (K–1) or sentences (2nd–5th) out loud against the clock — shows words-per-minute. A grown-up listens along. |
+| 🧭 Analogy Alley | Verbal reasoning (2–5) | Puppy is to dog as kitten is to ___ — eight relationship types, from concrete to abstract. |
+| 🔍 Clue Detective | Vocabulary in context (2–5) | A sentence with a blank: use the context clues to pick the word that truly fits. |
+| 🖍️ Fix It! | Grammar & usage (2–5) | One word in the sentence is wrong ("The dog eated the bone") — find it, then fix it. |
+| 💡 Main Idea Mission | Comprehension (2–5) | Read a mini passage and pick the title that captures the big idea (not the tempting detail). |
+| ⚖️ Fact or Opinion? | Critical reading (2–5) | "Dogs have four legs" vs "Dogs are the best pets" — can you prove it? |
+| 🎭 Homophone Heroes | Usage (2–5) | to/too/two, their/there/they're, weather/whether — pick the right twin for the sentence. |
+| 🤿 Deep Dive | Reading stamina (3–5) | A real 100+ word passage read against the clock, then a 4-question quiz from memory. |
 
 ## Learning at their own pace
 
@@ -117,7 +124,7 @@ and the 3rd grader both get fair fights from the same bosses.
   game can fake it.
 - **Daily quests** — three missions a day with coin/gem rewards, plus Reader
   XP levels (Lv 1–50 with titles) so there's always near-term progress.
-- **Badges** — 36 collectible badges for books, mastery, streaks, bosses,
+- **Badges** — 39 collectible badges for books, mastery, streaks, bosses,
   stories, duels, spelling, riddles, the pet, and the base.
 - **Sticker album** — every 2-star-or-better round opens a sticker pack: 48
   collectible emoji stickers in four packs, with rare ✨shiny✨ versions;

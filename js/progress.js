@@ -187,7 +187,14 @@ RR.progress = (function () {
     { id: 'story16',    e: '🔔', name: 'Galaxy Storyteller', hint: 'Finish Season 2 of the story', test: p => episodesRead(p) >= 16 },
     { id: 'duelist',    e: '⚔️', name: 'Duelist',        hint: 'Win a Sibling Duel',             test: p => (p.duelWins || 0) >= 1 },
     { id: 'rescue10',   e: '🛟', name: 'Word Lifeguard',  hint: 'Play Word Rescue 10 times',      test: p => gamePlays(p, 'rescue') >= 10 },
-    { id: 'spell10',    e: '✏️', name: 'Spelling Star',   hint: 'Play Spell It 10 times',         test: p => gamePlays(p, 'spell') >= 10 }
+    { id: 'spell10',    e: '✏️', name: 'Spelling Star',   hint: 'Play Spell It 10 times',         test: p => gamePlays(p, 'spell') >= 10 },
+    { id: 'silly10',    e: '🤪', name: 'Giggle Guard',   hint: 'Play Silly or Sensible 10 times', test: p => gamePlays(p, 'silly') >= 10 },
+    { id: 'riddle10',   e: '🕵️', name: 'Riddle Cracker', hint: 'Play Riddle Time 10 times',      test: p => gamePlays(p, 'riddle') >= 10 },
+    { id: 'morph10',    e: '🏭', name: 'Factory Boss',   hint: 'Play Word Factory 10 times',     test: p => gamePlays(p, 'morph') >= 10 },
+    { id: 'chains10',   e: '🔗', name: 'Chain Champion', hint: 'Play Word Chains 10 times',      test: p => gamePlays(p, 'chains') >= 10 },
+    { id: 'analogy10',  e: '🧭', name: 'Pattern Master', hint: 'Play Analogy Alley 10 times',    test: p => gamePlays(p, 'analogy') >= 10 },
+    { id: 'fixit10',    e: '🖍️', name: 'Word Editor',    hint: 'Play Fix It 10 times',           test: p => gamePlays(p, 'fixit') >= 10 },
+    { id: 'deepdive5',  e: '🤿', name: 'Deep Diver',     hint: 'Finish 5 Deep Dives',            test: p => gamePlays(p, 'deepdive') >= 5 }
   ];
 
   function badges(p) {
