@@ -33,7 +33,10 @@ anywhere and stores progress on the device.
   boss (damage = your attack + weapon, with ⚡ critical hits for fast answers);
   a wrong answer costs a heart, and the right answer is revealed so it stays a
   learning moment. Beat the boss for a big coin payout and the next stage.
-  Beaten bosses can be rematched for half rewards.
+  Beaten bosses can be rematched for half rewards. Every boss also has a
+  **signature move** (Grump's Coin Grab 🪙, Magma Dragon's Lava Lick 🌋,
+  The Final Word's Force Field 🔵…) it can unleash after landing a hit —
+  stealing a few coins, healing itself, or blocking your next combo.
 - **Power-ups** — a **perfect training round** earns a battle power-up
   (🛡️ Shield blocks the next hit · ⚡ Double doubles the next strike ·
   ⏳ Freeze slows the timer), spendable from a tray during any boss fight —
@@ -42,13 +45,18 @@ anywhere and stores progress on the device.
   🪙 Coin Rain (+25% training coins), 💎 Gem Storm (double boss gems),
   📔 Sticker Fest (every round wins a sticker), or ⚔️ Boss Rush (+50% boss
   coins). A banner on the player screen shows what's on and how long is left.
-- **Story campaign** — *Milo and the Lost Star*: an 8-episode original story
-  (about a boy, a robot co-pilot, and a lost little star) written at an early
-  2nd-grade level. Playing rounds unlocks the next episode, and every episode
-  ends on a cliffhanger. Same tap-a-word help and read-to-me as the books.
+- **Story campaign** — *Milo's Star Stories*, two 8-episode seasons:
+  Season 1 *The Lost Star* (a boy, a robot co-pilot, and a lost little star,
+  ~2nd-grade level) and Season 2 *The Star Bell* (the star river goes quiet
+  and the "song thief" turns out to be a lonely young comet who just needs a
+  friend — slightly harder reading). Playing rounds unlocks the next episode,
+  and every episode ends on a cliffhanger. Same tap-a-word help and
+  read-to-me as the books.
 - **My Base 🚀** — a per-kid rocket interior to decorate: six spots (window,
   poster, gadget shelf, garden, captain seat, rug) with three buyable items
   each. A pure coin sink that turns earnings into something they can show off.
+  The pet buddy lives in the room too — it perches by the captain seat, bobs
+  along at its current growth size, and cheers when new decor arrives.
 - **Pet buddy growth** — the equipped pet now grows with reading
   (Hatchling → Kid → Grown → ✨Star Form) and can be fed with coins for
   happiness and growth. Its mood fades gently after days away, but it never
@@ -67,11 +75,13 @@ and the 3rd grader both get fair fights from the same bosses.
 
 | Game | Skill | How it works |
 |---|---|---|
-| 📚 Story Books | Connected reading | A library of original decodable books per grade. The kid reads out loud, taps any tricky word to hear it, or has a page read aloud. Fewer helps = more stars. |
+| 📚 Story Books | Connected reading & comprehension | A library of original decodable books per grade. The kid reads out loud, taps any tricky word to hear it, or has a page read aloud. Fewer helps = more stars — and a friendly 2-question **quiz** after every book (and story episode) pays bonus coins for remembering what happened. |
 | 🔠 Letter Sounds | Phonics & phonemic awareness | Hear a sound, find the letter — or see a picture and pick its first sound. Digraphs (sh, ch, th…) appear from 1st grade up. |
 | 🧩 Sound It Out | Blending | Tap each sound tile to hear it, blend the sounds in your head, then pick the matching picture. |
 | 🧱 Word Builder | Segmenting & spelling | Hear a word, then build it by tapping sound tiles in order (with decoy tiles to dodge). |
+| ✏️ Spell It | Real spelling | Hear a word, then type it letter by letter on a full on-screen keyboard — with a gentle hint if you get stuck. |
 | 🧠 Memory Match | Word recognition | Flip cards to pair each written word with its picture — matches feed the same mastery tracking as the other games. |
+| 🛟 Word Rescue | Personalized review | A round built from the kid's OWN tricky words (the ones they keep missing) — rescue them back to mastery. The ▶ PLAY button routes here when stuck words pile up. |
 | 📝 Sentence Builder | Syntax & word order | Hear a sentence, then rebuild it from shuffled word tiles. |
 | 🎵 Rhyme Time | Phonemic awareness | Which picture rhymes with the prompt word? |
 | 👀 Sight Words | Instant word recognition | Warm-up flashcards with audio, plus a 45-second Lightning Round. Tricky words are collected for practice. |
@@ -100,8 +110,8 @@ and the 3rd grader both get fair fights from the same bosses.
   game can fake it.
 - **Daily quests** — three missions a day with coin/gem rewards, plus Reader
   XP levels (Lv 1–50 with titles) so there's always near-term progress.
-- **Badges** — 29 collectible badges for books, mastery, streaks, bosses,
-  stories, duels, the pet, and the base.
+- **Badges** — 32 collectible badges for books, mastery, streaks, bosses,
+  stories, duels, spelling, the pet, and the base.
 - **Sticker album** — every 2-star-or-better round opens a sticker pack: 48
   collectible emoji stickers in four packs, with rare ✨shiny✨ versions;
   duplicates convert to coins.
@@ -125,7 +135,11 @@ and the 3rd grader both get fair fights from the same bosses.
   movie night"); everyone's stars count together.
 - **Grown-up corner** (math-gated) — per-kid dashboard: journey breakdown,
   words mastered this week, current trouble words (tap to hear), best WPM,
-  streaks, plus the family goal editor.
+  streaks, plus the family goal editor, the **📖 Book Maker** (write custom
+  books starring your own kids — they appear on every grade's bookshelf with
+  an "⭐ Our book" tag), and **💾 Backup & transfer** (copy a backup code to
+  keep progress safe or move everyone to a new device — custom books ride
+  along inside it).
 
 ## Grade levels
 

@@ -1,0 +1,483 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Reading Rocket — Soft Storybook redesign</title>
+<style>
+@font-face{
+  font-family:'Fredoka';
+  src:url('fonts/Fredoka.woff2') format('woff2');
+  font-weight:300 700; font-display:swap;
+}
+:root{
+  --bg:#FFF7F0; --bg-2:#FBEFE4; --surface:#FFFFFF; --surface-2:#FFF1E6;
+  --hairline:rgba(74,53,43,.06);
+  --ink:#42352B; --ink-soft:#6F5E50; --ink-faint:#A08B79;
+  --coral:#FF9E86; --coral-tint:#FFE7DF; --coral-strong:#D9542F;
+  --teal:#7ED0C1; --teal-tint:#DDF3EE; --teal-strong:#1F8A77;
+  --yellow:#FFCE5C; --yellow-tint:#FFF2D2; --yellow-strong:#B77908;
+  --lav:#B9A8E8; --lav-tint:#ECE6FB; --lav-strong:#6E52C0;
+  --sky:#8FC7F0; --sky-tint:#E3F1FD; --sky-strong:#2C79C0;
+  --rose:#F5A8C4; --rose-tint:#FDE4ED; --rose-strong:#C9497A;
+  --r-sm:12px; --r-md:18px; --r-lg:26px; --r-xl:34px; --r-pill:999px;
+  --sh-sm:0 2px 6px rgba(74,53,43,.06);
+  --sh-md:0 10px 24px rgba(74,53,43,.09);
+  --sh-lg:0 18px 40px rgba(74,53,43,.14);
+  --sh-coral:0 12px 26px rgba(217,84,47,.30);
+  --font:'Fredoka',ui-rounded,'SF Pro Rounded',system-ui,sans-serif;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0}
+body{
+  font-family:var(--font); color:var(--ink); font-weight:500;
+  background:
+    radial-gradient(700px circle at 12% -8%, #FFE7DF, transparent 55%),
+    radial-gradient(700px circle at 92% 4%, #E3F1FD, transparent 55%),
+    #F3E7DA;
+  padding:34px 20px 80px;
+}
+.ico{display:inline-flex;align-items:center;justify-content:center;line-height:0;width:1.15em;height:1.15em;vertical-align:-.22em}
+.ico img{width:100%;height:100%;display:block}
+
+/* ---------- page shell ---------- */
+.pagehead{max-width:1240px;margin:0 auto 8px;text-align:center}
+.pagehead h1{font-size:30px;font-weight:700;margin:0;color:#3A2E24}
+.pagehead p{margin:8px auto 0;max-width:640px;color:#6b5a4c;font-size:15px}
+.legend{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;max-width:900px;margin:20px auto 34px}
+.sw{display:flex;align-items:center;gap:8px;background:#fff;border-radius:var(--r-pill);
+  padding:6px 12px 6px 6px;box-shadow:var(--sh-sm);font-size:12px;font-weight:600;color:#5c4c3f}
+.sw i{width:26px;height:26px;border-radius:50%;display:block}
+
+.frames{display:flex;gap:34px;justify-content:center;align-items:flex-start;flex-wrap:wrap;max-width:1300px;margin:0 auto}
+.demo{width:384px;flex:0 0 auto}
+.demo .cap{display:flex;align-items:center;gap:8px;justify-content:center;margin-bottom:14px}
+.demo .cap b{font-size:15px;font-weight:700;color:#3A2E24}
+.demo .cap span{font-size:12.5px;color:#7a6a5c;font-weight:600}
+
+/* ---------- phone frame ---------- */
+.phone{
+  position:relative; width:384px; height:812px; border-radius:44px; overflow:hidden;
+  background:var(--bg); box-shadow:0 30px 60px rgba(58,40,26,.22),0 0 0 1px rgba(58,40,26,.05);
+}
+.blobs{position:absolute;inset:0;pointer-events:none;
+  background:
+    radial-gradient(420px circle at 88% -6%, var(--coral-tint), transparent 60%),
+    radial-gradient(360px circle at -4% 34%, var(--sky-tint), transparent 60%);
+  opacity:.7}
+.scroll{position:absolute;inset:0;padding:14px 16px 104px;overflow:hidden}
+
+/* ---------- top app bar ---------- */
+.topbar{display:flex;align-items:center;gap:10px;padding:6px 2px 2px}
+.tb-avatar{width:42px;height:42px;border-radius:50%;background:var(--lav-tint);
+  display:flex;align-items:center;justify-content:center;flex:none;box-shadow:var(--sh-sm)}
+.tb-avatar .ico{width:26px;height:26px}
+.tb-id{flex:1;min-width:0}
+.tb-name{font-weight:700;font-size:16px;line-height:1.05}
+.tb-lv{font-size:11.5px;font-weight:700;color:var(--lav-strong)}
+.tb-pills{display:flex;gap:6px;align-items:center}
+.pill{display:inline-flex;align-items:center;gap:4px;background:var(--surface);
+  border-radius:var(--r-pill);padding:5px 10px;font-weight:700;font-size:13px;
+  color:var(--ink);box-shadow:var(--sh-sm)}
+.pill .ico{width:15px;height:15px}
+.pill.coin{background:var(--yellow-tint)} .pill.gem{background:var(--lav-tint)} .pill.star{background:var(--yellow-tint)}
+.gear{width:38px;height:38px;border-radius:50%;background:var(--surface);border:0;flex:none;
+  display:flex;align-items:center;justify-content:center;box-shadow:var(--sh-sm);cursor:pointer}
+.gear .ico{width:20px;height:20px}
+
+/* ---------- greeting ---------- */
+.greet{margin:16px 2px 0}
+.greet .eyebrow{font-size:12px;font-weight:700;letter-spacing:.3px;color:var(--ink-soft);text-transform:uppercase}
+.greet h2{margin:2px 0 0;font-size:27px;font-weight:700;line-height:1.1}
+.xp{margin:12px 2px 0;display:flex;align-items:center;gap:10px}
+.xp .track{flex:1;height:9px;border-radius:var(--r-pill);background:var(--surface-2)}
+.xp .track i{display:block;height:100%;width:64%;border-radius:var(--r-pill);
+  background:linear-gradient(90deg,var(--teal-strong),var(--teal))}
+.xp small{font-size:11.5px;font-weight:700;color:var(--ink-soft)}
+
+/* ---------- event ribbon ---------- */
+.ribbon{display:flex;align-items:center;gap:10px;margin-top:14px;
+  background:var(--lav-tint);border-radius:var(--r-md);padding:11px 12px;box-shadow:var(--sh-sm)}
+.ribbon .ico{width:22px;height:22px;flex:none}
+.ribbon p{margin:0;font-size:13px;font-weight:600;color:var(--ink);flex:1;line-height:1.25}
+.ribbon .days{font-size:11.5px;font-weight:700;color:var(--lav-strong);
+  background:#fff;border-radius:var(--r-pill);padding:4px 9px;flex:none}
+
+/* ---------- PLAY hero ---------- */
+.playbig{margin-top:16px;width:100%;height:96px;border:0;cursor:pointer;color:#fff;
+  border-radius:var(--r-xl);background:linear-gradient(180deg,#FF8A6B,#E4633F);
+  box-shadow:var(--sh-coral);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px}
+.playbig .lab{font-size:29px;font-weight:700;letter-spacing:.5px;display:flex;align-items:center;gap:10px}
+.playbig .lab .ico{width:22px;height:22px}
+.playbig .sub{font-size:13px;font-weight:600;opacity:.92}
+
+/* ---------- 2-up mini cards ---------- */
+.duo{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:14px}
+.mini{background:var(--surface);border-radius:var(--r-lg);padding:13px 14px;box-shadow:var(--sh-md);
+  border:1px solid var(--hairline);cursor:pointer}
+.mini .top{display:flex;align-items:center;justify-content:space-between}
+.mini .top .ico{width:24px;height:24px}
+.mini .top b{font-size:20px;font-weight:700}
+.mini .name{font-size:13px;font-weight:700;margin-top:6px;color:var(--ink)}
+.jtrack{position:relative;height:9px;border-radius:var(--r-pill);background:var(--surface-2);margin-top:9px}
+.jtrack i{display:block;height:100%;width:62%;border-radius:var(--r-pill);
+  background:linear-gradient(90deg,var(--sky-strong),var(--sky))}
+.jtrack .rk{position:absolute;top:50%;left:62%;transform:translate(-50%,-50%);width:18px;height:18px}
+.qdots{display:flex;gap:6px;margin-top:11px}
+.qdot{width:16px;height:16px;border-radius:50%;background:var(--surface-2)}
+.qdot.on{background:var(--coral)}
+
+/* ---------- section label ---------- */
+.eyebrow2{font-size:12px;font-weight:700;letter-spacing:.4px;text-transform:uppercase;
+  color:var(--ink-soft);margin:20px 4px 10px}
+
+/* ---------- continue rows ---------- */
+.row{display:flex;align-items:center;gap:12px;background:var(--surface);border-radius:var(--r-lg);
+  padding:12px;box-shadow:var(--sh-md);border:1px solid var(--hairline);margin-bottom:11px;cursor:pointer}
+.row .cover{width:52px;height:52px;border-radius:16px;flex:none;display:flex;align-items:center;justify-content:center}
+.row .cover .ico{width:32px;height:32px}
+.row .txt{flex:1;min-width:0}
+.row .txt .t{font-size:15.5px;font-weight:700;line-height:1.15}
+.row .txt .m{font-size:12.5px;font-weight:600;color:var(--ink-soft);margin-top:2px;display:flex;align-items:center;gap:5px}
+.row .m .ico{width:14px;height:14px}
+.chip{font-size:10.5px;font-weight:800;letter-spacing:.4px;padding:3px 8px;border-radius:var(--r-pill)}
+.chip.new{background:var(--coral-tint);color:var(--coral-strong)}
+.chip.boss{background:var(--coral-tint);color:var(--coral-strong)}
+.chev{color:var(--ink-faint);font-size:22px;font-weight:700;flex:none;padding-right:2px}
+
+/* ---------- owl tip ---------- */
+.tip{display:flex;gap:10px;align-items:center;margin-top:18px;background:var(--surface);
+  border-radius:var(--r-lg);padding:12px 14px;box-shadow:var(--sh-sm)}
+.tip .ico{width:34px;height:34px;flex:none}
+.tip p{margin:0;font-size:12.5px;font-weight:600;color:var(--ink-soft);line-height:1.3}
+.tip b{color:var(--ink)}
+
+/* ---------- pet peek ---------- */
+.petpeek{position:absolute;right:20px;bottom:96px;width:56px;height:56px;pointer-events:none;
+  filter:drop-shadow(0 4px 4px rgba(58,40,26,.18))}
+.petpeek .ico{width:100%;height:100%}
+
+/* ---------- tab bar ---------- */
+.tabbar{position:absolute;left:14px;right:14px;bottom:14px;height:66px;background:var(--surface);
+  border-radius:var(--r-xl);box-shadow:var(--sh-lg);display:flex;padding:7px 8px;gap:2px}
+.tab{flex:1;border:0;background:none;cursor:pointer;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;gap:3px;border-radius:22px;color:var(--ink-soft)}
+.tab .ico{width:23px;height:23px}
+.tab span{font-size:10.5px;font-weight:700;letter-spacing:.2px}
+.tab.on{background:var(--coral-tint);color:var(--coral-strong);transform:scale(1.03)}
+
+/* ---------- games grid ---------- */
+.gradepick{display:flex;gap:8px;justify-content:center;margin:14px 0 4px;flex-wrap:wrap}
+.gp{border:0;cursor:pointer;font:inherit;font-weight:700;padding:9px 17px;border-radius:var(--r-pill);
+  background:var(--surface);color:var(--ink-soft);box-shadow:var(--sh-sm);font-size:14px}
+.gp.on{background:var(--ink);color:#fff}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px}
+.gcard{background:var(--surface);border-radius:var(--r-lg);padding:15px 10px 13px;box-shadow:var(--sh-md);
+  border:1px solid var(--hairline);display:flex;flex-direction:column;align-items:center;gap:3px;text-align:center;cursor:pointer}
+.gcirc{width:62px;height:62px;border-radius:50%;display:flex;align-items:center;justify-content:center;margin-bottom:4px}
+.gcirc .ico{width:36px;height:36px}
+.gtitle{font-size:15px;font-weight:700;line-height:1.1}
+.gdesc{font-size:11.5px;font-weight:600;color:var(--ink-soft);line-height:1.2}
+.stars{margin-top:3px;font-size:14px;letter-spacing:1px;color:#E4D4C4}
+.stars b{color:var(--yellow)}
+
+/* ---------- stories ---------- */
+.screenhead{display:flex;align-items:center;gap:8px;margin:16px 2px 4px}
+.screenhead h2{margin:0;font-size:22px;font-weight:700;flex:1}
+.screenhead .ico{width:24px;height:24px}
+.seasonhead{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:700;
+  color:var(--lav-strong);background:var(--lav-tint);border-radius:var(--r-pill);
+  padding:6px 12px;margin:16px 2px 10px}
+.seasonhead .ico{width:15px;height:15px}
+.hint{font-size:12.5px;font-weight:600;color:var(--ink-soft);margin:8px 2px 0}
+.ep{display:flex;align-items:center;gap:12px;background:var(--surface);border-radius:var(--r-lg);
+  padding:11px 12px;box-shadow:var(--sh-sm);border:1px solid var(--hairline);margin-bottom:10px;position:relative;cursor:pointer}
+.ep .cover{width:44px;height:44px;border-radius:14px;flex:none;display:flex;align-items:center;justify-content:center;background:var(--lav-tint)}
+.ep .cover .ico{width:27px;height:27px}
+.ep .txt{flex:1;min-width:0}
+.ep .txt .t{font-size:15px;font-weight:700;line-height:1.15}
+.ep .txt .m{font-size:12px;font-weight:600;color:var(--ink-soft);margin-top:2px}
+.ep.new{background:var(--coral-tint);border-color:transparent}
+.ep.new::before{content:"";position:absolute;left:0;top:12px;bottom:12px;width:4px;border-radius:4px;background:var(--coral-strong)}
+.ep.new .cover{background:#fff}
+.ep.read .txt .m{color:var(--teal-strong)}
+.ep.locked{opacity:.55}
+.ep.locked .cover{background:var(--surface-2)}
+.done{color:var(--teal-strong);font-weight:800}
+.libcard{display:flex;align-items:center;gap:12px;background:var(--teal-tint);border-radius:var(--r-lg);
+  padding:13px;box-shadow:var(--sh-sm);margin-top:6px;cursor:pointer}
+.libcard .cover{width:46px;height:46px;border-radius:14px;background:#fff;display:flex;align-items:center;justify-content:center;flex:none}
+.libcard .cover .ico{width:28px;height:28px}
+.libcard .txt .t{font-size:15px;font-weight:700}
+.libcard .txt .m{font-size:12px;font-weight:600;color:var(--ink-soft);margin-top:2px}
+
+.press:active{transform:translateY(1px) scale(.99)}
+</style>
+</head>
+<body>
+
+<div class="pagehead">
+  <h1>Reading Rocket — “Soft Storybook” redesign</h1>
+  <p>Ink outlines and stage-sky repaints retired. Warm cream, pastel accents, soft shadows, big
+     rounded cards, and a floating bottom tab bar. Real font, real content, real OpenMoji art.</p>
+</div>
+
+<div class="legend">
+  <span class="sw"><i style="background:#FFF7F0;box-shadow:inset 0 0 0 1px rgba(0,0,0,.08)"></i>Cream&nbsp;#FFF7F0</span>
+  <span class="sw"><i style="background:#42352B"></i>Ink&nbsp;#42352B</span>
+  <span class="sw"><i style="background:#FF9E86"></i>Coral</span>
+  <span class="sw"><i style="background:#7ED0C1"></i>Teal</span>
+  <span class="sw"><i style="background:#FFCE5C"></i>Yellow</span>
+  <span class="sw"><i style="background:#B9A8E8"></i>Lavender</span>
+  <span class="sw"><i style="background:#8FC7F0"></i>Sky</span>
+  <span class="sw"><i style="background:#F5A8C4"></i>Rose</span>
+</div>
+
+<div class="frames">
+
+  <!-- ============ FRAME A: HOME ============ -->
+  <div class="demo">
+    <div class="cap"><b>Home</b><span>· dashboard + tab bar</span></div>
+    <div class="phone">
+      <div class="blobs"></div>
+      <div class="scroll">
+
+        <div class="topbar">
+          <div class="tb-avatar"><span class="ico" data-cp="1F9B8"></span></div>
+          <div class="tb-id">
+            <div class="tb-name">Big Reader</div>
+            <div class="tb-lv">Level 8 · Word Wizard</div>
+          </div>
+          <div class="tb-pills">
+            <span class="pill coin"><span class="ico" data-cp="1FA99"></span>631</span>
+            <span class="pill gem"><span class="ico" data-cp="1F48E"></span>52</span>
+          </div>
+          <button class="gear"><span class="ico" data-cp="2699"></span></button>
+        </div>
+
+        <div class="greet">
+          <div class="eyebrow">Wednesday · ready to read</div>
+          <h2>Hi, Big Reader! <span style="font-size:24px">👋</span></h2>
+        </div>
+        <div class="xp">
+          <div class="track"><i></i></div>
+          <small>Lv 8 · 640 XP to Lv 9</small>
+        </div>
+
+        <div class="ribbon">
+          <span class="ico" data-cp="1F48E"></span>
+          <p><b>Gem Storm week</b> — bosses pay double gems!</p>
+          <span class="days">6d</span>
+        </div>
+
+        <button class="playbig press">
+          <span class="lab"><span class="ico" data-cp="25B6"></span>PLAY</span>
+          <span class="sub">Continue where you left off</span>
+        </button>
+
+        <div class="duo">
+          <div class="mini press">
+            <div class="top"><span class="ico" data-cp="1F319"></span><b>62%</b></div>
+            <div class="name">Journey to the Moon</div>
+            <div class="jtrack"><i></i><span class="ico rk" data-cp="1F680"></span></div>
+          </div>
+          <div class="mini press">
+            <div class="top"><span class="ico" data-cp="1F3AF"></span><b>1/3</b></div>
+            <div class="name">Today’s Quests</div>
+            <div class="qdots"><i class="qdot on"></i><i class="qdot"></i><i class="qdot"></i></div>
+          </div>
+        </div>
+
+        <div class="eyebrow2">Keep going</div>
+
+        <div class="row press">
+          <div class="cover" style="background:var(--lav-tint)"><span class="ico" data-cp="1F320"></span></div>
+          <div class="txt">
+            <div class="t">Milo’s Star Stories</div>
+            <div class="m">Episode 5 · The Shadow Ship</div>
+          </div>
+          <span class="chip new">NEW</span>
+          <span class="chev">›</span>
+        </div>
+
+        <div class="row press">
+          <div class="cover" style="background:var(--coral-tint)"><span class="ico" data-cp="1F30B"></span></div>
+          <div class="txt">
+            <div class="t">Stage 4 · Lava Mountain</div>
+            <div class="m">Boss ready — Magma Dragon <span class="ico" data-cp="1F409"></span></div>
+          </div>
+          <span class="chip boss">FIGHT</span>
+          <span class="chev">›</span>
+        </div>
+
+        <div class="tip">
+          <span class="ico" data-cp="1F989"></span>
+          <p><b>Grown-up tip:</b> let them tap any tricky word to hear it — sounding out beats guessing.</p>
+        </div>
+
+      </div>
+
+      <div class="petpeek"><span class="ico" data-cp="1F436"></span></div>
+
+      <div class="tabbar">
+        <button class="tab on"><span class="ico" data-cp="1F3E0"></span><span>Home</span></button>
+        <button class="tab"><span class="ico" data-cp="1F3AE"></span><span>Play</span></button>
+        <button class="tab"><span class="ico" data-cp="1F4D6"></span><span>Read</span></button>
+        <button class="tab"><span class="ico" data-cp="1F5FA"></span><span>Adventure</span></button>
+        <button class="tab"><span class="ico" data-cp="1F9D1-200D-1F680"></span><span>Me</span></button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ FRAME B: STORIES ============ -->
+  <div class="demo">
+    <div class="cap"><b>Read</b><span>· campaign episodes + library</span></div>
+    <div class="phone">
+      <div class="blobs"></div>
+      <div class="scroll">
+
+        <div class="topbar">
+          <div class="tb-avatar"><span class="ico" data-cp="1F9B8"></span></div>
+          <div class="tb-id">
+            <div class="tb-name">Big Reader</div>
+            <div class="tb-lv">Level 8 · Word Wizard</div>
+          </div>
+          <div class="tb-pills">
+            <span class="pill coin"><span class="ico" data-cp="1FA99"></span>631</span>
+            <span class="pill gem"><span class="ico" data-cp="1F48E"></span>52</span>
+          </div>
+          <button class="gear"><span class="ico" data-cp="2699"></span></button>
+        </div>
+
+        <div class="screenhead">
+          <span class="ico" data-cp="1F320"></span>
+          <h2>Milo’s Star Stories</h2>
+          <span class="pill" style="background:var(--yellow-tint)"><span class="done">5</span>/16</span>
+        </div>
+        <p class="hint">Every round you play unlocks more of the story.</p>
+
+        <div class="seasonhead"><span class="ico" data-cp="1F320"></span>Season 1 · The Lost Star</div>
+
+        <div class="ep read press">
+          <div class="cover"><span class="ico" data-cp="1F320"></span></div>
+          <div class="txt"><div class="t">Ep 1 · The Falling Star</div><div class="m">✓ Read — read it again!</div></div>
+        </div>
+        <div class="ep read press">
+          <div class="cover"><span class="ico" data-cp="1F5FA"></span></div>
+          <div class="txt"><div class="t">Ep 2 · The Star Map</div><div class="m">✓ Read — read it again!</div></div>
+        </div>
+        <div class="ep read press">
+          <div class="cover"><span class="ico" data-cp="1F680"></span></div>
+          <div class="txt"><div class="t">Ep 3 · The Shed Secret</div><div class="m">✓ Read — read it again!</div></div>
+        </div>
+        <div class="ep read press">
+          <div class="cover"><span class="ico" data-cp="1F33B"></span></div>
+          <div class="txt"><div class="t">Ep 4 · Moon-Flower Fuel</div><div class="m">✓ Read — read it again!</div></div>
+        </div>
+        <div class="ep new press">
+          <div class="cover"><span class="ico" data-cp="1F6F8"></span></div>
+          <div class="txt"><div class="t">Ep 5 · The Shadow Ship</div><div class="m" style="color:var(--coral-strong)">✨ NEW — tap to read!</div></div>
+          <span class="chip new">NEW</span>
+        </div>
+        <div class="ep locked">
+          <div class="cover"><span class="ico" data-cp="1F512"></span></div>
+          <div class="txt"><div class="t">Ep 6 · ???</div><div class="m">Play 3 more rounds to unlock</div></div>
+        </div>
+
+        <div class="seasonhead"><span class="ico" data-cp="1F514"></span>Season 2 · The Star Bell</div>
+        <div class="ep locked">
+          <div class="cover"><span class="ico" data-cp="1F512"></span></div>
+          <div class="txt"><div class="t">Ep 9 · ???</div><div class="m">Finish Season 1 to begin</div></div>
+        </div>
+
+        <div class="eyebrow2">Story Books library</div>
+        <div class="libcard press">
+          <div class="cover"><span class="ico" data-cp="1F4DA"></span></div>
+          <div class="txt">
+            <div class="t">Grade 3 bookshelf</div>
+            <div class="m">The Dragon Who Could Not Roar · +5 more</div>
+          </div>
+          <span class="chev" style="margin-left:auto">›</span>
+        </div>
+
+      </div>
+
+      <div class="tabbar">
+        <button class="tab"><span class="ico" data-cp="1F3E0"></span><span>Home</span></button>
+        <button class="tab"><span class="ico" data-cp="1F3AE"></span><span>Play</span></button>
+        <button class="tab on"><span class="ico" data-cp="1F4D6"></span><span>Read</span></button>
+        <button class="tab"><span class="ico" data-cp="1F5FA"></span><span>Adventure</span></button>
+        <button class="tab"><span class="ico" data-cp="1F9D1-200D-1F680"></span><span>Me</span></button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ FRAME C: GAMES ============ -->
+  <div class="demo">
+    <div class="cap"><b>Play</b><span>· Training Grounds grid</span></div>
+    <div class="phone">
+      <div class="blobs"></div>
+      <div class="scroll">
+
+        <div class="topbar">
+          <div class="tb-avatar"><span class="ico" data-cp="1F9B8"></span></div>
+          <div class="tb-id">
+            <div class="tb-name">Big Reader</div>
+            <div class="tb-lv">Level 8 · Word Wizard</div>
+          </div>
+          <div class="tb-pills">
+            <span class="pill coin"><span class="ico" data-cp="1FA99"></span>631</span>
+            <span class="pill gem"><span class="ico" data-cp="1F48E"></span>52</span>
+          </div>
+          <button class="gear"><span class="ico" data-cp="2699"></span></button>
+        </div>
+
+        <div class="screenhead">
+          <span class="ico" data-cp="1F3AE"></span>
+          <h2>Training Grounds</h2>
+        </div>
+        <p class="hint">Every round earns <span class="ico" data-cp="1FA99" style="width:14px;height:14px"></span> coins.</p>
+
+        <div class="gradepick">
+          <button class="gp">K</button><button class="gp">1st</button><button class="gp">2nd</button>
+          <button class="gp on">3rd</button><button class="gp">4th</button><button class="gp">5th</button>
+        </div>
+
+        <div class="grid">
+          <div class="gcard press"><div class="gcirc" style="background:var(--coral-tint)"><span class="ico" data-cp="1F4DA"></span></div><div class="gtitle">Story Books</div><div class="gdesc">Read a real book!</div><div class="stars"><b>★</b><b>★</b><b>★</b></div></div>
+          <div class="gcard press"><div class="gcirc" style="background:var(--teal-tint)"><span class="ico" data-cp="1F520"></span></div><div class="gtitle">Letter Sounds</div><div class="gdesc">Hear a sound, find its letter</div><div class="stars"><b>★</b><b>★</b>★</div></div>
+          <div class="gcard press"><div class="gcirc" style="background:var(--yellow-tint)"><span class="ico" data-cp="1F9E9"></span></div><div class="gtitle">Sound It Out</div><div class="gdesc">Blend the sounds, pick the picture</div><div class="stars"><b>★</b><b>★</b><b>★</b></div></div>
+          <div class="gcard press"><div class="gcirc" style="background:var(--lav-tint)"><span class="ico" data-cp="1F9F1"></span></div><div class="gtitle">Word Builder</div><div class="gdesc">Build the word from sound tiles</div><div class="stars">★★★</div></div>
+          <div class="gcard press"><div class="gcirc" style="background:var(--sky-tint)"><span class="ico" data-cp="270F"></span></div><div class="gtitle">Spell It</div><div class="gdesc">Type the word you hear</div><div class="stars"><b>★</b><b>★</b>★</div></div>
+          <div class="gcard press"><div class="gcirc" style="background:var(--rose-tint)"><span class="ico" data-cp="1F9E0"></span></div><div class="gtitle">Memory Match</div><div class="gdesc">Flip and match word to picture</div><div class="stars"><b>★</b><b>★</b><b>★</b></div></div>
+          <div class="gcard press"><div class="gcirc" style="background:var(--coral-tint)"><span class="ico" data-cp="1F4DD"></span></div><div class="gtitle">Sentence Builder</div><div class="gdesc">Put the words in order</div><div class="stars">★★★</div></div>
+          <div class="gcard press"><div class="gcirc" style="background:var(--teal-tint)"><span class="ico" data-cp="1F6DF"></span></div><div class="gtitle">Word Rescue</div><div class="gdesc">Save your tricky words!</div><div class="stars"><b>★</b><b>★</b><b>★</b></div></div>
+          <div class="gcard press"><div class="gcirc" style="background:var(--yellow-tint)"><span class="ico" data-cp="1F3B5"></span></div><div class="gtitle">Rhyme Time</div><div class="gdesc">Find the word that rhymes</div><div class="stars"><b>★</b><b>★</b>★</div></div>
+          <div class="gcard press"><div class="gcirc" style="background:var(--lav-tint)"><span class="ico" data-cp="1F440"></span></div><div class="gtitle">Sight Words</div><div class="gdesc">Know them in a snap</div><div class="stars"><b>★</b><b>★</b><b>★</b></div></div>
+          <div class="gcard press"><div class="gcirc" style="background:var(--sky-tint)"><span class="ico" data-cp="26A1"></span></div><div class="gtitle">Speed Reader</div><div class="gdesc">Read out loud, beat the clock</div><div class="stars"><b>★</b><b>★</b><b>★</b></div></div>
+        </div>
+
+      </div>
+
+      <div class="tabbar">
+        <button class="tab"><span class="ico" data-cp="1F3E0"></span><span>Home</span></button>
+        <button class="tab on"><span class="ico" data-cp="1F3AE"></span><span>Play</span></button>
+        <button class="tab"><span class="ico" data-cp="1F4D6"></span><span>Read</span></button>
+        <button class="tab"><span class="ico" data-cp="1F5FA"></span><span>Adventure</span></button>
+        <button class="tab"><span class="ico" data-cp="1F9D1-200D-1F680"></span><span>Me</span></button>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  var CP='img/openmoji/';
+  document.querySelectorAll('.ico[data-cp]').forEach(function(el){
+    var img=document.createElement('img');
+    img.src=CP+el.dataset.cp+'.svg'; img.alt=''; img.draggable=false;
+    el.appendChild(img);
+  });
+</script>
+</body>
+</html>

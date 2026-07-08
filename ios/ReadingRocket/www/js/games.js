@@ -10,6 +10,7 @@ window.RR = window.RR || {};
 (function () {
   const D = RR.DATA;
   const A = RR.audio;
+  const S = RR.state; /* state.js loads before games.js (see index.html) */
 
   /* ---------- helpers ---------- */
   function shuffle(arr) {
@@ -1090,26 +1091,142 @@ window.RR = window.RR || {};
       const prev = container.querySelector('[data-act="prev"]');
       if (!prev.disabled) prev.addEventListener('click', () => { page--; A.sfx.page(); show(); });
       container.querySelector('[data-act="next"]').addEventListener('click', () => {
-        if (last) { finish(); return; }
+        if (last) {
+          /* Books/episodes with a recall quiz go through it first; ones
+             without a quiz field finish exactly as before. */
+          if (Array.isArray(book.quiz) && book.quiz.length) { startQuiz(); return; }
+          finish();
+          return;
+        }
         page++;
         A.sfx.page();
         show();
       });
     }
 
-    function finish() {
-      A.stop();
-      if (RR.voice) RR.voice.stop();
+    /* Base reward from the decoding read — stars are earned here and are
+       NEVER changed by the quiz. */
+    function computeResult() {
       const helpScore = wordTaps + 4 * pageReads;
       const stars = helpScore <= 4 ? 3 : helpScore <= 12 ? 2 : 1;
-      opts.onFinish({
+      return {
         stars,
         coins: book.pages.length * 4 + stars * 5,
         line1: `You read “${book.title}” — ${book.pages.length} pages, ${totalWords} words!`,
         line2: stars === 3 ? 'All by yourself — amazing!'
              : stars === 2 ? 'Great reading!'
              : 'Great practice — read it again soon!'
-      });
+      };
+    }
+
+    function finish() {
+      A.stop();
+      if (RR.voice) RR.voice.stop();
+      opts.onFinish(computeResult());
+    }
+
+    /* =========================================================
+       Comprehension quiz — 2 recall questions after the reading.
+       Bonus-only: right answers add coins + a proud line; a wrong
+       answer just shows the right one kindly. Stars never drop.
+       ========================================================= */
+    function startQuiz() {
+      A.stop();
+      if (RR.voice) RR.voice.stop();
+      const quiz = book.quiz;
+      let qi = 0;
+      let quizCorrect = 0;
+      let quizLive = true;
+
+      /* Speak a line, then advance once it's been heard — mirrors
+         speakAdvance, but inline since we're outside a roundShell. */
+      function speakThenAdvance(text) {
+        let done = false;
+        const go = () => {
+          if (done || !quizLive) return;
+          done = true;
+          setTimeout(() => { if (quizLive) { qi++; showQuestion(); } }, 350);
+        };
+        A.speak(text, { rate: 0.9, onend: go });
+        setTimeout(go, 8000);
+      }
+
+      function showQuestion() {
+        if (!quizLive) return;
+        if (qi >= quiz.length) { finishWithQuiz(); return; }
+        const q = quiz[qi];
+        container.innerHTML = `
+          <header class="gamebar">
+            <button class="iconbtn" data-act="back" aria-label="Back">←</button>
+            <div class="gametitle">${book.title}</div>
+            <div class="dots">${quiz.map((_, i) =>
+              `<span class="dot ${i < qi ? 'on' : i === qi ? 'now' : ''}"></span>`).join('')}</div>
+          </header>
+          <div class="quizhead">🤔 Quiz time! What do you remember?</div>
+          <div class="prompt">
+            <button class="speaker" data-act="replay" aria-label="Hear the question">🔊</button>
+            <h2>${q.q}</h2>
+          </div>
+          <div class="choices pics">
+            ${q.choices.map((c, i) => `
+              <button class="choice pic labeled" data-i="${i}">
+                <span class="pemoji">${c.e}</span>
+                <span class="plabel">${c.t}</span>
+              </button>`).join('')}
+          </div>`;
+
+        const say = () => A.speak(q.q, { rate: 0.9 });
+        container.querySelector('[data-act="replay"]').addEventListener('click', say);
+        container.querySelector('[data-act="back"]').addEventListener('click', () => {
+          quizLive = false;
+          A.stop();
+          if (RR.voice) RR.voice.stop();
+          opts.onBack();
+        });
+        setTimeout(() => { if (quizLive) say(); }, 350);
+
+        let answered = false;
+        container.querySelectorAll('.choice').forEach(btn => {
+          btn.addEventListener('click', () => {
+            if (answered) return;
+            answered = true;
+            container.querySelectorAll('.choice').forEach(x => x.disabled = true);
+            const right = q.choices[q.a].t;
+            if (+btn.dataset.i === q.a) {
+              btn.classList.add('correct');
+              A.sfx.ding();
+              haptic(true);
+              quizCorrect++;
+              speakThenAdvance(`That's right! ${right}.`);
+            } else {
+              btn.classList.add('wrong');
+              const rb = container.querySelector(`.choice[data-i="${q.a}"]`);
+              if (rb) rb.classList.add('correct');
+              A.sfx.buzz();
+              haptic(false);
+              speakThenAdvance(`Good try! It was ${right}.`);
+            }
+          });
+        });
+      }
+
+      function finishWithQuiz() {
+        A.stop();
+        if (RR.voice) RR.voice.stop();
+        const total = quiz.length;
+        const result = computeResult();
+        result.coins += 4 * quizCorrect;
+        result.quiz = { correct: quizCorrect, total };
+        const qline = quizCorrect === total
+          ? `🤔 Quiz: ${quizCorrect}/${total} — you remembered everything!`
+          : quizCorrect === 0
+            ? '🤔 Quiz done — read it again and try the quiz next time!'
+            : `🤔 Quiz: ${quizCorrect}/${total} — good remembering!`;
+        result.line2 = result.line2 ? `${result.line2} ${qline}` : qline;
+        opts.onFinish(result);
+      }
+
+      showQuestion();
     }
 
     show();
@@ -1124,7 +1241,9 @@ window.RR = window.RR || {};
     icon: '📚',
     desc: 'Read a real book!',
     start(container, ctx) {
-      const books = D.BOOKS[ctx.grade] || [];
+      /* built-in grade books + parent-authored family books (shown on every
+         grade's shelf). Custom ids flow through stats['book-'+id] unchanged. */
+      const books = (D.BOOKS[ctx.grade] || []).concat(S.customBooks());
 
       function library() {
         A.stop();
@@ -1140,7 +1259,7 @@ window.RR = window.RR || {};
                 <button class="bookcard" data-i="${i}">
                   <span class="bookcover">${b.cover}</span>
                   <span class="booktitle">${b.title}</span>
-                  <span class="bookmeta">${b.pages.length} pages${st ? ` · ✓ read ${st.reads}×` : ''}</span>
+                  <span class="bookmeta">${b.pages.length} pages${st ? ` · ✓ read ${st.reads}×` : ''}${b.custom ? ' · ⭐ Our book' : ''}</span>
                 </button>`;
             }).join('')}
           </div>
@@ -1166,19 +1285,286 @@ window.RR = window.RR || {};
     }
   };
 
+  /* =========================================================
+     GAME — Word Rescue (personalized review)
+     A short round that targets the kid's OWN stuck words: hear a
+     tricky word, pick how it's written, and "rescue" it. Falls
+     back to least-mastered grade words when nothing is stuck.
+     ========================================================= */
+  const RESCUE_TOTAL = 6;
+  const RESCUE_GRADES = ['K', '1', '2', '3', '4', '5'];
+
+  const rescueGame = {
+    title: 'Word Rescue',
+    icon: '🛟',
+    desc: 'Save your tricky words!',
+    start(container, ctx) {
+      /* Resolve a stuck mastery key back to something we can quiz. A word
+         may have been learned in another grade, so we search every grade;
+         a sight word only needs its string and its home grade (for choices). */
+      const findWord = word => {
+        for (const g of RESCUE_GRADES) {
+          const hit = (D.WORDS[g] || []).find(w => w.w === word);
+          if (hit) return { kind: 'word', word: hit, grade: g };
+        }
+        return null;
+      };
+      const findSight = word => {
+        for (const g of RESCUE_GRADES) {
+          if ((D.SIGHT[g] || []).includes(word)) return { kind: 'sight', word, grade: g };
+        }
+        return null;
+      };
+
+      const mastery = ctx.profile.mastery || {};
+      const MASTER_AT = RR.progress.MASTER_AT;
+      const used = new Set();
+      const items = [];
+      /* worst-missed first, drop keys that no longer resolve */
+      Object.entries(mastery)
+        .filter(([k, r]) => r.w >= 2 && r.c < MASTER_AT && (k.startsWith('w:') || k.startsWith('s:')))
+        .sort((a, b) => b[1].w - a[1].w)
+        .forEach(([k]) => {
+          const resolved = k.startsWith('w:') ? findWord(k.slice(2)) : findSight(k.slice(2));
+          if (resolved && !used.has(k)) { used.add(k); items.push(resolved); }
+        });
+
+      const troubleCount = items.length;
+      /* top up with least-mastered words from this grade (smartSample weights
+         struggled/unseen words to the front) */
+      if (items.length < RESCUE_TOTAL) {
+        const gradeWords = D.WORDS[ctx.grade] || [];
+        smartSample(ctx.profile, gradeWords, gradeWords.length, w => 'w:' + w.w)
+          .filter(w => !used.has('w:' + w.w))
+          .slice(0, RESCUE_TOTAL - items.length)
+          .forEach(w => { used.add('w:' + w.w); items.push({ kind: 'word', word: w, grade: ctx.grade }); });
+      }
+
+      const round = shuffle(items).slice(0, RESCUE_TOTAL);
+      const total = round.length || 1;
+      const hadTrouble = troubleCount > 0;
+
+      const shell = roundShell(container, ctx, 'Word Rescue', total);
+      let qi = 0;
+      let firstTryCount = 0;
+      let comboBonus = 0;
+      const outcomes = [];
+
+      introCard(shell, {
+        emoji: '🛟',
+        title: 'Word Rescue',
+        lines: hadTrouble
+          ? ['Some words got stuck — let’s save them!', 'Hear the word, then tap how it’s written.']
+          : ['No stuck words right now! 🎉', 'Let’s practice so they stick even harder.'],
+        buttonText: '🛟 Start the rescue!',
+        onStart: next
+      });
+
+      function next() {
+        if (!shell.live) return;
+        if (qi >= total) {
+          shell.die();
+          const line1 = hadTrouble
+            ? `You rescued ${firstTryCount} of ${total} words!`
+            : 'No stuck words — practice makes them stick even harder!';
+          const r = quizResult(firstTryCount, total, line1, comboBonus);
+          r.outcomes = outcomes;
+          ctx.finish(r);
+          return;
+        }
+        shell.nowDot(qi);
+        ask(round[qi]);
+      }
+
+      function ask(item) {
+        const dc = diffChoices(ctx);
+        let firstTry = true;
+        let answered = false;
+        let choices, correct, sayWord, outKey, picHtml, labelOf;
+        if (item.kind === 'word') {
+          correct = item.word;
+          sayWord = item.word.w;
+          outKey = 'w:' + item.word.w;
+          choices = withDistractors(item.word, D.WORDS[item.grade], dc.n, x => x.w, dc.hard ? wordSim : null);
+          labelOf = c => c.w;
+          picHtml = `<button class="bigpic" data-act="replay" aria-label="${item.word.w}">${item.word.e}</button>`;
+        } else {
+          correct = item.word;
+          sayWord = item.word;
+          outKey = 's:' + item.word;
+          choices = withDistractors(item.word, D.SIGHT[item.grade], dc.n, x => x, null);
+          labelOf = c => c;
+          picHtml = `<button class="speaker" data-act="replay" aria-label="Hear the word">🔊</button>`;
+        }
+
+        shell.area.innerHTML = `
+          <div class="prompt">
+            ${picHtml}
+            <h2>Which word did you hear?</h2>
+          </div>
+          <div class="choices words">
+            ${choices.map((c, i) => `<button class="choice wordpick" data-i="${i}">${labelOf(c)}</button>`).join('')}
+          </div>`;
+
+        const say = () => A.speak(sayWord, { rate: 0.85 });
+        shell.area.querySelector('[data-act="replay"]').addEventListener('click', say);
+        shell.after(350, say);
+
+        shell.area.querySelectorAll('.choice').forEach(btn => {
+          btn.addEventListener('click', () => {
+            if (answered) return;
+            const c = choices[+btn.dataset.i];
+            if (c === correct) {
+              answered = true;
+              btn.classList.add('correct');
+              shell.area.querySelectorAll('.choice').forEach(x => x.disabled = true);
+              A.sfx.ding();
+              haptic(true);
+              if (firstTry) { firstTryCount++; comboBonus += comboHit(shell); }
+              outcomes.push({ k: outKey, ok: firstTry });
+              shell.markDot(qi);
+              const f = document.createElement('div');
+              f.className = 'rescuefloat';
+              f.textContent = '🛟 ' + sayWord;
+              shell.area.appendChild(f);
+              shell.after(1100, () => f.remove());
+              qi++;
+              speakAdvance(shell, `You saved ${sayWord}!`, next, { rate: 0.9 });
+            } else {
+              firstTry = false;
+              comboMiss(shell);
+              btn.classList.add('wrong');
+              A.sfx.buzz();
+              haptic(false);
+            }
+          });
+        });
+      }
+    }
+  };
+
+  /* =========================================================
+     GAME — Spell It (real spelling on a full keyboard)
+     Hear the word, then tap letters on an A–Z keyboard to spell
+     it. Harder than Word Builder's tiles. A gentle hint appears
+     after two misses on the same slot so nobody gets stuck.
+     ========================================================= */
+  const SPELL_TOTAL = 6;
+  const SPELL_ROWS = ['qwertyuiop', 'asdfghjkl', 'zxcvbnm'];
+
+  const spellGame = {
+    title: 'Spell It',
+    icon: '✏️',
+    desc: 'Type the word you hear',
+    start(container, ctx) {
+      const shell = roundShell(container, ctx, 'Spell It', SPELL_TOTAL);
+      const words = D.WORDS[ctx.grade];
+      const round = smartSample(ctx.profile, words, SPELL_TOTAL, w => 'w:' + w.w);
+      let qi = 0;
+      let firstTryCount = 0;
+      let comboBonus = 0;
+      const outcomes = [];
+
+      function next() {
+        if (!shell.live) return;
+        if (qi >= SPELL_TOTAL) {
+          shell.die();
+          const r = quizResult(firstTryCount, SPELL_TOTAL, `${firstTryCount} of ${SPELL_TOTAL} spelled without a slip!`, comboBonus);
+          r.outcomes = outcomes;
+          ctx.finish(r);
+          return;
+        }
+        shell.nowDot(qi);
+        ask(round[qi]);
+      }
+
+      function ask(target) {
+        const letters = target.w.split('');
+        let pos = 0;
+        let firstTry = true;
+        let wrongHere = 0; /* consecutive wrong presses at the current slot */
+
+        shell.area.innerHTML = `
+          <div class="prompt">
+            <button class="bigpic" data-act="replay" aria-label="${target.w}">${target.e}</button>
+            <h2>Spell the word!</h2>
+            <div class="slots spell">
+              ${letters.map(() => `<div class="slot spellslot"></div>`).join('')}
+            </div>
+          </div>
+          <div class="spellkeys">
+            ${SPELL_ROWS.map(row => `<div class="skrow">${row.split('').map(ch =>
+              `<button class="skey" data-k="${ch}">${ch}</button>`).join('')}</div>`).join('')}
+          </div>`;
+
+        const slots = shell.area.querySelectorAll('.slot');
+        const keys = shell.area.querySelectorAll('.skey');
+        const keyFor = ch => shell.area.querySelector(`.skey[data-k="${ch}"]`);
+
+        const say = () => A.speak(target.w, { rate: 0.8 });
+        shell.area.querySelector('[data-act="replay"]').addEventListener('click', say);
+        shell.after(350, say);
+
+        keys.forEach(key => {
+          key.addEventListener('click', () => {
+            if (pos >= letters.length) return;
+            const ch = key.dataset.k;
+            if (ch === letters[pos]) {
+              A.sfx.pop();
+              slots[pos].textContent = ch;
+              slots[pos].classList.add('filled');
+              key.classList.add('flash');
+              shell.after(220, () => key.classList.remove('flash'));
+              keys.forEach(k => k.classList.remove('hint'));
+              wrongHere = 0;
+              pos++;
+              if (pos === letters.length) {
+                if (firstTry) { firstTryCount++; comboBonus += comboHit(shell); }
+                outcomes.push({ k: 'w:' + target.w, ok: firstTry });
+                shell.markDot(qi);
+                slots.forEach(s => s.classList.add('done'));
+                keys.forEach(k => k.disabled = true);
+                A.sfx.star();
+                haptic(true);
+                qi++;
+                shell.after(420, () => speakAdvance(shell, letters.join(' ') + ' spells ' + target.w + '!', next, { rate: 0.85 }));
+              }
+            } else {
+              firstTry = false;
+              comboMiss(shell);
+              wrongHere++;
+              A.sfx.buzz();
+              haptic(false);
+              key.classList.add('wrongkey');
+              shell.after(450, () => key.classList.remove('wrongkey'));
+              if (wrongHere >= 2) {
+                const hk = keyFor(letters[pos]);
+                if (hk) hk.classList.add('hint');
+              }
+            }
+          });
+        });
+      }
+
+      next();
+    }
+  };
+
   RR.games = {
     books: booksGame,
     sounds: soundsGame,
     blend: blendGame,
     build: buildGame,
+    spell: spellGame,
     memory: memoryGame,
     sentence: sentenceGame,
+    rescue: rescueGame,
     rhyme: rhymeGame,
     flash: flashGame,
     sight: sightGame
   };
 
-  RR.gameOrder = ['books', 'sounds', 'blend', 'build', 'memory', 'sentence', 'rhyme', 'sight', 'flash'];
+  RR.gameOrder = ['books', 'sounds', 'blend', 'build', 'spell', 'memory', 'sentence', 'rescue', 'rhyme', 'sight', 'flash'];
 
   /* Shared helpers for the adventure module. */
   RR.util = { shuffle, sample, smartSample, withDistractors, el, rimeOf, rhymePoolFor, wordSim, letterSim, haptic, bookReader };

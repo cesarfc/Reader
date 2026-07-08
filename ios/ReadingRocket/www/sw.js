@@ -4,7 +4,7 @@
    voice code). Network-first means every online load gets fresh, consistent
    files; the cache only steps in when offline. */
 
-const CACHE = 'reading-rocket-v14';
+const CACHE = 'reading-rocket-v16';
 const CORE = [
   './',
   'index.html',
@@ -26,7 +26,7 @@ const CORE = [
   'manifest.webmanifest',
   'icons/icon.svg'
 ];
-const OPTIONAL = ['icons/icon-192.png', 'icons/icon-512.png', 'icons/apple-touch-icon.png', 'fonts/Fredoka.woff2'];
+const OPTIONAL = ['icons/icon-192.png', 'icons/icon-512.png', 'icons/apple-touch-icon.png', 'fonts/Baloo2.woff2'];
 
 /* Best-effort precache of the OpenMoji art referenced by imgmap.js, so the
    illustrated emoji work offline from the very first install. The map is

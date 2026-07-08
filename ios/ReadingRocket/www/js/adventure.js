@@ -47,6 +47,7 @@ RR.nav = RR.nav || {};
   function renderShop(tab = 'weapon') {
     const p = S.current();
     if (!p) { RR.nav.home(); return; }
+    if (RR.ui) RR.ui.hideTabs();
     const items = tab === 'gem'
       ? D.SHOP.filter(i => i.gems)
       : D.SHOP.filter(i => i.slot === tab && !i.gems);
@@ -81,7 +82,7 @@ RR.nav = RR.nav || {};
           : 'Earn coins by playing training games and beating bosses!'}</p>
       </section>`;
 
-    app.querySelector('[data-act="back"]').addEventListener('click', () => RR.nav.player());
+    app.querySelector('[data-act="back"]').addEventListener('click', () => RR.nav.me());
     app.querySelectorAll('.shoptab').forEach(b =>
       b.addEventListener('click', () => { A.sfx.pop(); renderShop(b.dataset.tab); }));
     app.querySelectorAll('.shopbtn').forEach(b =>
@@ -111,12 +112,12 @@ RR.nav = RR.nav || {};
   function renderMap() {
     const p = S.current();
     if (!p) { RR.nav.home(); return; }
+    if (RR.ui) RR.ui.showTabs('adventure');
     app.innerHTML = `
       <section class="screen">
+        ${RR.ui ? RR.ui.appBar(p) : ''}
         <header class="gamebar">
-          <button class="iconbtn" data-act="back" aria-label="Back">←</button>
-          <div class="gametitle">Adventure Map</div>
-          ${coinPill(p)}
+          <div class="gametitle">🗺️ Adventure Map</div>
         </header>
         ${isChampion(p) ? `
           <div class="champbanner">🏆 GALAXY CHAMPION! 🏆<br><small>You beat every boss! Rematch any of them below.</small></div>` : ''}
@@ -148,9 +149,17 @@ RR.nav = RR.nav || {};
               </div>`;
           }).join('')}
         </div>
+        ${S.profiles.length >= 2 ? `
+          <button class="gorow" data-act="duel">
+            <span class="goicon yellow">⚔️</span>
+            <span class="goinfo"><b>Sibling Duel</b><small>Reader vs reader — fair questions for each!</small></span>
+            <span class="gochevron">›</span>
+          </button>` : ''}
       </section>`;
 
-    app.querySelector('[data-act="back"]').addEventListener('click', () => RR.nav.player());
+    if (RR.ui) RR.ui.wireAppBar();
+    const duelBtn = app.querySelector('[data-act="duel"]');
+    if (duelBtn) duelBtn.addEventListener('click', () => { A.sfx.whoosh(); RR.nav.duel(); });
     app.querySelectorAll('[data-fight]').forEach(b =>
       b.addEventListener('click', () => startBattle(+b.dataset.fight, !!b.dataset.rematch)));
     const train = app.querySelector('[data-act="train"]');
@@ -161,6 +170,7 @@ RR.nav = RR.nav || {};
   function startBattle(stageIdx, rematch = false) {
     const p = S.current();
     if (!p) { RR.nav.home(); return; }
+    if (RR.ui) RR.ui.hideTabs();
     const stage = D.STAGES[stageIdx];
     const boss = stage.boss;
     const u = U();
@@ -176,6 +186,8 @@ RR.nav = RR.nav || {};
     let finishFlashed = false;
     let enragedFlag = false;
     let combo = 0;
+    let movesUsed = 0;        /* boss signature moves used this battle (max 2) */
+    let blockNextHit = false; /* boss's block is up: the hero's next hit lands flat */
     let qTimer = null;
     let lastChoices = null, lastGetCorrect = null;
     let shieldOn = false, doubleOn = false, freezeOn = false; /* armed power-ups */
@@ -523,17 +535,21 @@ RR.nav = RR.nav || {};
     function heroStrike() {
       combo++;
       correctCount++;
+      const blocked = blockNextHit; /* boss's block eats the extras on this one hit */
+      if (blocked) blockNextHit = false;
       const comboMul = combo >= 5 ? 2 : combo >= 3 ? 1.5 : combo >= 2 ? 1.25 : 1;
-      const crit = Date.now() - qShownAt < 5000;
-      const doubled = doubleOn;
+      const crit = !blocked && Date.now() - qShownAt < 5000;
+      const doubled = !blocked && doubleOn; /* a blocked hit does NOT spend Double — leave it armed */
       if (doubled) { doubleOn = false; renderTray(); }
-      const dmg = Math.round(S.attack(p) * comboMul * (crit ? 1.5 : 1) * (doubled ? 2 : 1));
+      const dmg = blocked
+        ? S.attack(p) /* flat base damage: no combo, no crit, no double */
+        : Math.round(S.attack(p) * comboMul * (crit ? 1.5 : 1) * (doubled ? 2 : 1));
       bossHp = Math.max(0, bossHp - dmg);
       $('#hero-emoji').classList.add('lunge');
       after(180, () => {
         const bossSide = $('.bossside');
         $('#boss-emoji').classList.add('hit');
-        const tag = (doubled ? '⚡x2! ' : '') + (crit ? '⚡CRIT! ' : '') + '-' + dmg;
+        const tag = (blocked ? '🛡️ blocked! ' : '') + (doubled ? '⚡x2! ' : '') + (crit ? '⚡CRIT! ' : '') + '-' + dmg;
         floatText(bossSide, tag, crit ? 'crit' : '');
         if (combo >= 2) floatText($('.fighter.hero'), '🔥 x' + combo, 'combo');
         $('#boss-hp').style.width = (bossHp / bossMaxHp * 100) + '%';
@@ -597,8 +613,42 @@ RR.nav = RR.nav || {};
         $('#boss-emoji').classList.remove('lungeback');
         $('#hero-emoji').classList.remove('hit');
       });
-      if (heartsLeft <= 0) after(900, lose);
-      else after(1600, nextQ);
+      if (heartsLeft <= 0) { after(900, lose); return; }
+      /* sometimes the boss follows up with its signature move before the next question */
+      if (boss.move && bossHp > 0 && movesUsed < 2 && Math.random() < 0.4) {
+        movesUsed++;
+        after(1100, () => bossMove(boss.move));
+        after(2200, nextQ); /* extra beat so the move gets to shine */
+      } else {
+        after(1600, nextQ);
+      }
+    }
+
+    /* ----- boss signature move (max 2 per battle; always fair — never removes a heart) ----- */
+    function bossMove(move) {
+      const bossSide = $('.bossside');
+      floatText(bossSide, move.e + ' ' + move.name, 'crit');
+      const field = $('.battlefield');
+      if (field) { field.classList.add('quake'); setTimeout(() => field.classList.remove('quake'), 500); }
+      A.sfx.hurt();
+      buzz([40, 40, 90]);
+      A.speak(move.line);
+      if (move.type === 'steal') {
+        const grab = Math.min(p.coins, 5 + ((Math.random() * 6) | 0));
+        p.coins = Math.max(0, p.coins - grab);
+        S.save();
+        refreshCoins(p);
+        floatText($('.fighter.hero'), '-' + grab + ' 🪙', 'crit');
+      } else if (move.type === 'heal') {
+        const gain = Math.round(bossMaxHp * 0.1);
+        bossHp = Math.min(bossMaxHp, bossHp + gain);
+        const bar = $('#boss-hp');
+        if (bar) bar.style.width = (bossHp / bossMaxHp * 100) + '%';
+        floatText(bossSide, '+' + gain + ' 💚', 'combo');
+      } else if (move.type === 'block') {
+        blockNextHit = true; /* the hero's next hit only lands flat base damage */
+        combo = 0;
+      }
     }
 
     function win() {

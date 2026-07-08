@@ -43,11 +43,19 @@ RR.state = (function () {
     return {
       currentId: null,
       family: null, /* {target, reward, doneKey} — weekly family star goal */
+      customBooks: [], /* parent-authored family books (Book Maker) */
       profiles: [
         ensure({ id: uid(), name: 'Little Reader', avatar: '🐣', grade: 'K' }),
         ensure({ id: uid(), name: 'Big Reader',    avatar: '🚀', grade: '3' })
       ]
     };
+  }
+
+  /* Backfill root-level fields missing from older or imported saves.
+     Runs on every load AND after importSave swaps in a new object. */
+  function ensureRoot(d) {
+    d.customBooks = Array.isArray(d.customBooks) ? d.customBooks : [];
+    return d;
   }
 
   let data;
@@ -58,6 +66,7 @@ RR.state = (function () {
   } catch (e) {
     data = defaults();
   }
+  ensureRoot(data);
 
   function save() {
     try { localStorage.setItem(KEY, JSON.stringify(data)); } catch (e) { /* storage full/blocked */ }
@@ -160,12 +169,58 @@ RR.state = (function () {
     }
   }
 
+  /* ---------- custom books (Book Maker) ---------- */
+  function customBooks() { return data.customBooks; }
+  /* Insert or update a family book. New books get a stable id; existing ones
+     (matched by id) are replaced in place. Book shape mirrors DATA.BOOKS
+     entries plus custom:true. Always persists; returns the saved book. */
+  function saveCustomBook(book) {
+    if (!book.id) book.id = 'custom-' + Date.now().toString(36);
+    const i = data.customBooks.findIndex(b => b.id === book.id);
+    if (i >= 0) data.customBooks[i] = book;
+    else data.customBooks.push(book);
+    save();
+    return book;
+  }
+  function removeCustomBook(id) {
+    data.customBooks = data.customBooks.filter(b => b.id !== id);
+    save();
+  }
+
   /* ---------- family goal ---------- */
   function familyGoal() { return data.family; }
   function setFamilyGoal(goal) { data.family = goal; save(); }
   function familyWeekStars() {
     data.profiles.forEach(rollWeek);
     return data.profiles.reduce((n, p) => n + (p.weekStars || 0), 0);
+  }
+
+  /* ---------- backup & transfer ---------- */
+  /* Compact JSON with a wrapper so imports can sanity-check the payload. */
+  function exportSave() {
+    return JSON.stringify({ app: 'reading-rocket', v: 1, data });
+  }
+
+  /* Replace the whole save from a code. Accepts the wrapped { app, v, data }
+     form or a bare legacy { profiles:[...] } object. Validates into a temp
+     var and only swaps `data` on success, so a bad code never corrupts the
+     live save. Never throws — returns true/false. */
+  function importSave(text) {
+    try {
+      const parsed = JSON.parse(text);
+      if (!parsed || typeof parsed !== 'object') return false;
+      const next = Array.isArray(parsed.profiles) ? parsed : parsed.data;
+      if (!next || typeof next !== 'object') return false;
+      if (!Array.isArray(next.profiles) || !next.profiles.length) return false;
+      if (!next.profiles.every(p => p && typeof p === 'object' && p.id && p.name)) return false;
+      next.profiles.forEach(ensure); /* backfill fields missing from older exports */
+      ensureRoot(next);              /* backfill root-level fields (e.g. customBooks) */
+      data = next;
+      save();
+      return true;
+    } catch (e) {
+      return false;
+    }
   }
 
   /* ---------- record a finished training round ---------- */
@@ -258,6 +313,8 @@ RR.state = (function () {
     current, setCurrent, addProfile, removeProfile, recordRound, save,
     item, gear, attack, hearts, coinBoost, streakBoost, heroEmoji, earn, buy, equip,
     baseItem, buyBase, placeBase,
-    bump, rollWeek, familyGoal, setFamilyGoal, familyWeekStars
+    bump, rollWeek, familyGoal, setFamilyGoal, familyWeekStars,
+    customBooks, saveCustomBook, removeCustomBook,
+    exportSave, importSave
   };
 })();

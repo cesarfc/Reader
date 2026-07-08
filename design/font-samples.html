@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Reading Rocket — font samples</title>
+<style>
+  /* current font, for baseline */
+  @font-face { font-family: 'Fredoka'; src: url('../fonts/Fredoka.woff2') format('woff2'); font-weight: 300 700; font-display: swap; }
+  /* candidates */
+  @font-face { font-family: 'Baloo 2'; src: url('fonts/Baloo2.woff2') format('woff2'); font-weight: 400 800; font-display: swap; }
+  @font-face { font-family: 'Quicksand'; src: url('fonts/Quicksand.woff2') format('woff2'); font-weight: 300 700; font-display: swap; }
+  @font-face { font-family: 'Comic Neue'; src: url('fonts/ComicNeue-400.woff2') format('woff2'); font-weight: 400; font-display: swap; }
+  @font-face { font-family: 'Comic Neue'; src: url('fonts/ComicNeue-700.woff2') format('woff2'); font-weight: 700; font-display: swap; }
+  @font-face { font-family: 'Andika'; src: url('fonts/Andika-400.woff2') format('woff2'); font-weight: 400; font-display: swap; }
+  @font-face { font-family: 'Andika'; src: url('fonts/Andika-700.woff2') format('woff2'); font-weight: 700; font-display: swap; }
+
+  :root {
+    --bg: #FFF7F0; --surface: #fff; --surface-2: #FFF1E6;
+    --ink: #42352B; --ink-soft: #6F5E50;
+    --coral-strong: #D9542F; --coral-tint: #FFE7DF;
+    --teal: #7ED0C1; --lav-tint: #ECE6FB;
+    --sh-md: 0 10px 24px rgba(74,53,43,.09);
+    --sh-coral: 0 12px 26px rgba(217,84,47,.30);
+  }
+  * { box-sizing: border-box; margin: 0; }
+  body { background: var(--bg); color: var(--ink); padding: 28px 16px 60px; }
+  .wrap { max-width: 560px; margin: 0 auto; }
+  h1 { font-family: system-ui; font-size: 15px; color: var(--ink-soft); text-align: center; margin-bottom: 20px; font-weight: 600; }
+
+  .sample {
+    background: var(--surface); border-radius: 26px; box-shadow: var(--sh-md);
+    padding: 22px 22px 18px; margin-bottom: 22px;
+  }
+  .tag {
+    display: inline-block; font-family: system-ui; font-size: 12px; font-weight: 700;
+    letter-spacing: .4px; text-transform: uppercase; color: var(--ink-soft);
+    background: var(--lav-tint); border-radius: 999px; padding: 5px 12px; margin-bottom: 6px;
+  }
+  .note { font-family: system-ui; font-size: 12px; color: var(--ink-soft); margin-bottom: 14px; }
+
+  .greet { font-size: 29px; font-weight: 700; line-height: 1.15; }
+  .eyebrow { font-size: 12.5px; font-weight: 600; letter-spacing: .3px; color: var(--ink-soft); text-transform: uppercase; margin-bottom: 2px; }
+  .play {
+    margin: 14px 0; background: linear-gradient(180deg,#FF8A6B,#E4633F); color: #fff;
+    border-radius: 22px; text-align: center; padding: 14px; box-shadow: var(--sh-coral);
+  }
+  .play b { font-size: 24px; font-weight: 700; letter-spacing: 1px; }
+  .play span { display: block; font-size: 13px; font-weight: 500; opacity: .95; }
+  .tile { display: flex; align-items: center; gap: 12px; background: var(--surface-2); border-radius: 18px; padding: 10px 14px; margin-bottom: 14px; }
+  .tile .ic { font-size: 26px; }
+  .tile b { font-size: 15px; font-weight: 600; display: block; }
+  .tile small { font-size: 12.5px; color: var(--ink-soft); font-weight: 500; }
+  .book { font-size: 24px; line-height: 1.65; font-weight: 500; margin-bottom: 10px; }
+  .letters { font-size: 21px; color: var(--ink-soft); background: var(--coral-tint); border-radius: 14px; padding: 8px 14px; display: inline-block; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Same screen bits, five fonts — top block is today's font</h1>
+
+  <div class="sample" style="font-family:'Fredoka'">
+    <span class="tag">Fredoka — current</span>
+    <p class="note">What the app uses today. Round, geometric, cheerful.</p>
+    <div class="eyebrow">Level 8 · Word Wizard</div>
+    <div class="greet">Hi, Big Reader! 👋</div>
+    <div class="play"><b>▶ PLAY</b><span>Continue where you left off</span></div>
+    <div class="tile"><span class="ic">🧠</span><div><b>Memory Match</b><small>Flip and match word to picture</small></div></div>
+    <p class="book">The dog is big. Look at the pig!</p>
+    <span class="letters">a b d g p q · Il1 · quick jumps</span>
+  </div>
+
+  <div class="sample" style="font-family:'Baloo 2'">
+    <span class="tag">Baloo 2</span>
+    <p class="note">Chunky &amp; warm — the classic kids-app voice. Boldest personality.</p>
+    <div class="eyebrow">Level 8 · Word Wizard</div>
+    <div class="greet">Hi, Big Reader! 👋</div>
+    <div class="play"><b>▶ PLAY</b><span>Continue where you left off</span></div>
+    <div class="tile"><span class="ic">🧠</span><div><b>Memory Match</b><small>Flip and match word to picture</small></div></div>
+    <p class="book">The dog is big. Look at the pig!</p>
+    <span class="letters">a b d g p q · Il1 · quick jumps</span>
+  </div>
+
+  <div class="sample" style="font-family:'Quicksand'">
+    <span class="tag">Quicksand</span>
+    <p class="note">Light, geometric, airy — the cleanest and calmest of the set.</p>
+    <div class="eyebrow">Level 8 · Word Wizard</div>
+    <div class="greet">Hi, Big Reader! 👋</div>
+    <div class="play"><b>▶ PLAY</b><span>Continue where you left off</span></div>
+    <div class="tile"><span class="ic">🧠</span><div><b>Memory Match</b><small>Flip and match word to picture</small></div></div>
+    <p class="book">The dog is big. Look at the pig!</p>
+    <span class="letters">a b d g p q · Il1 · quick jumps</span>
+  </div>
+
+  <div class="sample" style="font-family:'Comic Neue'">
+    <span class="tag">Comic Neue</span>
+    <p class="note">Handwriting-adjacent — letters look like how kids learn to write them.</p>
+    <div class="eyebrow">Level 8 · Word Wizard</div>
+    <div class="greet">Hi, Big Reader! 👋</div>
+    <div class="play"><b>▶ PLAY</b><span>Continue where you left off</span></div>
+    <div class="tile"><span class="ic">🧠</span><div><b>Memory Match</b><small>Flip and match word to picture</small></div></div>
+    <p class="book">The dog is big. Look at the pig!</p>
+    <span class="letters">a b d g p q · Il1 · quick jumps</span>
+  </div>
+
+  <div class="sample" style="font-family:'Andika'">
+    <span class="tag">Andika</span>
+    <p class="note">Built by literacy experts for beginning readers — clearest letterforms, least "designery".</p>
+    <div class="eyebrow">Level 8 · Word Wizard</div>
+    <div class="greet">Hi, Big Reader! 👋</div>
+    <div class="play"><b>▶ PLAY</b><span>Continue where you left off</span></div>
+    <div class="tile"><span class="ic">🧠</span><div><b>Memory Match</b><small>Flip and match word to picture</small></div></div>
+    <p class="book">The dog is big. Look at the pig!</p>
+    <span class="letters">a b d g p q · Il1 · quick jumps</span>
+  </div>
+</div>
+</body>
+</html>

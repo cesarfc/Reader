@@ -379,34 +379,44 @@ RR.DATA = {
   STAGES: [
     { name: 'Sunny Meadow',     e: '🌻', wins: 2, colors: ['#fef3c7', '#bbf7d0'],
       boss: { name: 'Grump the Goblin', e: '👺', hp: 30,  reward: 60,
-              taunt: 'I am Grump! Read if you dare!' } },
+              taunt: 'I am Grump! Read if you dare!',
+              move: { name: 'Coin Grab!', e: '🪙', type: 'steal', line: 'Gimme your shiny coins, hee hee!' } } },
     { name: 'Whispering Woods', e: '🌲', wins: 3, colors: ['#d1fae5', '#86efac'],
       boss: { name: 'Shadow Wolf', e: '🐺', hp: 45,  reward: 90,
-              taunt: 'Awooo! No one reads in MY woods!' } },
+              taunt: 'Awooo! No one reads in MY woods!',
+              move: { name: 'Shadow Howl!', e: '🌑', type: 'block', line: 'Awoooo! My howl bounces your next hit!' } } },
     { name: 'Crystal Caves',    e: '💎', wins: 3, colors: ['#e0e7ff', '#a5b4fc'],
       boss: { name: 'Rocky the Troll', e: '🧌', hp: 60,  reward: 120,
-              taunt: 'Me Rocky! Me eat books!' } },
+              taunt: 'Me Rocky! Me eat books!',
+              move: { name: 'Book Munch!', e: '📖', type: 'heal', line: 'Chomp chomp! Books make Rocky strong!' } } },
     { name: 'Lava Mountain',    e: '🌋', wins: 4, colors: ['#ffedd5', '#fca5a5'],
       boss: { name: 'Magma Dragon', e: '🐉', hp: 85,  reward: 160,
-              taunt: 'My fire melts words! Sssss!' } },
+              taunt: 'My fire melts words! Sssss!',
+              move: { name: 'Lava Lick!', e: '🌋', type: 'heal', line: 'Slurp! Warm lava heals my shiny scales!' } } },
     { name: 'Storm Castle',     e: '🏰', wins: 4, colors: ['#e2e8f0', '#a5f3fc'],
       boss: { name: 'Thunder King', e: '🤴', hp: 110, reward: 200,
-              taunt: 'BOOM! I am the king of loud!' } },
+              taunt: 'BOOM! I am the king of loud!',
+              move: { name: 'Thunder Guard!', e: '⚡', type: 'block', line: 'ZAP! My thunder wall blocks your next swing!' } } },
     { name: 'Robo City',        e: '🏙️', wins: 5, colors: ['#cffafe', '#67e8f9'],
       boss: { name: 'Mega Bot', e: '🤖', hp: 130, reward: 240,
-              taunt: 'BEEP BOOP. READING NOT COMPUTED.' } },
+              taunt: 'BEEP BOOP. READING NOT COMPUTED.',
+              move: { name: 'Magnet Beam!', e: '🧲', type: 'steal', line: 'BEEP BOOP! Your coins stick right to me!' } } },
     { name: 'Moon Base',        e: '🌙', wins: 5, colors: ['#e2e8f0', '#cbd5e1'],
       boss: { name: 'Moon Beast', e: '👾', hp: 150, reward: 280,
-              taunt: 'Zorp! Your words cannot reach space!' } },
+              taunt: 'Zorp! Your words cannot reach space!',
+              move: { name: 'Moon Munch!', e: '🌙', type: 'heal', line: 'Nom nom! Moon rocks patch me right up!' } } },
     { name: 'Star Galaxy',      e: '🌌', wins: 6, colors: ['#ede9fe', '#c4b5fd'],
       boss: { name: 'Star Titan', e: '👹', hp: 175, reward: 350,
-              taunt: 'I have never lost to a reader. Ever.' } },
+              taunt: 'I have never lost to a reader. Ever.',
+              move: { name: 'Star Feast!', e: '⭐', type: 'heal', line: 'I gulp down starlight to grow mighty!' } } },
     { name: 'Rainbow Rift',     e: '🌈', wins: 6, colors: ['#fce7f3', '#fbcfe8'],
       boss: { name: 'Prism Phantom', e: '👻', hp: 210, reward: 420,
-              taunt: 'Boo! Your words fade in my fog!' } },
+              taunt: 'Boo! Your words fade in my fog!',
+              move: { name: 'Fog Swipe!', e: '🌫️', type: 'steal', line: 'Boo! My spooky fog swipes your coins away!' } } },
     { name: 'Cosmic Core',      e: '🌠', wins: 7, colors: ['#e0e7ff', '#818cf8'],
       boss: { name: 'The Final Word', e: '🛸', hp: 260, reward: 550,
-              taunt: 'I am the last boss. No reader passes me!' } }
+              taunt: 'I am the last boss. No reader passes me!',
+              move: { name: 'Force Field!', e: '🔵', type: 'block', line: 'My force field bounces your best attack!' } } }
   ],
 
   HERO_BASE_ATTACK: 10,
@@ -460,6 +470,9 @@ RR.DATA = {
         { t: 'In the middle of the glow sat a little star. It was shaking.', a: '⭐' },
         { t: '“Do not be scared,” said Milo. “I am Milo. What is your name?”', a: '🧒⭐' },
         { t: 'The star made a sound like a tiny bell. “Twink,” it said. Then it began to blink, fast.', a: '⭐💫' }
+      ], quiz: [
+        { q: 'What fell into Milo’s yard?', choices: [ { t: 'a little star', e: '⭐' }, { t: 'a big rock', e: '🪨' }, { t: 'a bird', e: '🐦' } ], a: 0 },
+        { q: 'What is the star’s name?', choices: [ { t: 'Milo', e: '🧒' }, { t: 'Twink', e: '⭐' }, { t: 'Bolt', e: '🤖' } ], a: 1 }
       ]},
     { id: 'ep2', title: 'The Star Map', cover: '🗺️', unlock: { rounds: 3 },
       cliff: 'What is inside the old shed? Episode 3 will tell!',
@@ -470,6 +483,9 @@ RR.DATA = {
         { t: '“But how will you get there? Stars fall down. They do not fall up!”', a: '🧒❓' },
         { t: 'Twink flew to the old shed at the end of the yard. It tapped the door three times.', a: '🏚️⭐' },
         { t: 'The rusty old door creaked… and opened all by itself.', a: '🚪✨' }
+      ], quiz: [
+        { q: 'What did the picture of light show?', choices: [ { t: 'a song', e: '🎵' }, { t: 'a face', e: '🙂' }, { t: 'a map', e: '🗺️' } ], a: 2 },
+        { q: 'Where did Twink fly?', choices: [ { t: 'to the pond', e: '🏞️' }, { t: 'to the old shed', e: '🏚️' }, { t: 'to the moon', e: '🌙' } ], a: 1 }
       ]},
     { id: 'ep3', title: 'The Shed Secret', cover: '🚀', unlock: { rounds: 8 },
       cliff: 'Where will they find rocket fuel? See Episode 4!',
@@ -480,6 +496,9 @@ RR.DATA = {
         { t: '“I am Bolt,” said the robot. “Co-pilot of this ship. I have been asleep for forty years.”', a: '🤖💤' },
         { t: 'Bolt saw Twink and bowed. “A star! We must take it home at once!”', a: '🤖⭐' },
         { t: 'Then Bolt’s eyes turned red. “WARNING,” he said. “Fuel: empty.”', a: '🤖🔴' }
+      ], quiz: [
+        { q: 'What was hidden in the shed?', choices: [ { t: 'a boat', e: '⛵' }, { t: 'a silver rocket', e: '🚀' }, { t: 'a red car', e: '🚗' } ], a: 1 },
+        { q: 'What is the robot’s name?', choices: [ { t: 'Milo', e: '🧒' }, { t: 'Twink', e: '⭐' }, { t: 'Bolt', e: '🤖' } ], a: 2 }
       ]},
     { id: 'ep4', title: 'Moon-Flower Fuel', cover: '🌻', unlock: { rounds: 14 },
       cliff: 'What is that shadow on the moon? Episode 5 knows…',
@@ -490,6 +509,9 @@ RR.DATA = {
         { t: 'They filled a jar with glowing petals. The rocket tank drank them up. RUMBLE!', a: '🫙✨' },
         { t: '“All aboard!” said Bolt. Milo buckled in. Twink sat on his shoulder.', a: '🚀🧒' },
         { t: 'The rocket lifted off! But far above, a long dark shadow slid across the moon…', a: '🚀🌑' }
+      ], quiz: [
+        { q: 'What does the rocket burn for fuel?', choices: [ { t: 'starlight', e: '🌟' }, { t: 'wood', e: '🪵' }, { t: 'coal', e: '⚫' } ], a: 0 },
+        { q: 'Where did they find the moon-flowers?', choices: [ { t: 'in the shed', e: '🏚️' }, { t: 'on a hill', e: '⛰️' }, { t: 'by the pond', e: '🌼' } ], a: 2 }
       ]},
     { id: 'ep5', title: 'The Shadow Ship', cover: '🛸', unlock: { rounds: 21 },
       cliff: 'Caught by the beam! Can they escape in Episode 6?',
@@ -500,6 +522,9 @@ RR.DATA = {
         { t: 'The gray ship had a hundred windows. In every window sat a jar with a sad star inside.', a: '🫙⭐' },
         { t: '“Faster, Bolt!” cried Milo. The little rocket zoomed and dipped and spun.', a: '🚀💨' },
         { t: 'But a beam of green light locked on. The rocket froze in the sky like a fly in honey.', a: '🟢🚀' }
+      ], quiz: [
+        { q: 'Who was following the rocket?', choices: [ { t: 'the Star Catcher', e: '🛸' }, { t: 'Twink’s mom', e: '🌟' }, { t: 'a comet', e: '☄️' } ], a: 0 },
+        { q: 'What color beam caught the rocket?', choices: [ { t: 'red', e: '🔴' }, { t: 'green', e: '🟢' }, { t: 'blue', e: '🔵' } ], a: 1 }
       ]},
     { id: 'ep6', title: 'Inside the Catcher', cover: '🫙', unlock: { rounds: 29 },
       cliff: 'The alarm is ringing! Run for it in Episode 7!',
@@ -510,6 +535,9 @@ RR.DATA = {
         { t: 'Milo picked up the book. He sounded it out, slow and brave: “MOON… BEAM… PIE.”', a: '🧒📖' },
         { t: '“CORRECT,” said the guard, and it fell asleep, just like that.', a: '🤖💤' },
         { t: 'Milo turned the great silver wheel that opened every jar. Then the alarm began to ring!', a: '🚨' }
+      ], quiz: [
+        { q: 'What did the guard robot want?', choices: [ { t: 'a ticket', e: '🎫' }, { t: 'a password', e: '🔑' }, { t: 'a coin', e: '🪙' } ], a: 1 },
+        { q: 'Who read the password out loud?', choices: [ { t: 'Milo', e: '🧒' }, { t: 'Bolt', e: '🤖' }, { t: 'Twink', e: '⭐' } ], a: 0 }
       ]},
     { id: 'ep7', title: 'The Great Escape', cover: '💫', unlock: { rounds: 38 },
       cliff: 'Twink is almost home… the last episode awaits!',
@@ -520,6 +548,9 @@ RR.DATA = {
         { t: 'It drifted away into the black, cold and quiet, like an old empty bottle.', a: '🌑' },
         { t: 'The free stars raced home across the sky, painting it with light.', a: '🌌💫' },
         { t: 'Milo cheered. But Twink tugged his sleeve. Twink was not home. Not yet.', a: '⭐🧒' }
+      ], quiz: [
+        { q: 'What happened to the stars in the jars?', choices: [ { t: 'they burst free', e: '✨' }, { t: 'they broke', e: '💥' }, { t: 'they hid', e: '🙈' } ], a: 0 },
+        { q: 'What happened to the Star Catcher’s ship?', choices: [ { t: 'it flew home', e: '🏠' }, { t: 'it went dark and drifted away', e: '🛸' }, { t: 'it blew up', e: '💥' } ], a: 1 }
       ]},
     { id: 'ep8', title: 'Home at Last', cover: '🌟', unlock: { rounds: 48 },
       cliff: 'The End… or is it? Keep reading, Star Reader! ⭐',
@@ -530,6 +561,115 @@ RR.DATA = {
         { t: 'Twink gave Milo a gift: a tiny bell made of starlight. “So you can find me.”', a: '🔔🧒' },
         { t: '“Any time you read under the night sky,” said Twink, “I will be listening.”', a: '⭐📖' },
         { t: 'Milo flew home and slept till noon. On his desk, the little bell glowed. The end!', a: '🛏️🔔' }
+      ], quiz: [
+        { q: 'Who came to meet Twink?', choices: [ { t: 'Twink’s mother and father', e: '🌟' }, { t: 'the Star Catcher', e: '🛸' }, { t: 'a spaceship', e: '🚀' } ], a: 0 },
+        { q: 'What did Twink give Milo?', choices: [ { t: 'a gold coin', e: '🪙' }, { t: 'a tiny bell', e: '🔔' }, { t: 'a map', e: '🗺️' } ], a: 1 }
+      ]},
+
+    /* ===== Season 2 — "Milo and the Star Bell" ===== */
+    { id: 'ep9', title: 'The Bell Rings', season: 2, cover: '🔔', unlock: { rounds: 60 },
+      cliff: 'Why was the bright star river turning gray? The next chapter knows…',
+      pages: [
+        { t: 'Autumn came, and the nights grew long and cool. Milo kept the little star bell safe on his desk.', a: '🍂🔔' },
+        { t: 'One windy night, the bell rang all by itself. Its ring was faint and sad, not merry like before.', a: '🔔💨' },
+        { t: 'Milo knew that sound meant one thing. Somewhere far away, Twink needed a friend.', a: '🧒🔔' },
+        { t: 'He raced to the old shed and woke Bolt. “The star river is calling,” Milo said. “We have to fly.”', a: '🤖🚀' },
+        { t: 'They poured the last jar of moon-flower petals into the tank. The rocket rumbled to life.', a: '🫙✨' },
+        { t: 'Up they soared, past the clouds and the moon. But the river of stars ahead looked dim and gray.', a: '🚀🌫️' }
+      ], quiz: [
+        { q: 'What woke Milo on the windy night?', choices: [ { t: 'the star bell rang', e: '🔔' }, { t: 'a loud storm', e: '⛈️' }, { t: 'Bolt beeped', e: '🤖' } ], a: 0 },
+        { q: 'What did they use to fuel the rocket?', choices: [ { t: 'coal', e: '⚫' }, { t: 'moon-flower petals', e: '🌼' }, { t: 'water', e: '💧' } ], a: 1 }
+      ]},
+    { id: 'ep10', title: 'The Quiet River', season: 2, cover: '🌌', unlock: { rounds: 75 },
+      cliff: 'What was the shadow, and where did it take the songs?',
+      pages: [
+        { t: 'The rocket slowed beside the great star river. Twink flew out to meet them, glowing dim.', a: '⭐🌌' },
+        { t: '“I am so glad you came,” Twink chimed. “Something is wrong. The stars have lost their song.”', a: '⭐😟' },
+        { t: 'Long ago the whole river rang like bells. Now it was hushed and still, quiet as deep snow.', a: '🤫🌌' },
+        { t: '“A star with no song grows cold,” Twink said. “And a cold star cannot shine for long.”', a: '⭐❄️' },
+        { t: 'Milo touched a gray star. It felt like ice. It still glowed, but it made no sound at all.', a: '🧊⭐' },
+        { t: '“A shadow drifts through the river at night,” said Twink. “When it leaves, the songs are gone.”', a: '🌑🌌' }
+      ], quiz: [
+        { q: 'What did the stars lose?', choices: [ { t: 'their light', e: '💡' }, { t: 'their song', e: '🎵' }, { t: 'their names', e: '🏷️' } ], a: 1 },
+        { q: 'What happens to a star with no song?', choices: [ { t: 'it grows cold', e: '❄️' }, { t: 'it gets bigger', e: '🔵' }, { t: 'it turns red', e: '🔴' } ], a: 0 }
+      ]},
+    { id: 'ep11', title: 'Tracks in the Dark', season: 2, cover: '🔦', unlock: { rounds: 90 },
+      cliff: 'Who was hiding in the ice cave, humming the missing songs?',
+      pages: [
+        { t: 'Milo, Bolt, and Twink followed the river to find the shadow. Every star they passed was silent.', a: '🚀🌌' },
+        { t: 'Bolt turned on his scanner. A green line blinked. “I hear humming,” he said, “far ahead.”', a: '🤖📡' },
+        { t: 'They followed the humming through the dark. It was soft and sweet — a stolen star-song.', a: '🎶🌑' },
+        { t: 'The trail led to a cave of blue ice at the cold edge of the river.', a: '🧊🕳️' },
+        { t: 'Inside, jars of glowing light sat in neat rows. Each jar held a captured song.', a: '🫙🎵' },
+        { t: 'In the middle of the cave, something small was curled up tight, humming to itself.', a: '❓🎶' }
+      ], quiz: [
+        { q: 'What did Bolt’s scanner hear?', choices: [ { t: 'a bell', e: '🔔' }, { t: 'humming', e: '🎶' }, { t: 'thunder', e: '⛈️' } ], a: 1 },
+        { q: 'What was inside the ice cave?', choices: [ { t: 'jars of songs', e: '🫙' }, { t: 'piles of gold', e: '🪙' }, { t: 'sleeping bats', e: '🦇' } ], a: 0 }
+      ]},
+    { id: 'ep12', title: 'The Song Thief', season: 2, cover: '☄️', unlock: { rounds: 105 },
+      cliff: 'Why would a lonely comet want to steal the stars’ songs?',
+      pages: [
+        { t: 'Milo stepped closer. The small shape uncurled. It was a young comet, no bigger than a dog.', a: '☄️' },
+        { t: 'Her tail was pale and short. Her eyes were wide and afraid. She had been taking the songs.', a: '☄️😨' },
+        { t: 'When she saw them, she hissed and darted behind a jar. “Go away! These are mine!”', a: '☄️💨' },
+        { t: 'Bolt raised his claws. But Milo held up a hand. “Wait. Look at her. She is shaking.”', a: '🤖✋' },
+        { t: 'The little comet was all alone in the cold cave, far from any friend.', a: '☄️❄️' },
+        { t: '“I am Milo,” he said softly. “I will not hurt you. What is your name?” The comet whispered, “…Rue.”', a: '🧒☄️' }
+      ], quiz: [
+        { q: 'Who was taking the songs?', choices: [ { t: 'a young comet', e: '☄️' }, { t: 'the Star Catcher', e: '🛸' }, { t: 'a robot', e: '🤖' } ], a: 0 },
+        { q: 'What is the comet’s name?', choices: [ { t: 'Twink', e: '⭐' }, { t: 'Rue', e: '☄️' }, { t: 'Bolt', e: '🤖' } ], a: 1 }
+      ]},
+    { id: 'ep13', title: 'Rue’s Reason', season: 2, cover: '❄️', unlock: { rounds: 120 },
+      cliff: 'How can you share a song without taking it away?',
+      pages: [
+        { t: 'Milo sat down on the cold floor, close but not too close. “Rue,” he said, “please tell me why.”', a: '🧒☄️' },
+        { t: 'Rue sniffed. “Comets fly alone,” she said. “We travel for years through the empty dark.”', a: '☄️🌑' },
+        { t: '“One night I drifted near the river. I heard the stars sing. It was the best sound in the world.”', a: '🎶✨' },
+        { t: '“I did not want to be lonely anymore. So I kept the songs in jars, to hear them again and again.”', a: '🫙🎵' },
+        { t: '“But it did not help,” Rue said. Her voice cracked. “The stars went sad, and I felt worse than before.”', a: '☄️😢' },
+        { t: 'Milo nodded. He knew you cannot keep a song in a jar. A song has to be shared to stay alive.', a: '🧒💭' }
+      ], quiz: [
+        { q: 'Why do comets feel lonely?', choices: [ { t: 'they fly alone for years', e: '☄️' }, { t: 'they are too small', e: '🔬' }, { t: 'they cannot see', e: '🙈' } ], a: 0 },
+        { q: 'Why did Rue keep the songs?', choices: [ { t: 'to sell them', e: '🪙' }, { t: 'so she would not be lonely', e: '🥺' }, { t: 'to make gifts', e: '🎁' } ], a: 1 }
+      ]},
+    { id: 'ep14', title: 'Milo’s Idea', season: 2, cover: '📖', unlock: { rounds: 140 },
+      cliff: 'Would the stars forgive Rue and take her back?',
+      pages: [
+        { t: 'Then Milo remembered something Twink once told him under the night sky.', a: '🧒💡' },
+        { t: '“When you read a story out loud, you do not lose it,” Milo said. “You share it. It grows.”', a: '📖✨' },
+        { t: '“Songs are the same. If you sing one, it does not go away. It goes to everyone who hears it.”', a: '🎶💞' },
+        { t: 'Twink brought a glowing song-book. Milo showed Rue how to follow the notes and sing along.', a: '📖🎵' },
+        { t: 'One by one, they opened the jars. The songs floated free and drifted back toward the river.', a: '🫙🎶' },
+        { t: 'But this time Rue did not grab them. She sang with them, soft and shaky, and let them go.', a: '☄️🎶' }
+      ], quiz: [
+        { q: 'What did Milo teach Rue to do?', choices: [ { t: 'sing along, not keep the songs', e: '🎶' }, { t: 'hide better', e: '🙈' }, { t: 'build more jars', e: '🫙' } ], a: 0 },
+        { q: 'What did Twink bring?', choices: [ { t: 'a map', e: '🗺️' }, { t: 'a glowing song-book', e: '📖' }, { t: 'a jar', e: '🫙' } ], a: 1 }
+      ]},
+    { id: 'ep15', title: 'The River Sings Again', season: 2, cover: '🎶', unlock: { rounds: 160 },
+      cliff: 'But a comet can never stay still for long…',
+      pages: [
+        { t: 'The songs flew home to the stars. Slowly, the gray river began to glow gold again.', a: '🌌✨' },
+        { t: 'One by one, the stars woke up and chimed. The whole sky started to ring like bells.', a: '⭐🔔' },
+        { t: 'At first the stars were shy of Rue. They remembered the cold, quiet nights.', a: '⭐☄️' },
+        { t: '“Please teach her your song,” Milo asked. “Rue does not want to take it now. She wants to share it.”', a: '🧒🎵' },
+        { t: 'So the stars taught Rue their tune. She sang it back, wobbly at first, then bright and clear.', a: '☄️🎶' },
+        { t: 'The river rang louder than ever, with a comet’s voice woven through. Rue was not alone anymore.', a: '🌌💫' }
+      ], quiz: [
+        { q: 'What happened when the songs came back?', choices: [ { t: 'the river glowed and rang', e: '🔔' }, { t: 'the river froze', e: '🧊' }, { t: 'the river went dark', e: '🌑' } ], a: 0 },
+        { q: 'What did the stars do for Rue?', choices: [ { t: 'chased her away', e: '🏃' }, { t: 'taught her their song', e: '🎶' }, { t: 'gave her jars', e: '🫙' } ], a: 1 }
+      ]},
+    { id: 'ep16', title: 'The Long Way Home', season: 2, cover: '🔔', unlock: { rounds: 180 },
+      cliff: 'So if you hear a faraway bell on a quiet night, it might be Rue, singing you a star-song. Sweet dreams, Star Reader! 🔔⭐',
+      pages: [
+        { t: 'Comets cannot stay in one place. Soon Rue had to fly on, far around the sun and back.', a: '☄️☀️' },
+        { t: '“Do not be sad,” Rue told Milo. “I carry the star-song now. I will sing it everywhere I go.”', a: '☄️🎶' },
+        { t: '“So no star will ever feel too far away,” she said, “and neither will I.”', a: '☄️⭐' },
+        { t: 'The stars gave Rue a little bell of her own, made of comet ice, so they could always find her.', a: '🔔☄️' },
+        { t: 'Twink chimed to Milo, “Whenever a friend needs you, your bell will ring. And you always come.”', a: '⭐🔔' },
+        { t: 'Milo flew home and slept till noon. On his desk, the little bell glowed warm. The end!', a: '🛏️🔔' }
+      ], quiz: [
+        { q: 'Why did Rue have to leave?', choices: [ { t: 'comets cannot stay still', e: '☄️' }, { t: 'she was angry', e: '😠' }, { t: 'she was scared', e: '😨' } ], a: 0 },
+        { q: 'What gift did the stars give Rue?', choices: [ { t: 'a map', e: '🗺️' }, { t: 'a jar of songs', e: '🫙' }, { t: 'a little bell', e: '🔔' } ], a: 2 }
       ]}
   ],
 
@@ -589,6 +729,9 @@ RR.DATA = {
         { t: 'The rat hid in a box.', a: '📦' },
         { t: 'The cat sat on the box.', a: '🐱📦' },
         { t: 'The cat and the rat nap.', a: '🐱🐀💤' }
+      ], quiz: [
+        { q: 'Who hid in the box?', choices: [ { t: 'the cat', e: '🐱' }, { t: 'the rat', e: '🐀' }, { t: 'a hen', e: '🐔' } ], a: 1 },
+        { q: 'What did they do at the end?', choices: [ { t: 'ran', e: '🏃' }, { t: 'hopped', e: '🐸' }, { t: 'napped', e: '😴' } ], a: 2 }
       ]},
       { id: 'k-big-sun', title: 'The Big Sun', cover: '☀️', pages: [
         { t: 'The sun is up.', a: '☀️' },
@@ -597,6 +740,9 @@ RR.DATA = {
         { t: 'The pig is in the mud.', a: '🐷' },
         { t: 'The dog runs to me.', a: '🐶💨' },
         { t: 'We sit in the sun.', a: '☀️😊' }
+      ], quiz: [
+        { q: 'What is up?', choices: [ { t: 'a bug', e: '🐛' }, { t: 'a hen', e: '🐔' }, { t: 'the sun', e: '☀️' } ], a: 2 },
+        { q: 'What is in the mud?', choices: [ { t: 'the pig', e: '🐷' }, { t: 'the dog', e: '🐶' }, { t: 'the hen', e: '🐔' } ], a: 0 }
       ]},
       { id: 'k-red-cap', title: 'My Red Cap', cover: '🧢', pages: [
         { t: 'Look at my red cap.', a: '🧢' },
@@ -606,6 +752,9 @@ RR.DATA = {
         { t: 'The cap is in the web!', a: '🕸️🧢' },
         { t: 'The bug got the cap.', a: '🐛🧢' },
         { t: 'I like my cap. And the bug.', a: '😊🐛' }
+      ], quiz: [
+        { q: 'What color is the cap?', choices: [ { t: 'blue', e: '🔵' }, { t: 'red', e: '🔴' }, { t: 'green', e: '🟢' } ], a: 1 },
+        { q: 'Where did the cap go?', choices: [ { t: 'in the web', e: '🕸️' }, { t: 'in a box', e: '📦' }, { t: 'in the mud', e: '🟤' } ], a: 0 }
       ]}
     ],
     1: [
@@ -618,6 +767,9 @@ RR.DATA = {
         { t: 'A duck quacks. “Can I swim too?”', a: '🦆' },
         { t: '“Yes! Jump in, duck!”', a: '🦆💦' },
         { t: 'Best pals in the pond.', a: '🐸🐟🦆' }
+      ], quiz: [
+        { q: 'Where did the frog sit?', choices: [ { t: 'on a log', e: '🪵' }, { t: 'on a rock', e: '🪨' }, { t: 'on a boat', e: '⛵' } ], a: 0 },
+        { q: 'Who was the last to swim?', choices: [ { t: 'a fish', e: '🐟' }, { t: 'a duck', e: '🦆' }, { t: 'a cat', e: '🐱' } ], a: 1 }
       ]},
       { id: 'g1-lost-sock', title: 'The Lost Sock', cover: '🧦', pages: [
         { t: 'Max the dog has a red sock.', a: '🐶🧦' },
@@ -628,6 +780,9 @@ RR.DATA = {
         { t: 'Max sniffs. Sniff, sniff, sniff!', a: '🐶👃' },
         { t: 'The sock is on the duck!', a: '🦆🧦' },
         { t: 'Silly duck! Max grins.', a: '🐶🦆😄' }
+      ], quiz: [
+        { q: 'Who lost the sock?', choices: [ { t: 'Max the dog', e: '🐶' }, { t: 'a cat', e: '🐱' }, { t: 'a duck', e: '🦆' } ], a: 0 },
+        { q: 'Where was the sock?', choices: [ { t: 'in the tub', e: '🛁' }, { t: 'on the bed', e: '🛏️' }, { t: 'on the duck', e: '🦆' } ], a: 2 }
       ]},
       { id: 'g1-ship-trip', title: 'The Ship Trip', cover: '🚢', pages: [
         { t: 'Chip and Dad get on a ship.', a: '🚢' },
@@ -638,6 +793,9 @@ RR.DATA = {
         { t: 'Splash! Chip is all wet.', a: '💦😆' },
         { t: 'The sun sets. The trip ends.', a: '🌅' },
         { t: 'Chip naps on the ship. What a trip!', a: '😴🚢' }
+      ], quiz: [
+        { q: 'Who went on the ship?', choices: [ { t: 'Chip and Mom', e: '👩' }, { t: 'Chip and Dad', e: '👨' }, { t: 'Chip and a cat', e: '🐱' } ], a: 1 },
+        { q: 'What did Chip see on the deck?', choices: [ { t: 'a crab', e: '🦀' }, { t: 'a frog', e: '🐸' }, { t: 'a shark', e: '🦈' } ], a: 0 }
       ]}
     ],
     2: [
@@ -650,6 +808,9 @@ RR.DATA = {
         { t: 'A wave rocked the boat. “Hold the rope!”', a: '🌊' },
         { t: 'Then the sun came out. A rainbow glowed.', a: '🌈' },
         { t: 'The goat and the mouse sailed home with a tale to tell.', a: '🐐🐭🏠' }
+      ], quiz: [
+        { q: 'What did the goat make?', choices: [ { t: 'a boat', e: '⛵' }, { t: 'a house', e: '🏠' }, { t: 'a cart', e: '🛒' } ], a: 0 },
+        { q: 'Who sailed with the goat?', choices: [ { t: 'a duck', e: '🦆' }, { t: 'a mouse', e: '🐭' }, { t: 'a fish', e: '🐟' } ], a: 1 }
       ]},
       { id: 'g2-night-light', title: 'The Night Light', cover: '💡', pages: [
         { t: 'Jane can not sleep at night. It is too dark.', a: '🌃😟' },
@@ -660,6 +821,9 @@ RR.DATA = {
         { t: 'Jane holds her bear tight and counts sheep.', a: '🧸🐑' },
         { t: 'One sheep, five sheep, nine sheep…', a: '🐑🐑🐑' },
         { t: 'Jane sleeps tight all night. Sweet dreams!', a: '😴🌙' }
+      ], quiz: [
+        { q: 'Who gave Jane a night light?', choices: [ { t: 'her dad', e: '👨' }, { t: 'her mom', e: '👩' }, { t: 'her cat', e: '🐱' } ], a: 1 },
+        { q: 'The scary shape was really her…?', choices: [ { t: 'coat', e: '🧥' }, { t: 'bear', e: '🧸' }, { t: 'cat', e: '🐱' } ], a: 0 }
       ]},
       { id: 'g2-snail-mail', title: 'The Snail Mail', cover: '🐌', pages: [
         { t: 'The snail brings the mail. He is slow, but he will not fail.', a: '🐌✉️' },
@@ -670,6 +834,9 @@ RR.DATA = {
         { t: 'At the top, he needs a rest. He dreams of the sea.', a: '💤🌊' },
         { t: 'The last stop: a cake for the mole’s birthday!', a: '🎂' },
         { t: 'The mole shouts, “You saved the day, Snail Mail!”', a: '🥳🐌' }
+      ], quiz: [
+        { q: 'What does the snail bring?', choices: [ { t: 'the mail', e: '✉️' }, { t: 'the milk', e: '🥛' }, { t: 'the news', e: '📰' } ], a: 0 },
+        { q: 'Who gets a birthday cake?', choices: [ { t: 'the fox', e: '🦊' }, { t: 'the goat', e: '🐐' }, { t: 'the mole', e: '🦫' } ], a: 2 }
       ]}
     ],
     3: [
@@ -683,6 +850,9 @@ RR.DATA = {
         { t: 'The big dragons’ fire was too wild to help. But Ember glowed gently and melted a path.', a: '🐉✨❄️' },
         { t: 'The dragons cheered. Ember squeaked with joy — and nobody laughed.', a: '🎉' },
         { t: 'The littlest dragon with the littlest roar was the bravest of them all.', a: '🐉🏆' }
+      ], quiz: [
+        { q: 'What came out when Ember tried to roar?', choices: [ { t: 'a big roar', e: '🔊' }, { t: 'a tiny squeak', e: '🐭' }, { t: 'a puff of fire', e: '🔥' } ], a: 1 },
+        { q: 'How did Ember help in the snow?', choices: [ { t: 'she melted a path', e: '✨' }, { t: 'she dug a hole', e: '🕳️' }, { t: 'she flew for help', e: '🕊️' } ], a: 0 }
       ]},
       { id: 'g3-robot-garden', title: 'The Robot’s Garden', cover: '🤖', pages: [
         { t: 'Unit Seven was a robot who worked in a rocket factory. Every day: tighten, weld, repeat.', a: '🤖🏭' },
@@ -693,6 +863,9 @@ RR.DATA = {
         { t: 'The other robots gathered around. “Error?” they beeped. “No,” said Unit Seven. “Flower.”', a: '🤖🌻' },
         { t: 'Soon every robot had a pot. The factory roof became a garden.', a: '🏭🌻🌷' },
         { t: 'Sometimes the best programs are the ones you write yourself.', a: '🤖💚' }
+      ], quiz: [
+        { q: 'Where did Unit Seven work?', choices: [ { t: 'a rocket factory', e: '🏭' }, { t: 'a flower shop', e: '🌷' }, { t: 'a school', e: '🏫' } ], a: 0 },
+        { q: 'What grew from the seed?', choices: [ { t: 'a rose', e: '🌹' }, { t: 'a sunflower', e: '🌻' }, { t: 'a tall tree', e: '🌳' } ], a: 1 }
       ]},
       { id: 'g3-red-planet', title: 'Mission to the Red Planet', cover: '🚀', pages: [
         { t: 'Commander Maya checked her helmet twice. Today was launch day.', a: '👩‍🚀🚀' },
@@ -704,6 +877,9 @@ RR.DATA = {
         { t: 'Inside the sparkle: tiny frozen crystals of ice. Water! Maybe life was possible here.', a: '💎💧' },
         { t: 'Maya smiled inside her helmet. The first discovery is the sweetest.', a: '👩‍🚀😊' },
         { t: 'That night she sent a message home: “It’s beautiful out here. Science rocks.”', a: '📡🌌' }
+      ], quiz: [
+        { q: 'Who flew the rocket?', choices: [ { t: 'Commander Maya', e: '👩‍🚀' }, { t: 'Captain Rio', e: '🧑‍🚀' }, { t: 'Doctor Lee', e: '👨‍⚕️' } ], a: 0 },
+        { q: 'What did Maya find inside the rock?', choices: [ { t: 'gold', e: '🪙' }, { t: 'frozen ice', e: '💧' }, { t: 'a bug', e: '🐛' } ], a: 1 }
       ]}
     ],
     4: [
@@ -716,6 +892,9 @@ RR.DATA = {
         { t: 'The mouse had drawn a maze of chalk lines, like a tiny city map.', a: '🗺️' },
         { t: '“You’re an artist!” Mia whispered. The mouse twitched its whiskers proudly.', a: '🐭🎨' },
         { t: 'Mia kept the secret. But every Friday, she left one piece of chalk by the crack.', a: '🤫' }
+      ], quiz: [
+        { q: 'What kept going missing from Room 12?', choices: [ { t: 'the chalk', e: '🖍️' }, { t: 'the books', e: '📚' }, { t: 'the clock', e: '🕐' } ], a: 0 },
+        { q: 'Who was taking it?', choices: [ { t: 'a bird', e: '🐦' }, { t: 'a mouse', e: '🐭' }, { t: 'another kid', e: '🧒' } ], a: 1 }
       ]},
       { id: 'g4-raindrop', title: 'Journey of a Raindrop', cover: '💧', pages: [
         { t: 'High above the mountains, a raindrop named Rio formed inside a heavy gray cloud.', a: '☁️' },
@@ -726,6 +905,9 @@ RR.DATA = {
         { t: 'At last, Rio reached the sea and floated under the wide blue sky.', a: '🌊' },
         { t: 'The warm sun lifted him up, up, up — lighter than a whisper.', a: '☀️' },
         { t: 'Soon Rio was back inside a cloud, ready for the next adventure. The journey never ends.', a: '☁️✨' }
+      ], quiz: [
+        { q: 'What is the raindrop’s name?', choices: [ { t: 'Rio', e: '💧' }, { t: 'Milo', e: '🧒' }, { t: 'Sky', e: '☁️' } ], a: 0 },
+        { q: 'Where did Rio end up at the end?', choices: [ { t: 'in a cave', e: '🕳️' }, { t: 'back inside a cloud', e: '☁️' }, { t: 'in a well', e: '🪣' } ], a: 1 }
       ]}
     ],
     5: [
@@ -738,6 +920,9 @@ RR.DATA = {
         { t: 'The “dream machine” was not a machine at all. It was a list: Be curious. Ask questions. Build things. Fail. Try again.', a: '📜' },
         { t: 'Zoe smiled. She grabbed a screwdriver and the broken clocks and got to work.', a: '🔧' },
         { t: 'By morning, something in the attic was ticking again — and so was a brand-new idea.', a: '⏰💡' }
+      ], quiz: [
+        { q: 'Where did Zoe find the notebook?', choices: [ { t: 'her grandfather’s attic', e: '🏚️' }, { t: 'the library', e: '📚' }, { t: 'her school desk', e: '🏫' } ], a: 0 },
+        { q: 'What was the “dream machine” really?', choices: [ { t: 'a flying bike', e: '🚲' }, { t: 'a list of ideas', e: '📜' }, { t: 'a robot', e: '🤖' } ], a: 1 }
       ]},
       { id: 'g5-pluto', title: 'The Last Message from Pluto Station', cover: '🛰️', pages: [
         { t: 'The research station at the edge of the solar system had been silent for nine years.', a: '🛰️' },
@@ -748,6 +933,9 @@ RR.DATA = {
         { t: 'When the airlock opened, Unit K stood at attention, dented but proud.', a: '🤖✨' },
         { t: 'Its memory held nine years of discoveries — and one short poem about loneliness.', a: '💾' },
         { t: 'Back on Earth, scientists studied the data for decades. But the poem is what everyone remembers.', a: '🌍📜' }
+      ], quiz: [
+        { q: 'Who sent the message?', choices: [ { t: 'Commander Reyes', e: '👩‍🚀' }, { t: 'a robot named Unit K', e: '🤖' }, { t: 'an alien', e: '👽' } ], a: 1 },
+        { q: 'How long had the station been silent?', choices: [ { t: 'nine years', e: '📅' }, { t: 'one week', e: '🗓️' }, { t: 'a hundred years', e: '⏳' } ], a: 0 }
       ]}
     ]
   }

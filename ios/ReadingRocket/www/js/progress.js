@@ -183,8 +183,11 @@ RR.progress = (function () {
     { id: 'petstar',    e: '🐾', name: 'Best Friend',    hint: 'Grow your pet to Star Form',     test: p => ((p.petState || {}).xp || 0) >= 400 },
     { id: 'decorator',  e: '🛋️', name: 'Decorator',      hint: 'Decorate every spot in your base', test: p => p.base && Object.values(p.base.placed).filter(Boolean).length >= 6 },
     { id: 'story3',     e: '🌠', name: 'Story Fan',      hint: 'Read 3 story episodes',          test: p => episodesRead(p) >= 3 },
-    { id: 'story8',     e: '🌟', name: 'Star Reader',    hint: 'Finish the whole story',         test: p => episodesRead(p) >= (D().CAMPAIGN || []).length },
-    { id: 'duelist',    e: '⚔️', name: 'Duelist',        hint: 'Win a Sibling Duel',             test: p => (p.duelWins || 0) >= 1 }
+    { id: 'story8',     e: '🌟', name: 'Star Reader',    hint: 'Finish the whole story',         test: p => episodesRead(p) >= 8 },
+    { id: 'story16',    e: '🔔', name: 'Galaxy Storyteller', hint: 'Finish Season 2 of the story', test: p => episodesRead(p) >= 16 },
+    { id: 'duelist',    e: '⚔️', name: 'Duelist',        hint: 'Win a Sibling Duel',             test: p => (p.duelWins || 0) >= 1 },
+    { id: 'rescue10',   e: '🛟', name: 'Word Lifeguard',  hint: 'Play Word Rescue 10 times',      test: p => gamePlays(p, 'rescue') >= 10 },
+    { id: 'spell10',    e: '✏️', name: 'Spelling Star',   hint: 'Play Spell It 10 times',         test: p => gamePlays(p, 'spell') >= 10 }
   ];
 
   function badges(p) {
@@ -285,6 +288,8 @@ RR.progress = (function () {
       if (available('sounds')) cand.push({ id: 'sounds', n: unmastered(d.LETTERS, 'l:', l => l.l) });
       if (available('sight')) cand.push({ id: 'sight', n: unmastered(d.SIGHT[grade], 's:', s => s) });
       if (available('memory')) cand.push({ id: 'memory', n: unmastered(d.WORDS[grade], 'w:', w => w.w) - 2 });
+      if (available('rescue')) cand.push({ id: 'rescue', n: troubleWords(p, 99).length * 3 });
+      if (available('spell')) cand.push({ id: 'spell', n: unmastered(d.WORDS[grade], 'w:', w => w.w) - 3 });
       cand.sort((a, b) => b.n - a.n);
       return cand[0] && cand[0].n > 0 ? cand[0].id : 'books';
     };

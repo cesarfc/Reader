@@ -22,6 +22,7 @@ RR.nav = RR.nav || {};
   const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 
   function renderDuel() {
+    if (RR.ui) RR.ui.hideTabs();
     const profiles = S.profiles;
     if (profiles.length < 2) { RR.nav.home(); return; }
     if (profiles.length === 2) { startDuel(profiles[0], profiles[1]); return; }

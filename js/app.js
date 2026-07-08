@@ -92,6 +92,70 @@ RR.nav = RR.nav || {};
   function petHide() {
     if (petEl) { petEl.remove(); petEl = null; }
   }
+  /* Read-only pet surface for other modules (e.g. My Base renders the pet in-room). */
+  RR.pet = { stage: petStage, next: petNextStage, show: petShow, hide: petHide };
+
+  /* ---------------- Tabbed shell: floating tab bar + top app bar ----------------
+     Tab screens (Home/Play/Read/Adventure/Me) show the bar; drill-downs
+     (games, battles, readers, shop, base, parent) hide it and use a back
+     arrow that returns to their owning tab. */
+  const TABS = [
+    { id: 'home', e: '🏠', label: 'Home', go: () => renderPlayer() },
+    { id: 'play', e: '🎮', label: 'Play', go: () => renderPlayTab() },
+    { id: 'read', e: '📖', label: 'Read', go: () => RR.nav.story() },
+    { id: 'adventure', e: '🗺️', label: 'Adventure', go: () => RR.nav.map() },
+    { id: 'me', e: '🧑‍🚀', label: 'Me', go: () => renderMeTab() }
+  ];
+  let tabEl = null;
+  function showTabs(active) {
+    if (!tabEl) {
+      tabEl = document.createElement('nav');
+      tabEl.id = 'tabbar';
+      tabEl.setAttribute('aria-label', 'Main');
+      document.body.appendChild(tabEl);
+    }
+    tabEl.hidden = false;
+    document.body.classList.add('tabs-on');
+    tabEl.innerHTML = TABS.map(t => `
+      <button class="tabitem ${t.id === active ? 'on' : ''}" data-tab="${t.id}" aria-label="${t.label}">
+        <span class="tabicon">${t.e}</span><span class="tablabel">${t.label}</span>
+      </button>`).join('');
+    tabEl.querySelectorAll('.tabitem').forEach(b =>
+      b.addEventListener('click', () => {
+        if (b.dataset.tab === active) return;
+        A.sfx.pop();
+        TABS.find(t => t.id === b.dataset.tab).go();
+      }));
+  }
+  function hideTabs() {
+    if (tabEl) tabEl.hidden = true;
+    document.body.classList.remove('tabs-on');
+  }
+  RR.ui = { showTabs, hideTabs, appBar: appBarHtml, wireAppBar };
+
+  /* Slim top app bar shared by all five tabs. */
+  function appBarHtml(p) {
+    const lv = P.levelOf(p.xp).level;
+    return `
+      <header class="appbar">
+        <button class="appbar-id" data-act="switch" aria-label="Switch reader">
+          <span class="appbar-avatar">${S.heroEmoji(p)}</span>
+          <span class="appbar-name"><b>${esc(p.name)}</b><small>Lv ${lv}</small></span>
+        </button>
+        <div class="appbar-pills">
+          <span class="coinpill">🪙 ${p.coins}</span>
+          <span class="coinpill gem">💎 ${p.gems}</span>
+          <button class="iconbtn" data-act="settings" aria-label="Sound and voice settings">⚙️</button>
+        </div>
+      </header>`;
+  }
+  function wireAppBar() {
+    wireMute(app);
+    const st = app.querySelector('[data-act="settings"]');
+    if (st) st.addEventListener('click', openSettings);
+    const sw = app.querySelector('[data-act="switch"]');
+    if (sw) sw.addEventListener('click', () => { A.sfx.whoosh(); renderHome(); });
+  }
   RR.onFeedback = kind => {
     if (!petEl) return;
     const cls = kind === 'happy' ? 'petjump' : kind === 'sad' ? 'petsad' : 'petparty';
@@ -144,6 +208,7 @@ RR.nav = RR.nav || {};
   function renderHome() {
     A.stop();
     petHide();
+    hideTabs();
     document.body.className = '';
     const goal = S.familyGoal();
     app.innerHTML = `
@@ -303,7 +368,7 @@ RR.nav = RR.nav || {};
       } else {
         A.speak(['Yum!', 'So tasty!', 'Nom nom nom!'][(Math.random() * 3) | 0]);
       }
-      renderPlayer();
+      renderMeTab();
     });
   }
 
@@ -344,14 +409,19 @@ RR.nav = RR.nav || {};
     const read = P.episodesRead(p);
     const next = eps.find(ep => !P.episodeRead(p, ep.id));
     const status = next ? P.campaignStatus(p, next) : null;
+    const epLabel = ep => {
+      const season = ep.season || 1;
+      const n = eps.filter(e => (e.season || 1) === season).indexOf(ep) + 1;
+      return season > 1 ? `Season ${season}, Episode ${n}` : `Episode ${n}`;
+    };
     const line = !next ? '🌟 The End — read your favorites again!'
-      : status.open ? `✨ Episode ${eps.indexOf(next) + 1} is ready: “${next.title}”`
+      : status.open ? `✨ ${epLabel(next)} is ready: “${next.title}”`
       : status.reason;
     return `
       <button class="storycard ${next && status.open ? 'fresh' : ''}" data-act="story">
         <span class="storycover big">${next ? next.cover : '🌟'}</span>
         <span class="storyinfo">
-          <span class="storytitle">🌠 Milo and the Lost Star</span>
+          <span class="storytitle">🌠 Milo's Star Stories</span>
           <span class="storymeta">${line}</span>
         </span>
         <span class="storycount">${read}/${eps.length}</span>
@@ -380,97 +450,153 @@ RR.nav = RR.nav || {};
       </div>`;
   }
 
+  /* "Keep going" rows on the Home tab: next story episode + adventure stage. */
+  function storyRowHtml(p) {
+    const eps = D.CAMPAIGN || [];
+    if (!eps.length) return '';
+    const next = eps.find(ep => !P.episodeRead(p, ep.id));
+    const status = next ? P.campaignStatus(p, next) : null;
+    const epLabel = ep => {
+      const season = ep.season || 1;
+      const n = eps.filter(e => (e.season || 1) === season).indexOf(ep) + 1;
+      return (season > 1 ? `S${season} · ` : '') + `Episode ${n}`;
+    };
+    const line = !next ? 'The End — read your favorites again!'
+      : status.open ? `${epLabel(next)} · ${next.title}`
+      : status.reason;
+    return `
+      <button class="gorow" data-act="story">
+        <span class="goicon lav">${next ? next.cover : '🌟'}</span>
+        <span class="goinfo"><b>Milo's Star Stories</b><small>${esc(line)}</small></span>
+        ${next && status.open ? '<span class="gochip new">NEW</span>' : '<span class="gochevron">›</span>'}
+      </button>`;
+  }
+
+  function adventureRowHtml(p) {
+    if (RR.adventure.isChampion(p)) {
+      return `
+        <button class="gorow" data-act="adventure">
+          <span class="goicon yellow">🏆</span>
+          <span class="goinfo"><b>Galaxy Champion!</b><small>Rematch any boss on the map</small></span>
+          <span class="gochevron">›</span>
+        </button>`;
+    }
+    const stage = RR.adventure.stageOf(p);
+    const ready = RR.adventure.bossReady(p);
+    return `
+      <button class="gorow" data-act="adventure">
+        <span class="goicon coral">${stage.e}</span>
+        <span class="goinfo"><b>Stage ${p.stage + 1} · ${stage.name}</b>
+          <small>${ready ? `Boss ready — ${stage.boss.name} ${stage.boss.e}` : `${Math.min(p.stageWins, stage.wins)}/${stage.wins} rounds to wake ${stage.boss.name}`}</small></span>
+        ${ready ? '<span class="gochip fight">FIGHT</span>' : '<span class="gochevron">›</span>'}
+      </button>`;
+  }
+
+  /* Quest sheet: the three daily quests, opened from the Home minicard. */
+  function questSheet(p) {
+    const overlay = document.createElement('div');
+    overlay.className = 'overlay';
+    overlay.innerHTML = `
+      <div class="modal">
+        ${questCardHtml(p)}
+        <div class="modalbtns"><button class="btn" data-act="close">Let's go!</button></div>
+      </div>`;
+    document.body.appendChild(overlay);
+    overlay.querySelector('[data-act="close"]').addEventListener('click', () => overlay.remove());
+    overlay.addEventListener('click', e => { if (e.target === overlay) overlay.remove(); });
+  }
+
+  /* ---------------- Home tab: the "what do I do right now" dashboard ---------------- */
   function renderPlayer() {
     const p = S.current();
     if (!p) { renderHome(); return; }
     S.rollWeek(p);
-    document.body.className = 'stage-' + Math.min(p.stage, 9);
     petShow();
+    P.ensureQuests(p);
+    S.save();
+    const lv = P.levelOf(p.xp);
+    const pct = Math.round(P.gradeProgress(p, p.grade).overall * 100);
+    const pos = Math.min(100, pct / 80 * 100);
+    const gradReady = P.readyToGraduate(p);
+    const qDone = p.quests.items.filter(i => i.done).length;
     const tip = D.TIPS[(Math.random() * D.TIPS.length) | 0];
-    const stage = RR.adventure.stageOf(p);
-    const champion = RR.adventure.isChampion(p);
-    const ready = RR.adventure.bossReady(p);
-    const weapon = S.gear(p, 'weapon');
-    const armor = S.gear(p, 'armor');
-    const pet = S.gear(p, 'pet');
-    const gearChips = [weapon, armor, pet].filter(Boolean)
-      .map(g => `<span class="gearchip">${g.e} ${g.name}</span>`).join('') ||
-      '<span class="gearchip none">No gear yet — visit the shop!</span>';
+    const DAYS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 
     app.innerHTML = `
       <section class="screen">
-        <header class="playerbar">
-          <button class="iconbtn" data-act="back" aria-label="Back">←</button>
-          <div class="playerid">
-            <span class="pavatar small">${S.heroEmoji(p)}</span>
-            <div>
-              <div class="pname">${esc(p.name)}</div>
-              <div class="pstars small">🪙 ${p.coins} · 💎 ${p.gems} · ⭐ ${p.stars || 0}</div>
-            </div>
-          </div>
-          <button class="iconbtn" data-act="settings" aria-label="Voice and speed settings">⚙️</button>
-          ${muteButton()}
-        </header>
-        ${xpBarHtml(p)}
-        ${eventBannerHtml()}
-
-        <button class="playbig" data-act="play">▶ PLAY!</button>
-
-        <div class="herocard">
-          <span class="heroemoji">${heroFigureHtml(p)}</span>
-          <div class="heromid">
-            <div class="statchips">
-              <span class="statchip">⚔️ ${S.attack(p)}</span>
-              <span class="statchip">❤️ ${S.hearts(p)}</span>
-              ${S.coinBoost(p) ? `<span class="statchip">🪙+${S.coinBoost(p)}%</span>` : ''}
-              ${S.streakBoost(p) ? `<span class="statchip">🔥+${S.streakBoost(p)}%</span>` : ''}
-            </div>
-            <div class="herogear">${gearChips}</div>
-          </div>
-          <div class="herobtns">
-            <button class="btn shopgo" data-act="shop">🛒<br>Shop</button>
-            <button class="btn ghost shopgo" data-act="base">🚀<br>My Base</button>
-            <button class="btn ghost shopgo" data-act="stickers">📔<br>Stickers</button>
-            <button class="btn ghost shopgo" data-act="badges">🏅<br>Stuff</button>
+        ${appBarHtml(p)}
+        <div class="greet">
+          <span class="eyebrow">${DAYS[new Date().getDay()]} · ready to read</span>
+          <h1>Hi, ${esc(p.name)}! 👋</h1>
+          <div class="xprow">
+            <span class="xplv">Lv ${lv.level}</span>
+            <div class="timebar xbar"><i style="width:${Math.round(lv.into / lv.need * 100)}%"></i></div>
+            <span class="xptitle">${P.titleOf(lv.level)}</span>
           </div>
         </div>
+        ${eventBannerHtml()}
 
-        ${petPanelHtml(p)}
+        <button class="playbig" data-act="play">▶ PLAY<span>Continue where you left off</span></button>
 
-        ${champion ? `
-          <div class="advcard champ">
-            <div class="advtop"><span class="stageemoji">🏆</span>
-              <div><div class="advname">Galaxy Champion!</div>
-              <div class="advboss">Every boss defeated. Rematch them anytime!</div></div>
-            </div>
-            <button class="btn ghost" data-act="map">🗺️ Adventure Map</button>
-          </div>` : `
-          <div class="advcard" style="--s1:${stage.colors[0]};--s2:${stage.colors[1]}">
-            <div class="advtop"><span class="stageemoji">${stage.e}</span>
-              <div><div class="advname">Stage ${p.stage + 1}: ${stage.name}</div>
-              <div class="advboss">Boss: ${stage.boss.name} ${stage.boss.e}</div></div>
-            </div>
-            <div class="stageprogress">
-              <div class="timebar"><i style="width:${Math.min(100, p.stageWins / stage.wins * 100)}%"></i></div>
-              <span class="muted">${Math.min(p.stageWins, stage.wins)}/${stage.wins} rounds</span>
-            </div>
-            <div class="advbtns">
-              ${ready
-                ? `<button class="btn big fightbtn pulse" data-act="fight">⚔️ FIGHT THE BOSS!</button>`
-                : `<span class="advhint">Play ${stage.wins - p.stageWins} more round${stage.wins - p.stageWins === 1 ? '' : 's'} to wake the boss…</span>`}
-              <button class="btn ghost" data-act="map">🗺️ Map</button>
-            </div>
-          </div>`}
+        <div class="tworow">
+          <button class="minicard" data-act="journey">
+            <span class="minitop">🌙 <b>${pct}%</b></span>
+            <span class="minilabel">${D.GRADE_LABEL[p.grade]} journey</span>
+            <span class="jtrack"><i class="jtrail" style="width:${pos}%"></i><span class="jmoon">🌙</span><span class="jrocket" style="left:${pos}%">🚀</span></span>
+            ${gradReady ? '<span class="readychip">🎓 Graduate!</span>' : ''}
+          </button>
+          <button class="minicard" data-act="quests">
+            <span class="minitop">🎯 <b>${qDone}/3</b></span>
+            <span class="minilabel">Today's quests</span>
+            <span class="qdots">${p.quests.items.map(i => `<i class="qdot ${i.done ? 'on' : ''}"></i>`).join('')}</span>
+          </button>
+        </div>
 
-        ${storyCardHtml(p)}
-        ${journeyCardHtml(p)}
-        ${questCardHtml(p)}
+        <span class="eyebrow section">Keep going</span>
+        ${storyRowHtml(p)}
+        ${adventureRowHtml(p)}
 
+        <div class="tiprow">
+          <span class="owl">🦉</span>
+          <div class="bubble"><b>Grown-up tip:</b> ${tip}</div>
+        </div>
+      </section>`;
+    wireAppBar();
+    showTabs('home');
+    app.querySelector('[data-act="play"]').addEventListener('click', () => {
+      const act = P.nextActivity(p);
+      S.save();
+      A.sfx.whoosh();
+      if (act.kind === 'battle') RR.nav.battle(p.stage);
+      else startGame(act.id);
+    });
+    app.querySelector('[data-act="journey"]').addEventListener('click', () => {
+      if (P.readyToGraduate(p)) renderCeremony();
+      else journeyModal(p);
+    });
+    app.querySelector('[data-act="quests"]').addEventListener('click', () => questSheet(p));
+    const evBtn = app.querySelector('[data-act="event"]');
+    if (evBtn) evBtn.addEventListener('click', eventModal);
+    const storyBtn = app.querySelector('[data-act="story"]');
+    if (storyBtn) storyBtn.addEventListener('click', () => { A.sfx.whoosh(); RR.nav.story(); });
+    const advBtn = app.querySelector('[data-act="adventure"]');
+    if (advBtn) advBtn.addEventListener('click', () => { A.sfx.whoosh(); RR.nav.map(); });
+    guideSay('player', 'Tap the big play button to start!');
+    maybeDailyGift(p);
+  }
+
+  /* ---------------- Play tab: grade picker + Training Grounds ---------------- */
+  function renderPlayTab() {
+    const p = S.current();
+    if (!p) { renderHome(); return; }
+    petHide();
+    app.innerHTML = `
+      <section class="screen">
+        ${appBarHtml(p)}
+        <h2 class="trainhead">🎮 Training Grounds <small>every round earns 🪙</small></h2>
         <div class="gradepick">
           ${GRADES.map(g => `<button class="gradepill ${g === p.grade ? 'on' : ''}" data-g="${g}">${gradePill(g)}</button>`).join('')}
         </div>
-
-        <h2 class="trainhead">⚒️ Training Grounds <small>every round earns 🪙</small></h2>
         <div class="gamegrid">
           ${RR.gameOrder.filter(id => {
             const g = RR.games[id];
@@ -487,50 +613,61 @@ RR.nav = RR.nav || {};
               </button>`;
           }).join('')}
         </div>
-
-        <div class="tiprow">
-          <span class="owl">🦉</span>
-          <div class="bubble"><b>Grown-up tip:</b> ${tip}</div>
-        </div>
       </section>`;
-    wireMute(app);
-    app.querySelector('[data-act="back"]').addEventListener('click', renderHome);
-    app.querySelector('[data-act="settings"]').addEventListener('click', openSettings);
-    app.querySelector('[data-act="play"]').addEventListener('click', () => {
-      const act = P.nextActivity(p);
-      S.save();
-      A.sfx.whoosh();
-      if (act.kind === 'battle') RR.nav.battle(p.stage);
-      else startGame(act.id);
-    });
-    app.querySelector('[data-act="shop"]').addEventListener('click', () => RR.nav.shop());
-    app.querySelector('[data-act="base"]').addEventListener('click', () => RR.nav.base());
-    app.querySelector('[data-act="stickers"]').addEventListener('click', renderStickers);
-    app.querySelector('[data-act="badges"]').addEventListener('click', renderBadges);
-    wirePetPanel(p);
-    const evBtn = app.querySelector('[data-act="event"]');
-    if (evBtn) evBtn.addEventListener('click', eventModal);
-    const storyBtn = app.querySelector('[data-act="story"]');
-    if (storyBtn) storyBtn.addEventListener('click', () => { A.sfx.whoosh(); RR.nav.story(); });
-    guideSay('player', 'Tap the big play button to start!');
-    app.querySelector('[data-act="journey"]').addEventListener('click', () => {
-      if (P.readyToGraduate(p)) renderCeremony();
-      else journeyModal(p);
-    });
-    app.querySelectorAll('[data-act="map"]').forEach(b => b.addEventListener('click', () => RR.nav.map()));
-    const fight = app.querySelector('[data-act="fight"]');
-    if (fight) fight.addEventListener('click', () => RR.nav.battle(p.stage));
+    wireAppBar();
+    showTabs('play');
     app.querySelectorAll('.gradepill').forEach(b =>
       b.addEventListener('click', () => {
         p.grade = b.dataset.g;
         S.save();
         A.sfx.pop();
-        renderPlayer();
+        renderPlayTab();
       }));
     app.querySelectorAll('.gamecard').forEach(b =>
       b.addEventListener('click', () => startGame(b.dataset.game)));
+  }
 
-    maybeDailyGift(p);
+  /* ---------------- Me tab: hero, pet, and everything you own ---------------- */
+  function renderMeTab() {
+    const p = S.current();
+    if (!p) { renderHome(); return; }
+    petHide();
+    const gearChips = ['weapon', 'armor', 'pet'].map(s => S.gear(p, s)).filter(Boolean)
+      .map(g => `<span class="gearchip">${g.e} ${g.name}</span>`).join('') ||
+      '<span class="gearchip none">No gear yet — visit the shop!</span>';
+    app.innerHTML = `
+      <section class="screen">
+        ${appBarHtml(p)}
+        <div class="herocard">
+          <span class="heroemoji">${heroFigureHtml(p)}</span>
+          <div class="heromid">
+            <div class="statchips">
+              <span class="statchip">⚔️ ${S.attack(p)}</span>
+              <span class="statchip">❤️ ${S.hearts(p)}</span>
+              <span class="statchip">⭐ ${p.stars || 0}</span>
+              ${S.coinBoost(p) ? `<span class="statchip">🪙+${S.coinBoost(p)}%</span>` : ''}
+              ${S.streakBoost(p) ? `<span class="statchip">🔥+${S.streakBoost(p)}%</span>` : ''}
+            </div>
+            <div class="herogear">${gearChips}</div>
+          </div>
+        </div>
+        ${petPanelHtml(p)}
+        <div class="megrid">
+          <button class="mego" data-act="shop"><span class="goicon yellow">🛒</span><b>Star Shop</b><small>Gear up your hero</small></button>
+          <button class="mego" data-act="base"><span class="goicon sky">🚀</span><b>My Base</b><small>Decorate your rocket</small></button>
+          <button class="mego" data-act="stickers"><span class="goicon rose">📔</span><b>Stickers</b><small>${P.stickerCount(p)}/${P.stickerTotal()} collected</small></button>
+          <button class="mego" data-act="badges"><span class="goicon teal">🏅</span><b>My Stuff</b><small>Badges & gear</small></button>
+        </div>
+        <div class="parentrow"><button class="parentlink" data-act="parent">👨‍👩‍👧 Grown-up corner</button></div>
+      </section>`;
+    wireAppBar();
+    showTabs('me');
+    wirePetPanel(p);
+    app.querySelector('[data-act="shop"]').addEventListener('click', () => RR.nav.shop());
+    app.querySelector('[data-act="base"]').addEventListener('click', () => RR.nav.base());
+    app.querySelector('[data-act="stickers"]').addEventListener('click', renderStickers);
+    app.querySelector('[data-act="badges"]').addEventListener('click', renderBadges);
+    app.querySelector('[data-act="parent"]').addEventListener('click', () => parentGate(renderParent));
   }
 
   /* ---------------- Journey breakdown ---------------- */
@@ -565,6 +702,7 @@ RR.nav = RR.nav || {};
   /* ---------------- Graduation ceremony ---------------- */
   function renderCeremony() {
     const p = S.current();
+    hideTabs();
     const from = p.grade;
     const to = P.nextGrade(from);
     if (!to || p.celebrated[from]) { renderPlayer(); return; }
@@ -594,6 +732,7 @@ RR.nav = RR.nav || {};
   /* ---------------- Sticker album ---------------- */
   function renderStickers() {
     const p = S.current();
+    hideTabs();
     const got = P.stickerCount(p);
     const total = P.stickerTotal();
     app.innerHTML = `
@@ -613,13 +752,14 @@ RR.nav = RR.nav || {};
             }).join('')}
           </div>`).join('')}
       </section>`;
-    app.querySelector('[data-act="back"]').addEventListener('click', renderPlayer);
+    app.querySelector('[data-act="back"]').addEventListener('click', renderMeTab);
     guideSay('stickers', 'Look at all your stickers! Win more by playing games!');
   }
 
   /* ---------------- My Stuff: gear, stickers, badges ---------------- */
   function renderBadges() {
     const p = S.current();
+    hideTabs();
     const list = P.badges(p);
     const got = list.filter(b => b.earned).length;
     const owned = p.owned.map(id => S.item(id)).filter(Boolean);
@@ -651,7 +791,7 @@ RR.nav = RR.nav || {};
             </div>`).join('')}
         </div>
       </section>`;
-    app.querySelector('[data-act="back"]').addEventListener('click', renderPlayer);
+    app.querySelector('[data-act="back"]').addEventListener('click', renderMeTab);
     app.querySelector('[data-act="album"]').addEventListener('click', renderStickers);
   }
 
@@ -701,7 +841,12 @@ RR.nav = RR.nav || {};
     overlay.className = 'overlay';
     overlay.innerHTML = `
       <div class="modal">
-        <h2>⚙️ Voice & Speed</h2>
+        <h2>⚙️ Sound & Voice</h2>
+        <label class="mlabel">Sound</label>
+        <div class="gradepick modalgrades soundopts">
+          <button class="gradepill ${!A.muted ? 'on' : ''}" data-m="0">🔊 On</button>
+          <button class="gradepill ${A.muted ? 'on' : ''}" data-m="1">🔇 Off</button>
+        </div>
         ${voices.length && !hasNatural ? `
           <p class="gemhint">💡 This device only has basic voices right now — the tip below
           unlocks a much more natural one (takes 2 minutes).</p>` : ''}
@@ -749,6 +894,12 @@ RR.nav = RR.nav || {};
         A.speak("Let's read together!", { rate: 0.9 });
       }));
     overlay.querySelector('[data-act="test"]').addEventListener('click', () => A.sample());
+    overlay.querySelectorAll('.soundopts .gradepill').forEach(b =>
+      b.addEventListener('click', () => {
+        A.setMuted(b.dataset.m === '1');
+        overlay.querySelectorAll('.soundopts .gradepill').forEach(x => x.classList.toggle('on', x === b));
+        if (!A.muted) A.sfx.pop();
+      }));
     overlay.querySelectorAll('.listenopts .gradepill').forEach(b =>
       b.addEventListener('click', () => {
         RR.voice.setEnabled(b.dataset.l === '1');
@@ -790,7 +941,26 @@ RR.nav = RR.nav || {};
     overlay.querySelector('[data-act="cancel"]').addEventListener('click', () => overlay.remove());
   }
 
+  /* Confirm the destructive part of an import before it runs. */
+  function confirmReplace(onReplace) {
+    const overlay = document.createElement('div');
+    overlay.className = 'overlay';
+    overlay.innerHTML = `
+      <div class="modal">
+        <h2>⚠️ Replace all progress?</h2>
+        <p class="muted">This replaces ALL progress on this device with the code's progress. Continue?</p>
+        <div class="modalbtns">
+          <button class="btn danger" data-act="replace">Replace</button>
+          <button class="btn ghost" data-act="cancel">Cancel</button>
+        </div>
+      </div>`;
+    document.body.appendChild(overlay);
+    overlay.querySelector('[data-act="replace"]').addEventListener('click', () => { overlay.remove(); onReplace(); });
+    overlay.querySelector('[data-act="cancel"]').addEventListener('click', () => overlay.remove());
+  }
+
   function renderParent() {
+    hideTabs();
     const goal = S.familyGoal();
     app.innerHTML = `
       <section class="screen">
@@ -849,6 +1019,38 @@ RR.nav = RR.nav || {};
         </div>
 
         <div class="parentcard">
+          <h3 class="famh">📖 Book Maker</h3>
+          <p class="muted">Write books starring YOUR kids — their names, your pets, your places. Personal books are the ones they read again and again.</p>
+          ${S.customBooks().length
+            ? S.customBooks().map(b => `
+              <div class="stuffrow">
+                <span class="gearchip">${esc(b.cover)} ${esc(b.title)} · ${b.pages.length} pg</span>
+                <button class="btn ghost" data-editbook="${esc(b.id)}">✏️ Edit</button>
+                <button class="btn danger" data-delbook="${esc(b.id)}">🗑 Remove</button>
+              </div>`).join('')
+            : '<p class="pstatsrow muted">No family books yet — tap “New book” to write your first one!</p>'}
+          <div class="modalbtns">
+            <button class="btn" data-act="newbook">➕ New book</button>
+          </div>
+        </div>
+
+        <div class="parentcard">
+          <h3 class="famh">💾 Backup & transfer</h3>
+          <p class="muted">Progress lives only on this device. Copy this code somewhere safe, or paste a code from another device.</p>
+          <label class="mlabel">This device's backup code</label>
+          <textarea class="minput backupout" readonly rows="3">${esc(S.exportSave())}</textarea>
+          <div class="modalbtns">
+            <button class="btn ghost" data-act="copybackup">📋 Copy backup code</button>
+          </div>
+          <label class="mlabel">Paste a code from another device</label>
+          <textarea class="minput backupin" rows="3" placeholder="Paste a backup code here"></textarea>
+          <p class="muted importerr" hidden>That code doesn't look right — check you copied all of it.</p>
+          <div class="modalbtns">
+            <button class="btn" data-act="importbackup">📥 Import</button>
+          </div>
+        </div>
+
+        <div class="parentcard">
           <h3 class="famh">⚙️ Voice & speed</h3>
           <button class="btn ghost" data-act="voice">Open voice settings</button>
         </div>
@@ -882,12 +1084,182 @@ RR.nav = RR.nav || {};
     const clear = app.querySelector('[data-act="cleargoal"]');
     if (clear) clear.addEventListener('click', () => { S.setFamilyGoal(null); renderHome(); });
     app.querySelector('[data-act="voice"]').addEventListener('click', openSettings);
+
+    /* ----- Backup & transfer ----- */
+    const backupOut = app.querySelector('.backupout');
+    const copyBtn = app.querySelector('[data-act="copybackup"]');
+    copyBtn.addEventListener('click', () => {
+      const code = S.exportSave();
+      const done = () => {
+        A.sfx.coin();
+        copyBtn.textContent = '✓ Copied!';
+        setTimeout(() => { copyBtn.textContent = '📋 Copy backup code'; }, 1500);
+      };
+      /* execCommand fallback needs the code selected in a real textarea */
+      const fallback = () => {
+        backupOut.value = code;
+        backupOut.focus();
+        backupOut.select();
+        try { if (document.execCommand('copy')) done(); } catch (e) { /* copy unavailable */ }
+      };
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(code).then(done, fallback);
+      } else {
+        fallback();
+      }
+    });
+
+    const importBtn = app.querySelector('[data-act="importbackup"]');
+    const backupIn = app.querySelector('.backupin');
+    const importErr = app.querySelector('.importerr');
+    importBtn.addEventListener('click', () => {
+      importErr.hidden = true;
+      const text = backupIn.value;
+      /* importing overwrites everything — confirm before touching the save */
+      confirmReplace(() => {
+        if (S.importSave(text)) {
+          A.sfx.fanfare();
+          RR.confetti.burst(80);
+          renderHome();
+        } else {
+          importBtn.classList.add('shake');
+          setTimeout(() => importBtn.classList.remove('shake'), 450);
+          importErr.hidden = false;
+        }
+      });
+    });
+
+    /* ----- Book Maker ----- */
+    app.querySelector('[data-act="newbook"]').addEventListener('click', () => bookMakerEditor(null));
+    app.querySelectorAll('[data-editbook]').forEach(btn =>
+      btn.addEventListener('click', () => {
+        const book = S.customBooks().find(b => b.id === btn.dataset.editbook);
+        if (book) bookMakerEditor(book);
+      }));
+    app.querySelectorAll('[data-delbook]').forEach(btn =>
+      btn.addEventListener('click', () => {
+        const book = S.customBooks().find(b => b.id === btn.dataset.delbook);
+        if (!book) return;
+        confirmRemoveBook(book, () => {
+          S.removeCustomBook(book.id);
+          A.sfx.pop();
+          renderParent();
+        });
+      }));
+  }
+
+  /* Confirm removing a family book (no window.confirm — matches confirmReplace). */
+  function confirmRemoveBook(book, onConfirm) {
+    const overlay = document.createElement('div');
+    overlay.className = 'overlay';
+    overlay.innerHTML = `
+      <div class="modal">
+        <h2>🗑 Remove this book?</h2>
+        <p class="muted">“${esc(book.title)}” will be removed from every reader's bookshelf. This can't be undone.</p>
+        <div class="modalbtns">
+          <button class="btn danger" data-act="remove">Remove</button>
+          <button class="btn ghost" data-act="cancel">Cancel</button>
+        </div>
+      </div>`;
+    document.body.appendChild(overlay);
+    overlay.querySelector('[data-act="remove"]').addEventListener('click', () => { overlay.remove(); onConfirm(); });
+    overlay.querySelector('[data-act="cancel"]').addEventListener('click', () => overlay.remove());
+  }
+
+  /* Author or edit a family book. Works on a copy so Cancel discards changes;
+     Save validates a title + at least one page with words, then persists. */
+  function bookMakerEditor(existing) {
+    const id = existing ? existing.id : null;
+    const title0 = existing ? existing.title : '';
+    const cover0 = existing ? existing.cover : '📕';
+    const pages = existing
+      ? existing.pages.map(pg => ({ t: pg.t, a: pg.a }))
+      : [{ t: '', a: '' }, { t: '', a: '' }];
+
+    const overlay = document.createElement('div');
+    overlay.className = 'overlay';
+    overlay.innerHTML = `
+      <div class="modal">
+        <h2>📖 ${existing ? 'Edit book' : 'New book'}</h2>
+        <p class="muted">Read it together when you're done — tap any word for help, or “Read to me”.</p>
+        <label class="mlabel">Title</label>
+        <input class="minput bmtitle" type="text" maxlength="30" placeholder="Sofia and the Big Dog" value="${esc(title0)}">
+        <label class="mlabel">Cover emoji</label>
+        <input class="minput bmcover" type="text" maxlength="2" value="${esc(cover0)}">
+        <label class="mlabel">Pages</label>
+        <div class="bmpages"></div>
+        <div class="modalbtns">
+          <button class="btn ghost" data-act="addpage">➕ Add page</button>
+        </div>
+        <p class="pstatsrow muted bmerr" hidden>Add a title and at least one page with words to save.</p>
+        <div class="modalbtns">
+          <button class="btn" data-act="save">💾 Save book</button>
+          <button class="btn ghost" data-act="cancel">Cancel</button>
+        </div>
+      </div>`;
+    document.body.appendChild(overlay);
+
+    const pagesEl = overlay.querySelector('.bmpages');
+
+    /* pull the on-screen values back into `pages` before we redraw the list */
+    function syncPages() {
+      pagesEl.querySelectorAll('.bmpagerow').forEach((row, i) => {
+        if (!pages[i]) return;
+        pages[i].t = row.querySelector('.bmptext').value;
+        pages[i].a = row.querySelector('.bmpart').value;
+      });
+    }
+
+    function renderPages() {
+      pagesEl.innerHTML = pages.map((pg, i) => `
+        <div class="bmpagerow">
+          <label class="mlabel">Page ${i + 1}</label>
+          <textarea class="minput bmptext" rows="2" placeholder="The cat sat on the mat.">${esc(pg.t)}</textarea>
+          <input class="minput bmpart" type="text" maxlength="8" placeholder="🐱" value="${esc(pg.a)}">
+          ${pages.length > 1 ? `<div class="modalbtns"><button class="btn ghost bmpdel" data-i="${i}">✕ Remove page ${i + 1}</button></div>` : ''}
+        </div>`).join('');
+      pagesEl.querySelectorAll('.bmpdel').forEach(btn =>
+        btn.addEventListener('click', () => {
+          syncPages();
+          pages.splice(+btn.dataset.i, 1);
+          renderPages();
+          A.sfx.pop();
+        }));
+    }
+    renderPages();
+
+    overlay.querySelector('[data-act="addpage"]').addEventListener('click', () => {
+      syncPages();
+      pages.push({ t: '', a: '' });
+      renderPages();
+      A.sfx.pop();
+    });
+    overlay.querySelector('[data-act="cancel"]').addEventListener('click', () => overlay.remove());
+    overlay.querySelector('[data-act="save"]').addEventListener('click', () => {
+      syncPages();
+      const title = overlay.querySelector('.bmtitle').value.trim();
+      const cover = overlay.querySelector('.bmcover').value.trim() || '📕';
+      const cleanPages = pages
+        .map(pg => ({ t: pg.t.trim(), a: (pg.a || '').trim() || '📖' }))
+        .filter(pg => pg.t);
+      if (!title || !cleanPages.length) {
+        overlay.querySelector('.bmerr').hidden = false;
+        return;
+      }
+      const book = { title, cover, pages: cleanPages, custom: true };
+      if (id) book.id = id; /* preserve id when editing */
+      S.saveCustomBook(book);
+      A.sfx.coins();
+      overlay.remove();
+      renderParent();
+    });
   }
 
   /* ---------------- Run a training game ---------------- */
   function startGame(gameId) {
     const p = S.current();
     if (!p) { renderHome(); return; }
+    hideTabs();
     A.sfx.whoosh();
     const section = document.createElement('section');
     section.className = 'screen';
@@ -896,7 +1268,7 @@ RR.nav = RR.nav || {};
     const ctx = {
       profile: p,
       grade: p.grade,
-      quit: renderPlayer,
+      quit: renderPlayTab,
       finish(result) {
         const meta = S.recordRound(p, gameId, p.grade, result);
         renderResults(gameId, result, meta);
@@ -908,6 +1280,7 @@ RR.nav = RR.nav || {};
   /* ---------------- Results ---------------- */
   function renderResults(gameId, r, meta) {
     const p = S.current();
+    hideTabs();
     const msg = r.stars === 3 ? 'Out of this world!' : r.stars === 2 ? 'Great flying!' : 'Good practice — go again!';
     const stage = RR.adventure.stageOf(p);
     const ready = RR.adventure.bossReady(p);
@@ -1016,7 +1389,7 @@ RR.nav = RR.nav || {};
     const fight = app.querySelector('[data-act="fight"]');
     if (fight) fight.addEventListener('click', () => RR.nav.battle(p.stage));
     app.querySelector('[data-act="again"]').addEventListener('click', () => startGame(gameId));
-    app.querySelector('[data-act="menu"]').addEventListener('click', renderPlayer);
+    app.querySelector('[data-act="menu"]').addEventListener('click', renderPlayTab);
     app.querySelectorAll('.results .trickyword').forEach(b =>
       b.addEventListener('click', () => A.speak(b.dataset.w, { rate: 0.8 })));
   }
@@ -1102,6 +1475,8 @@ RR.nav = RR.nav || {};
 
   RR.nav.home = renderHome;
   RR.nav.player = renderPlayer;
+  RR.nav.play = renderPlayTab;
+  RR.nav.me = renderMeTab;
   RR.nav.game = startGame;
   RR.nav.ceremony = renderCeremony;
 

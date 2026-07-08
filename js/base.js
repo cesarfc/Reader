@@ -13,12 +13,29 @@ RR.nav = RR.nav || {};
 
   const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 
-  function renderBase(openSlot = null) {
+  function renderBase(openSlot = null, celebrate = false) {
     const p = S.current();
     if (!p) { RR.nav.home(); return; }
+    RR.pet.hide(); /* one pet on screen: use the in-room pet, not the fixed corner buddy */
+    if (RR.ui) RR.ui.hideTabs();
     const placedCount = Object.values(p.base.placed).filter(Boolean).length;
     const slotDef = id => D.BASE.slots.find(s => s.id === id);
     const item = id => S.baseItem(id);
+
+    /* The equipped pet lives in the room and grows with reading (RR.pet.stage). */
+    const pet = S.gear(p, 'pet');
+    let petHtml = '';
+    if (pet) {
+      const st = RR.pet.stage(p.petState || { xp: 0 });
+      const seatFilled = !!p.base.placed.seat;
+      const px = seatFilled ? 63 : 50; /* perch beside the seat, else stand center floor */
+      const py = seatFilled ? 56 : 74;
+      const size = Math.round(34 * st.scale);
+      const style = `position:absolute;left:${px}%;top:${py}%;transform:translate(-50%,-50%);`
+        + `border:0;background:none;cursor:pointer;line-height:1;padding:4px;font-size:${size}px;`
+        + 'filter:drop-shadow(0 3px 2px rgba(29,69,102,0.3));z-index:2';
+      petHtml = `<button class="basepet" aria-label="Your pet" style="${style}"><span class="petemoji ${st.aura ? 'petaura' : ''}">${pet.e}</span></button>`;
+    }
 
     app.innerHTML = `
       <section class="screen">
@@ -41,6 +58,7 @@ RR.nav = RR.nav || {};
                 ${placed ? placed.e : `<span class="slotghost">${s.e}</span>`}
               </button>`;
           }).join('')}
+          ${petHtml}
         </div>
         ${openSlot ? (() => {
           const s = slotDef(openSlot);
@@ -65,7 +83,26 @@ RR.nav = RR.nav || {};
         })() : ''}
       </section>`;
 
-    app.querySelector('[data-act="back"]').addEventListener('click', () => RR.nav.player());
+    /* Tap the pet: pop, a quick jump, and a happy line by name.
+       Reuse the stylesheet's .petemoji.petpetted (petjump keyframes) — no new CSS. */
+    const petBtn = app.querySelector('.basepet');
+    if (petBtn) {
+      const em = petBtn.querySelector('.petemoji');
+      const jump = () => { em.classList.remove('petpetted'); void em.offsetWidth; em.classList.add('petpetted'); };
+      petBtn.addEventListener('click', () => {
+        A.sfx.pop();
+        jump();
+        const lines = [
+          `${pet.name} loves your rocket!`,
+          `Wheee! ${pet.name} did a happy jump!`,
+          `${pet.name} feels right at home!`
+        ];
+        A.speak(lines[(Math.random() * lines.length) | 0]);
+      });
+      if (celebrate) jump(); /* one-shot cheer after a buy or place re-render */
+    }
+
+    app.querySelector('[data-act="back"]').addEventListener('click', () => RR.nav.me());
     app.querySelectorAll('.baseslot').forEach(b =>
       b.addEventListener('click', () => {
         A.sfx.pop();
@@ -77,12 +114,12 @@ RR.nav = RR.nav || {};
         if (p.base.owned.includes(it.id)) {
           S.placeBase(p, it.id);
           A.sfx.pop();
-          renderBase(openSlot);
+          renderBase(openSlot, true);
         } else if (S.buyBase(p, it.id)) {
           A.sfx.coins();
           RR.confetti.burst(60);
           A.speak(`The ${it.name} looks great in your rocket!`);
-          renderBase(openSlot);
+          renderBase(openSlot, true);
         } else {
           A.sfx.buzz();
           b.classList.add('shake');
