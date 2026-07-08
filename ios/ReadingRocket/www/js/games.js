@@ -1318,6 +1318,458 @@ window.RR = window.RR || {};
   };
 
   /* =========================================================
+     CHALLENGE ZONE (grades 2-5) — seven harder thinking games.
+     All quiz-style: coins/stars via quizResult, no mastery keys
+     (these train reasoning/vocab, not the tracked word lists).
+     ========================================================= */
+  const CHALLENGE_GRADES = ['2', '3', '4', '5'];
+
+  /* Generic single-answer quiz runner: renders a prompt + choices,
+     retries on wrong, speaks praise, advances. Keeps the challenge
+     games from re-implementing the same loop. */
+  function challengeQuiz(shell, ctx, round, renderQ, doneLine) {
+    let qi = 0;
+    let firstTryCount = 0;
+    let comboBonus = 0;
+
+    function next() {
+      if (!shell.live) return;
+      if (qi >= round.length) {
+        shell.die();
+        ctx.finish(quizResult(firstTryCount, round.length, doneLine(firstTryCount, round.length), comboBonus));
+        return;
+      }
+      shell.nowDot(qi);
+      const q = renderQ(round[qi]);
+      let firstTry = true;
+      let answered = false;
+      shell.area.querySelectorAll('.choice').forEach(btn => {
+        btn.addEventListener('click', () => {
+          if (answered) return;
+          if (q.isCorrect(+btn.dataset.i)) {
+            answered = true;
+            btn.classList.add('correct');
+            A.sfx.ding();
+            haptic(true);
+            if (firstTry) { firstTryCount++; comboBonus += comboHit(shell); }
+            if (q.onCorrect) q.onCorrect();
+            shell.markDot(qi);
+            qi++;
+            speakAdvance(shell, q.praise, next, { rate: 0.92 });
+          } else {
+            firstTry = false;
+            comboMiss(shell);
+            btn.classList.add('wrong');
+            A.sfx.buzz();
+            haptic(false);
+          }
+        });
+      });
+    }
+
+    next();
+  }
+
+  /* ---- Analogy Alley ---- */
+  const analogyGame = {
+    title: 'Analogy Alley',
+    icon: '🧭',
+    desc: 'Puppy is to dog as…',
+    grades: CHALLENGE_GRADES,
+    start(container, ctx) {
+      const pool = (D.ANALOGIES && D.ANALOGIES[ctx.grade]) || [];
+      const round = sample(pool, Math.min(6, pool.length));
+      const shell = roundShell(container, ctx, 'Analogy Alley', round.length);
+      if (!round.length) { shell.die(); ctx.quit(); return; }
+      challengeQuiz(shell, ctx, round, item => {
+        const opts = shuffle([item.d].concat(item.foils));
+        shell.area.innerHTML = `
+          <div class="prompt">
+            <div class="analogyrow"><b>${item.a}</b> ▸ <b>${item.b}</b></div>
+            <div class="analogyrow">so… <b>${item.c}</b> ▸ <span class="analogyq">?</span></div>
+            <span class="kindchip">💡 ${item.kind}</span>
+          </div>
+          <div class="choices words">
+            ${opts.map((c, i) => `<button class="choice wordpick" data-i="${i}">${c}</button>`).join('')}
+          </div>`;
+        A.speak(`${item.a} goes with ${item.b}. So ${item.c} goes with…?`, { rate: 0.9 });
+        return {
+          isCorrect: i => opts[i] === item.d,
+          praise: `${item.c} goes with ${item.d}! Just like ${item.a} and ${item.b}!`
+        };
+      }, (n, t) => `${n} of ${t} analogies solved on the first try!`);
+    }
+  };
+
+  /* ---- Clue Detective (cloze / context clues) ---- */
+  const clozeGame = {
+    title: 'Clue Detective',
+    icon: '🔍',
+    desc: 'Which word fits the clues?',
+    grades: CHALLENGE_GRADES,
+    start(container, ctx) {
+      const pool = (D.CLOZE && D.CLOZE[ctx.grade]) || [];
+      const round = sample(pool, Math.min(6, pool.length));
+      const shell = roundShell(container, ctx, 'Clue Detective', round.length);
+      if (!round.length) { shell.die(); ctx.quit(); return; }
+      challengeQuiz(shell, ctx, round, item => {
+        const opts = shuffle([item.answer].concat(item.foils));
+        shell.area.innerHTML = `
+          <div class="prompt">
+            <h2>Which word fits the clues?</h2>
+            <div class="riddlecard clozecard">${item.t.replace('___', '<span class="clozegap">______</span>')}</div>
+          </div>
+          <div class="choices words">
+            ${opts.map((c, i) => `<button class="choice wordpick" data-i="${i}">${c}</button>`).join('')}
+          </div>`;
+        return {
+          isCorrect: i => opts[i] === item.answer,
+          onCorrect: () => {
+            const gap = shell.area.querySelector('.clozegap');
+            if (gap) { gap.textContent = item.answer; gap.classList.add('filled'); }
+          },
+          praise: 'The clues gave it away! Great detective work!'
+        };
+      }, (n, t) => `${n} of ${t} clues cracked on the first try!`);
+    }
+  };
+
+  /* ---- Fix It! (find the mistake, then fix it) ---- */
+  const fixitGame = {
+    title: 'Fix It!',
+    icon: '🖍️',
+    desc: 'Find and fix the mistake',
+    grades: CHALLENGE_GRADES,
+    start(container, ctx) {
+      const pool = (D.FIXIT && D.FIXIT[ctx.grade]) || [];
+      const round = sample(pool, Math.min(6, pool.length));
+      const shell = roundShell(container, ctx, 'Fix It!', round.length);
+      if (!round.length) { shell.die(); ctx.quit(); return; }
+      let qi = 0;
+      let firstTryCount = 0;
+      let comboBonus = 0;
+
+      function next() {
+        if (!shell.live) return;
+        if (qi >= round.length) {
+          shell.die();
+          ctx.finish(quizResult(firstTryCount, round.length, `${firstTryCount} of ${round.length} fixed without a slip!`, comboBonus));
+          return;
+        }
+        shell.nowDot(qi);
+        find(round[qi]);
+      }
+
+      function find(item) {
+        let firstTry = true;
+        shell.area.innerHTML = `
+          <div class="prompt">
+            <h2>One word is wrong. Tap it!</h2>
+            <p class="booktext fixtext">${item.t.split(/\s+/).map(tok => {
+              const clean = tok.replace(/[^a-zA-Z'’-]/g, '');
+              return `<button class="word" data-w="${clean}">${tok}</button>`;
+            }).join(' ')}</p>
+          </div>`;
+        shell.area.querySelectorAll('.word').forEach(w =>
+          w.addEventListener('click', () => {
+            if (w.dataset.w === item.wrong) {
+              w.classList.add('lit');
+              A.sfx.ding();
+              haptic(true);
+              shell.after(400, () => fix(item, firstTry));
+            } else {
+              firstTry = false;
+              comboMiss(shell);
+              A.sfx.buzz();
+              haptic(false);
+            }
+          }));
+      }
+
+      function fix(item, cleanSoFar) {
+        if (!shell.live) return;
+        let firstTry = cleanSoFar;
+        let answered = false;
+        const opts = shuffle([item.right].concat(item.foils));
+        shell.area.innerHTML = `
+          <div class="prompt">
+            <h2>“${item.wrong}” is wrong. What should it be?</h2>
+            <p class="booktext fixtext">${item.t.replace(item.wrong, '<b class="fixslot">______</b>')}</p>
+          </div>
+          <div class="choices words">
+            ${opts.map((c, i) => `<button class="choice wordpick" data-i="${i}">${c}</button>`).join('')}
+          </div>`;
+        shell.area.querySelectorAll('.choice').forEach(btn => {
+          btn.addEventListener('click', () => {
+            if (answered) return;
+            if (opts[+btn.dataset.i] === item.right) {
+              answered = true;
+              btn.classList.add('correct');
+              const slot = shell.area.querySelector('.fixslot');
+              if (slot) slot.textContent = item.right;
+              A.sfx.ding();
+              haptic(true);
+              if (firstTry) { firstTryCount++; comboBonus += comboHit(shell); }
+              shell.markDot(qi);
+              qi++;
+              speakAdvance(shell, `Fixed! ${item.t.replace(item.wrong, item.right)}`, next, { rate: 0.9 });
+            } else {
+              firstTry = false;
+              comboMiss(shell);
+              btn.classList.add('wrong');
+              A.sfx.buzz();
+              haptic(false);
+            }
+          });
+        });
+      }
+
+      next();
+    }
+  };
+
+  /* ---- Main Idea Mission ---- */
+  const mainideaGame = {
+    title: 'Main Idea Mission',
+    icon: '💡',
+    desc: 'What’s the big idea?',
+    grades: CHALLENGE_GRADES,
+    start(container, ctx) {
+      const pool = (D.MAINIDEA && D.MAINIDEA[ctx.grade]) || [];
+      const round = sample(pool, Math.min(5, pool.length));
+      const shell = roundShell(container, ctx, 'Main Idea Mission', round.length);
+      if (!round.length) { shell.die(); ctx.quit(); return; }
+      challengeQuiz(shell, ctx, round, item => {
+        const opts = shuffle(item.choices.map((t, i) => ({ t, ok: i === item.a })));
+        shell.area.innerHTML = `
+          <div class="prompt">
+            <div class="riddlecard">${item.p}</div>
+            <h2>Which title fits best?</h2>
+            <button class="btn ghost" data-act="say">🔊 Read it to me</button>
+          </div>
+          <div class="choices meanings">
+            ${opts.map((o, i) => `<button class="choice meaningpick" data-i="${i}">${o.t}</button>`).join('')}
+          </div>`;
+        shell.area.querySelector('[data-act="say"]').addEventListener('click', () => A.speak(item.p, { rate: 0.9 }));
+        return {
+          isCorrect: i => opts[i].ok,
+          praise: 'That’s the big idea!'
+        };
+      }, (n, t) => `${n} of ${t} big ideas found on the first try!`);
+    }
+  };
+
+  /* ---- Fact or Opinion? ---- */
+  const factopGame = {
+    title: 'Fact or Opinion?',
+    icon: '⚖️',
+    desc: 'Can you prove it?',
+    grades: CHALLENGE_GRADES,
+    start(container, ctx) {
+      const pool = (D.FACTOP && D.FACTOP[ctx.grade]) || [];
+      const round = sample(pool, Math.min(8, pool.length));
+      const shell = roundShell(container, ctx, 'Fact or Opinion?', round.length);
+      if (!round.length) { shell.die(); ctx.quit(); return; }
+      let qi = 0;
+      let firstTryCount = 0;
+      let comboBonus = 0;
+
+      function next() {
+        if (!shell.live) return;
+        if (qi >= round.length) {
+          shell.die();
+          ctx.finish(quizResult(firstTryCount, round.length, `${firstTryCount} of ${round.length} judged right on the first try!`, comboBonus));
+          return;
+        }
+        shell.nowDot(qi);
+        const item = round[qi];
+        let firstTry = true;
+        let answered = false;
+        shell.area.innerHTML = `
+          <div class="prompt">
+            <h2>Fact you can prove — or someone’s opinion?</h2>
+            <button class="flashcard sentences tappable sillycard" data-act="say">${item.t}</button>
+          </div>
+          <div class="bigjudge">
+            <button class="btn good big" data-j="1">📊 Fact</button>
+            <button class="btn big sillybtn" data-j="0">💭 Opinion</button>
+          </div>`;
+        const say = () => A.speak(item.t, { rate: 0.85 });
+        shell.area.querySelector('[data-act="say"]').addEventListener('click', say);
+        shell.area.querySelectorAll('[data-j]').forEach(btn => {
+          btn.addEventListener('click', () => {
+            if (answered) return;
+            if ((btn.dataset.j === '1') === !!item.fact) {
+              answered = true;
+              A.sfx.ding();
+              haptic(true);
+              if (firstTry) { firstTryCount++; comboBonus += comboHit(shell); }
+              shell.markDot(qi);
+              qi++;
+              speakAdvance(shell, item.fact ? 'Yes — that’s a fact you could prove!' : 'Right — that’s just what someone thinks!', next, { rate: 0.95 });
+            } else {
+              firstTry = false;
+              comboMiss(shell);
+              btn.classList.add('shake');
+              shell.after(450, () => btn.classList.remove('shake'));
+              A.sfx.buzz();
+              haptic(false);
+              say();
+            }
+          });
+        });
+      }
+
+      next();
+    }
+  };
+
+  /* ---- Homophone Heroes ---- */
+  const homophonesGame = {
+    title: 'Homophone Heroes',
+    icon: '🎭',
+    desc: 'to, too, or two?',
+    grades: CHALLENGE_GRADES,
+    start(container, ctx) {
+      const pool = (D.HOMOPHONES && D.HOMOPHONES[ctx.grade]) || [];
+      const round = sample(pool, Math.min(6, pool.length));
+      const shell = roundShell(container, ctx, 'Homophone Heroes', round.length);
+      if (!round.length) { shell.die(); ctx.quit(); return; }
+      challengeQuiz(shell, ctx, round, item => {
+        const opts = item.options.map((t, i) => ({ t, ok: i === item.a }));
+        shell.area.innerHTML = `
+          <div class="prompt">
+            <h2>They sound the same — which one fits?</h2>
+            <div class="riddlecard clozecard">${item.t.replace('___', '<span class="clozegap">______</span>')}</div>
+          </div>
+          <div class="choices words">
+            ${opts.map((o, i) => `<button class="choice wordpick" data-i="${i}">${o.t}</button>`).join('')}
+          </div>`;
+        return {
+          isCorrect: i => opts[i].ok,
+          onCorrect: () => {
+            const gap = shell.area.querySelector('.clozegap');
+            if (gap) { gap.textContent = item.options[item.a]; gap.classList.add('filled'); }
+          },
+          praise: 'That’s the right twin!'
+        };
+      }, (n, t) => `${n} of ${t} twins picked right on the first try!`);
+    }
+  };
+
+  /* ---- Deep Dive (reading stamina + comprehension, grades 3-5) ---- */
+  const deepdiveGame = {
+    title: 'Deep Dive',
+    icon: '🤿',
+    desc: 'A big read, big questions',
+    grades: ['3', '4', '5'],
+    start(container, ctx) {
+      const pool = (D.DEEPDIVE && D.DEEPDIVE[ctx.grade]) || [];
+      const shell = roundShell(container, ctx, 'Deep Dive', 4);
+      if (!pool.length) { shell.die(); ctx.quit(); return; }
+      const dive = sample(pool, 1)[0];
+      const totalWords = dive.p.split(/\s+/).length;
+      let readSecs = 0;
+      let correct = 0;
+
+      introCard(shell, {
+        emoji: '🤿',
+        title: dive.title,
+        lines: [
+          `A real ${totalWords}-word read. Take a deep breath and read it ALL —`,
+          'then answer 4 questions from memory!'
+        ],
+        buttonText: '🤿 Dive in!',
+        onStart: read
+      });
+
+      function read() {
+        const t0 = Date.now();
+        shell.area.innerHTML = `
+          <div class="speedtop"><span class="clock">0s</span>${RR.voice && RR.voice.enabled() ? '<span class="micchip">🎤 listening</span>' : ''}</div>
+          <div class="riddlecard divetext"><b>${dive.e} ${dive.title}</b><br><br>${dive.p}</div>
+          <div class="speedbtns">
+            <button class="btn good big" data-act="done">✓ I read it all!</button>
+          </div>`;
+        const iv = setInterval(() => {
+          const el2 = shell.area.querySelector('.clock');
+          if (el2) el2.textContent = ((Date.now() - t0) / 1000).toFixed(0) + 's';
+        }, 500);
+        shell.timers.push(iv);
+        if (RR.voice && RR.voice.enabled()) {
+          RR.voice.listen({ expect: dive.p, minScore: 0.8, timeoutMs: 180000, onMatch() { A.sfx.ding(); } });
+        }
+        shell.area.querySelector('[data-act="done"]').addEventListener('click', () => {
+          clearInterval(iv);
+          if (RR.voice) RR.voice.stop();
+          readSecs = Math.max(1, Math.round((Date.now() - t0) / 1000));
+          A.sfx.tick();
+          quiz();
+        });
+      }
+
+      function quiz() {
+        let qi = 0;
+        function next() {
+          if (!shell.live) return;
+          if (qi >= dive.quiz.length) { finish(); return; }
+          shell.nowDot(qi);
+          const q = dive.quiz[qi];
+          let answered = false;
+          shell.area.innerHTML = `
+            <div class="prompt">
+              <h2>${q.q}</h2>
+              <button class="btn ghost" data-act="say">🔊 Hear the question</button>
+            </div>
+            <div class="choices pics">
+              ${q.choices.map((c, i) => `
+                <button class="choice pic labeled" data-i="${i}">
+                  <span class="pemoji">${c.e}</span>
+                  <span class="plabel">${c.t}</span>
+                </button>`).join('')}
+            </div>`;
+          A.speak(q.q, { rate: 0.9 });
+          shell.area.querySelector('[data-act="say"]').addEventListener('click', () => A.speak(q.q, { rate: 0.9 }));
+          shell.area.querySelectorAll('.choice').forEach(btn => {
+            btn.addEventListener('click', () => {
+              if (answered) return;
+              answered = true;
+              if (+btn.dataset.i === q.a) {
+                correct++;
+                btn.classList.add('correct');
+                A.sfx.ding();
+                haptic(true);
+              } else {
+                btn.classList.add('wrong');
+                shell.area.querySelectorAll('.choice').forEach(x => { if (+x.dataset.i === q.a) x.classList.add('correct'); });
+                A.sfx.buzz();
+                haptic(false);
+              }
+              shell.markDot(qi);
+              qi++;
+              shell.after(900, next);
+            });
+          });
+        }
+        next();
+      }
+
+      function finish() {
+        shell.die();
+        const stars = correct >= 4 ? 3 : correct >= 3 ? 2 : 1;
+        const wpm = Math.round(totalWords / readSecs * 60);
+        ctx.finish({
+          stars,
+          coins: 10 + correct * 4 + stars * 5,
+          quiz: { correct, total: dive.quiz.length },
+          line1: `${totalWords} words in ${readSecs}s (${wpm} wpm)`,
+          line2: `🤔 Quiz: ${correct}/${dive.quiz.length} from memory!`
+        });
+      }
+    }
+  };
+
+  /* =========================================================
      GAME 4 — Rhyme Time (phonemic awareness)
      ========================================================= */
   function rimeOf(word) {
@@ -2214,7 +2666,15 @@ window.RR = window.RR || {};
   RR.games.nonsense = nonsenseGame;
   RR.games.scramble = scrambleGame;
 
-  RR.gameOrder = ['books', 'sounds', 'blend', 'build', 'chains', 'spell', 'memory', 'sentence', 'morph', 'twins', 'rescue', 'silly', 'riddle', 'scramble', 'rhyme', 'sight', 'flash', 'nonsense'];
+  RR.games.analogy = analogyGame;
+  RR.games.cloze = clozeGame;
+  RR.games.fixit = fixitGame;
+  RR.games.mainidea = mainideaGame;
+  RR.games.factop = factopGame;
+  RR.games.homophones = homophonesGame;
+  RR.games.deepdive = deepdiveGame;
+
+  RR.gameOrder = ['books', 'sounds', 'blend', 'build', 'chains', 'spell', 'memory', 'sentence', 'morph', 'twins', 'rescue', 'silly', 'riddle', 'scramble', 'rhyme', 'sight', 'flash', 'nonsense', 'analogy', 'cloze', 'fixit', 'mainidea', 'factop', 'homophones', 'deepdive'];
 
   /* Shared helpers for the adventure module. */
   RR.util = { shuffle, sample, smartSample, withDistractors, el, rimeOf, rhymePoolFor, wordSim, letterSim, haptic, bookReader };

@@ -590,7 +590,8 @@ RR.nav = RR.nav || {};
     { label: '🔤 Sounds & letters', ids: ['sounds', 'blend', 'build', 'chains', 'rhyme'] },
     { label: '📝 Words & spelling', ids: ['spell', 'memory', 'morph', 'twins', 'rescue', 'sight'] },
     { label: '🤔 Meaning & thinking', ids: ['books', 'sentence', 'silly', 'riddle', 'scramble'] },
-    { label: '⚡ Speed rounds', ids: ['flash', 'nonsense'] }
+    { label: '⚡ Speed rounds', ids: ['flash', 'nonsense'] },
+    { label: '🎓 Challenge Zone', ids: ['analogy', 'cloze', 'fixit', 'mainidea', 'factop', 'homophones', 'deepdive'] }
   ];
 
   function renderPlayTab() {

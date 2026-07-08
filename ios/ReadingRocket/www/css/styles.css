@@ -1772,3 +1772,49 @@ body.tabs-on #petbuddy { bottom: calc(env(safe-area-inset-bottom) + 84px); }
   .riddlecard { font-size: 18px; }
   .scramrow { font-size: 14.5px; }
 }
+
+/* ---------- Challenge Zone games ---------- */
+.analogyrow { font-size: 24px; font-weight: 500; margin: 6px 0; }
+.analogyrow b { font-weight: 700; }
+.analogyq {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 44px;
+  height: 40px;
+  background: var(--yellow-tint);
+  border: 2px dashed var(--yellow);
+  border-radius: var(--r-sm);
+  font-weight: 700;
+}
+.kindchip {
+  display: inline-block;
+  margin-top: 8px;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--ink-soft);
+  background: var(--lav-tint);
+  border-radius: var(--r-pill);
+  padding: 4px 12px;
+}
+.clozegap {
+  color: var(--ink-faint);
+  border-bottom: 3px dashed var(--yellow);
+  font-weight: 700;
+  padding: 0 4px;
+}
+.clozegap.filled { color: var(--teal-strong); border-bottom-color: transparent; background: var(--teal-tint); border-radius: 8px; }
+.fixtext { max-width: none; text-align: center; }
+.fixslot { color: var(--coral-strong); }
+.divetext { font-size: 18px; line-height: 1.7; text-align: left; }
+.gamecard[data-game="analogy"]    { --gc: var(--yellow-tint); }
+.gamecard[data-game="cloze"]      { --gc: var(--sky-tint); }
+.gamecard[data-game="fixit"]      { --gc: var(--coral-tint); }
+.gamecard[data-game="mainidea"]   { --gc: var(--teal-tint); }
+.gamecard[data-game="factop"]     { --gc: var(--lav-tint); }
+.gamecard[data-game="homophones"] { --gc: var(--rose-tint); }
+.gamecard[data-game="deepdive"]   { --gc: var(--sky-tint); }
+@media (max-width: 420px) {
+  .analogyrow { font-size: 20px; }
+  .divetext { font-size: 16px; }
+}
