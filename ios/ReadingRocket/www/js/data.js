@@ -433,6 +433,140 @@ RR.DATA = {
     ['sh', 'ch'], ['th', 'wh'], ['ck', 'k'], ['ll', 'l']
   ],
 
+  /* ---------- Weekly events ----------
+     One event per week, picked deterministically from the week key —
+     no server needed, both kids see the same event. Multipliers are
+     small and capped where they're applied. */
+  EVENTS: [
+    { id: 'coinrain',    e: '🪙', name: 'Coin Rain',    blurb: 'All training rounds pay +25% coins!', coinMul: 1.25 },
+    { id: 'doublegems',  e: '💎', name: 'Gem Storm',    blurb: 'Boss victories pay DOUBLE gems!',     bossGemMul: 2 },
+    { id: 'stickerfest', e: '📔', name: 'Sticker Fest', blurb: 'Every single round wins a sticker!',  stickerAll: true },
+    { id: 'bossrush',    e: '⚔️', name: 'Boss Rush',    blurb: 'Boss victories pay +50% coins!',      bossCoinMul: 1.5 }
+  ],
+
+  /* ---------- Story campaign ----------
+     "Milo and the Lost Star" — one continuing story, unlocked episode by
+     episode. unlock.rounds = total training rounds played (any game);
+     every episode also needs the one before it to be read.
+     Written at ~2nd-grade level so a K graduate grows into it and a
+     3rd-grader still enjoys it. cliff = the cliffhanger teaser. */
+  CAMPAIGN: [
+    { id: 'ep1', title: 'The Falling Star', cover: '🌠', unlock: { rounds: 0 },
+      cliff: 'Why is the little star blinking? Find out in Episode 2!',
+      pages: [
+        { t: 'One night, Milo could not sleep. He looked out his window at the dark sky.', a: '🌃🪟' },
+        { t: 'A tiny light fell from the sky. It landed in his yard with a soft POP.', a: '🌠' },
+        { t: 'Milo ran outside in his pajamas. The grass glowed gold.', a: '🏃✨' },
+        { t: 'In the middle of the glow sat a little star. It was shaking.', a: '⭐' },
+        { t: '“Do not be scared,” said Milo. “I am Milo. What is your name?”', a: '🧒⭐' },
+        { t: 'The star made a sound like a tiny bell. “Twink,” it said. Then it began to blink, fast.', a: '⭐💫' }
+      ]},
+    { id: 'ep2', title: 'The Star Map', cover: '🗺️', unlock: { rounds: 3 },
+      cliff: 'What is inside the old shed? Episode 3 will tell!',
+      pages: [
+        { t: 'Twink blinked and blinked. Then a picture of light grew in the air!', a: '⭐🗺️' },
+        { t: 'It was a map. It showed the moon, and behind it, a river of stars.', a: '🌙🌌' },
+        { t: '“Is that your home?” asked Milo. Twink glowed bright. That meant yes.', a: '⭐😊' },
+        { t: '“But how will you get there? Stars fall down. They do not fall up!”', a: '🧒❓' },
+        { t: 'Twink flew to the old shed at the end of the yard. It tapped the door three times.', a: '🏚️⭐' },
+        { t: 'The rusty old door creaked… and opened all by itself.', a: '🚪✨' }
+      ]},
+    { id: 'ep3', title: 'The Shed Secret', cover: '🚀', unlock: { rounds: 8 },
+      cliff: 'Where will they find rocket fuel? See Episode 4!',
+      pages: [
+        { t: 'Inside the shed, under a dusty sheet, was a small silver rocket.', a: '🚀' },
+        { t: '“Grandpa built this!” said Milo. “He said it flew to the moon, long ago.”', a: '👴🌙' },
+        { t: 'Something beeped in the corner. A little robot rolled out of a box.', a: '🤖' },
+        { t: '“I am Bolt,” said the robot. “Co-pilot of this ship. I have been asleep for forty years.”', a: '🤖💤' },
+        { t: 'Bolt saw Twink and bowed. “A star! We must take it home at once!”', a: '🤖⭐' },
+        { t: 'Then Bolt’s eyes turned red. “WARNING,” he said. “Fuel: empty.”', a: '🤖🔴' }
+      ]},
+    { id: 'ep4', title: 'Moon-Flower Fuel', cover: '🌻', unlock: { rounds: 14 },
+      cliff: 'What is that shadow on the moon? Episode 5 knows…',
+      pages: [
+        { t: '“This rocket burns starlight,” said Bolt. “And starlight grows in moon-flowers.”', a: '🤖🌼' },
+        { t: 'Moon-flowers only open at midnight, by the pond, when the moon is round.', a: '🌕🌼' },
+        { t: 'Milo, Bolt, and Twink waited by the pond. At midnight, the flowers opened like tiny lamps.', a: '🌼✨' },
+        { t: 'They filled a jar with glowing petals. The rocket tank drank them up. RUMBLE!', a: '🫙✨' },
+        { t: '“All aboard!” said Bolt. Milo buckled in. Twink sat on his shoulder.', a: '🚀🧒' },
+        { t: 'The rocket lifted off! But far above, a long dark shadow slid across the moon…', a: '🚀🌑' }
+      ]},
+    { id: 'ep5', title: 'The Shadow Ship', cover: '🛸', unlock: { rounds: 21 },
+      cliff: 'Caught by the beam! Can they escape in Episode 6?',
+      pages: [
+        { t: 'Space was quiet and full of stars. Twink pointed the way with a beam of light.', a: '🌌⭐' },
+        { t: 'Then the stars behind them went dark, one by one. Something big was following.', a: '🌑' },
+        { t: '“That is the Star Catcher,” said Bolt. “He bottles stars and keeps them for himself.”', a: '🛸😠' },
+        { t: 'The gray ship had a hundred windows. In every window sat a jar with a sad star inside.', a: '🫙⭐' },
+        { t: '“Faster, Bolt!” cried Milo. The little rocket zoomed and dipped and spun.', a: '🚀💨' },
+        { t: 'But a beam of green light locked on. The rocket froze in the sky like a fly in honey.', a: '🟢🚀' }
+      ]},
+    { id: 'ep6', title: 'Inside the Catcher', cover: '🫙', unlock: { rounds: 29 },
+      cliff: 'The alarm is ringing! Run for it in Episode 7!',
+      pages: [
+        { t: 'The beam pulled them into a huge dark room full of shelves. Jars and jars of stars.', a: '🫙🫙' },
+        { t: 'A guard robot blocked the door. “PASSWORD?” it buzzed.', a: '🤖🚫' },
+        { t: 'Bolt whispered, “The password book fell out of its pocket! But I cannot read cursive!”', a: '📖' },
+        { t: 'Milo picked up the book. He sounded it out, slow and brave: “MOON… BEAM… PIE.”', a: '🧒📖' },
+        { t: '“CORRECT,” said the guard, and it fell asleep, just like that.', a: '🤖💤' },
+        { t: 'Milo turned the great silver wheel that opened every jar. Then the alarm began to ring!', a: '🚨' }
+      ]},
+    { id: 'ep7', title: 'The Great Escape', cover: '💫', unlock: { rounds: 38 },
+      cliff: 'Twink is almost home… the last episode awaits!',
+      pages: [
+        { t: 'A thousand stars burst from their jars like fireflies from a barn.', a: '✨✨' },
+        { t: 'They spun around Milo, warm and bright, and lifted the little rocket up.', a: '🚀✨' },
+        { t: 'The Star Catcher howled. But without stolen starlight, his ship went dark.', a: '🛸⬛' },
+        { t: 'It drifted away into the black, cold and quiet, like an old empty bottle.', a: '🌑' },
+        { t: 'The free stars raced home across the sky, painting it with light.', a: '🌌💫' },
+        { t: 'Milo cheered. But Twink tugged his sleeve. Twink was not home. Not yet.', a: '⭐🧒' }
+      ]},
+    { id: 'ep8', title: 'Home at Last', cover: '🌟', unlock: { rounds: 48 },
+      cliff: 'The End… or is it? Keep reading, Star Reader! ⭐',
+      pages: [
+        { t: 'Behind the moon flowed the river of stars, just like the map had shown.', a: '🌙🌌' },
+        { t: 'Two big stars rushed to meet them. Twink’s mother and father!', a: '🌟🌟' },
+        { t: 'The whole sky rang like a thousand tiny bells. That is how stars laugh.', a: '🔔✨' },
+        { t: 'Twink gave Milo a gift: a tiny bell made of starlight. “So you can find me.”', a: '🔔🧒' },
+        { t: '“Any time you read under the night sky,” said Twink, “I will be listening.”', a: '⭐📖' },
+        { t: 'Milo flew home and slept till noon. On his desk, the little bell glowed. The end!', a: '🛏️🔔' }
+      ]}
+  ],
+
+  /* ---------- Rocket Base ----------
+     A per-profile rocket interior. Each slot holds one decoration;
+     items are a pure coin sink (no gems, no stats — just pride). */
+  BASE: {
+    slots: [
+      { id: 'window', name: 'Window',        e: '🪟', x: 50, y: 16 },
+      { id: 'poster', name: 'Poster wall',   e: '🖼️', x: 17, y: 32 },
+      { id: 'gadget', name: 'Gadget shelf',  e: '🔭', x: 83, y: 32 },
+      { id: 'plant',  name: 'Space garden',  e: '🪴', x: 18, y: 68 },
+      { id: 'seat',   name: 'Captain seat',  e: '🪑', x: 50, y: 62 },
+      { id: 'rug',    name: 'Floor rug',     e: '🧶', x: 50, y: 88 }
+    ],
+    items: [
+      { id: 'win-stars',    slot: 'window', e: '🌌', name: 'Starfield',     price: 40 },
+      { id: 'win-earth',    slot: 'window', e: '🌍', name: 'Earth View',    price: 80 },
+      { id: 'win-rainbow',  slot: 'window', e: '🌈', name: 'Rainbow Sky',   price: 140 },
+      { id: 'post-rocket',  slot: 'poster', e: '🚀', name: 'Rocket Poster', price: 35 },
+      { id: 'post-dragon',  slot: 'poster', e: '🐉', name: 'Dragon Poster', price: 75 },
+      { id: 'post-star',    slot: 'poster', e: '🌟', name: 'Gold Star',     price: 130 },
+      { id: 'gad-scope',    slot: 'gadget', e: '🔭', name: 'Telescope',     price: 45 },
+      { id: 'gad-robot',    slot: 'gadget', e: '🤖', name: 'Robo-Pal',      price: 100 },
+      { id: 'gad-radio',    slot: 'gadget', e: '📡', name: 'Star Radio',    price: 160 },
+      { id: 'plant-sprout', slot: 'plant',  e: '🌱', name: 'Sprout',        price: 30 },
+      { id: 'plant-flower', slot: 'plant',  e: '🌻', name: 'Sunflower',     price: 70 },
+      { id: 'plant-cactus', slot: 'plant',  e: '🌵', name: 'Space Cactus',  price: 120 },
+      { id: 'seat-pilot',   slot: 'seat',   e: '💺', name: 'Pilot Seat',    price: 30 },
+      { id: 'seat-couch',   slot: 'seat',   e: '🛋️', name: 'Comfy Couch',   price: 90 },
+      { id: 'seat-dino',    slot: 'seat',   e: '🦖', name: 'Dino Chair',    price: 150 },
+      { id: 'rug-red',      slot: 'rug',    e: '🟥', name: 'Red Rug',       price: 25 },
+      { id: 'rug-purple',   slot: 'rug',    e: '🟪', name: 'Purple Rug',    price: 60 },
+      { id: 'rug-galaxy',   slot: 'rug',    e: '🌀', name: 'Galaxy Rug',    price: 110 }
+    ]
+  },
+
   /* ---------- Sticker album ----------
      Rounds with 2+ stars award one random sticker. 5% are ✨shiny.
      Duplicates auto-convert to coins (5 normal / 15 shiny). */

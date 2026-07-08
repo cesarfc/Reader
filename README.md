@@ -25,14 +25,39 @@ anywhere and stores progress on the device.
 - **Star Shop** — hero skins (🦸🥷🧙🦖👽👑), weapons that raise attack
   (🪵→⚡), armor that adds battle hearts (🛡️→🐲), and pets that boost coin
   earnings (🐶 +10% … 🦄 +50%).
-- **8 stages** — Sunny Meadow 🌻 → Whispering Woods 🌲 → Crystal Caves 💎 →
+- **10 stages** — Sunny Meadow 🌻 → Whispering Woods 🌲 → Crystal Caves 💎 →
   Lava Mountain 🌋 → Storm Castle 🏰 → Robo City 🏙️ → Moon Base 🌙 → Star
-  Galaxy 🌌. Play training rounds to wake each stage's boss.
+  Galaxy 🌌 → Rainbow Rift 🌈 → Cosmic Core 🌠. Play training rounds to wake
+  each stage's boss — and each stage paints its own scenery and sky.
 - **Boss battles** — the fight IS a reading quiz. A correct answer attacks the
   boss (damage = your attack + weapon, with ⚡ critical hits for fast answers);
   a wrong answer costs a heart, and the right answer is revealed so it stays a
   learning moment. Beat the boss for a big coin payout and the next stage.
   Beaten bosses can be rematched for half rewards.
+- **Power-ups** — a **perfect training round** earns a battle power-up
+  (🛡️ Shield blocks the next hit · ⚡ Double doubles the next strike ·
+  ⏳ Freeze slows the timer), spendable from a tray during any boss fight —
+  so flawless practice directly powers the adventure.
+- **Weekly events** — every Monday a new event week starts automatically:
+  🪙 Coin Rain (+25% training coins), 💎 Gem Storm (double boss gems),
+  📔 Sticker Fest (every round wins a sticker), or ⚔️ Boss Rush (+50% boss
+  coins). A banner on the player screen shows what's on and how long is left.
+- **Story campaign** — *Milo and the Lost Star*: an 8-episode original story
+  (about a boy, a robot co-pilot, and a lost little star) written at an early
+  2nd-grade level. Playing rounds unlocks the next episode, and every episode
+  ends on a cliffhanger. Same tap-a-word help and read-to-me as the books.
+- **My Base 🚀** — a per-kid rocket interior to decorate: six spots (window,
+  poster, gadget shelf, garden, captain seat, rug) with three buyable items
+  each. A pure coin sink that turns earnings into something they can show off.
+- **Pet buddy growth** — the equipped pet now grows with reading
+  (Hatchling → Kid → Grown → ✨Star Form) and can be fed with coins for
+  happiness and growth. Its mood fades gently after days away, but it never
+  gets sad enough to nag and never blocks play.
+- **Sibling Duel ⚔️** — pass-the-device head-to-head from the home screen:
+  five questions each, drawn from **each kid's own grade and difficulty**, so
+  a kindergartener and a 3rd grader get a fair match. Scoring is correctness
+  plus a speed bonus; both players win coins. Deliberately doesn't touch
+  mastery or quests — competition never skews the learning data.
 
 Boss difficulty comes from HP (more right answers needed), while question
 difficulty always follows the reader's grade setting — so the kindergartener
@@ -46,9 +71,11 @@ and the 3rd grader both get fair fights from the same bosses.
 | 🔠 Letter Sounds | Phonics & phonemic awareness | Hear a sound, find the letter — or see a picture and pick its first sound. Digraphs (sh, ch, th…) appear from 1st grade up. |
 | 🧩 Sound It Out | Blending | Tap each sound tile to hear it, blend the sounds in your head, then pick the matching picture. |
 | 🧱 Word Builder | Segmenting & spelling | Hear a word, then build it by tapping sound tiles in order (with decoy tiles to dodge). |
+| 🧠 Memory Match | Word recognition | Flip cards to pair each written word with its picture — matches feed the same mastery tracking as the other games. |
+| 📝 Sentence Builder | Syntax & word order | Hear a sentence, then rebuild it from shuffled word tiles. |
 | 🎵 Rhyme Time | Phonemic awareness | Which picture rhymes with the prompt word? |
 | 👀 Sight Words | Instant word recognition | Warm-up flashcards with audio, plus a 45-second Lightning Round. Tricky words are collected for practice. |
-| ⚡ Speed Reader | Fluency | Read words (K–1) or sentences (2nd–3rd) out loud against the clock — shows words-per-minute. A grown-up listens along. |
+| ⚡ Speed Reader | Fluency | Read words (K–1) or sentences (2nd–5th) out loud against the clock — shows words-per-minute. A grown-up listens along. |
 
 ## Learning at their own pace
 
@@ -73,7 +100,8 @@ and the 3rd grader both get fair fights from the same bosses.
   game can fake it.
 - **Daily quests** — three missions a day with coin/gem rewards, plus Reader
   XP levels (Lv 1–50 with titles) so there's always near-term progress.
-- **Badges** — 22 collectible badges for books, mastery, streaks, and bosses.
+- **Badges** — 29 collectible badges for books, mastery, streaks, bosses,
+  stories, duels, the pet, and the base.
 - **Sticker album** — every 2-star-or-better round opens a sticker pack: 48
   collectible emoji stickers in four packs, with rare ✨shiny✨ versions;
   duplicates convert to coins.
@@ -82,9 +110,17 @@ and the 3rd grader both get fair fights from the same bosses.
   unmastered words); voice guidance speaks instructions for K–1 profiles; the
   Journey meter is a rocket flying to the moon; quests use progress dots; the
   equipped pet rides along on screen and reacts to right/wrong answers.
-- **Living world** — the sky tints to match your current adventure stage, and
-  results screens play a celebration sequence (stars → coins counting up →
-  bonuses → sticker pack peel).
+- **Living world** — every adventure stage gets its own sky and horizon
+  (forest, caves, lava, castle, robo-skyline, moonscape, starfields…), the
+  hero visibly wears its equipped gear everywhere, and results screens play a
+  celebration sequence (stars with golden bursts → coins counting up →
+  bonuses → sticker pack peel), with fireworks for level-ups and graduation.
+- **Listen mode 🎤 (beta, optional)** — where speech recognition is available
+  (desktop/Android Chrome; not in the iOS app), the app can *listen* while the
+  kid reads out loud: Speed Reader cards auto-advance, Lightning Round words
+  score hands-free, and book words light up green as they're read. Strictly
+  celebratory — misreads never cost anything, the tap buttons always work, and
+  it's off unless a grown-up turns it on in ⚙️ settings.
 - **Family goal** — grown-ups set a weekly shared star target ("50 ⭐ →
   movie night"); everyone's stars count together.
 - **Grown-up corner** (math-gated) — per-kid dashboard: journey breakdown,
@@ -156,6 +192,10 @@ All the learning content lives in [js/data.js](js/data.js):
 - **Add shop items** under `SHOP` (`slot` of `skin`/`weapon`/`armor`/`pet`) and
   **stages/bosses** under `STAGES` — names, emoji, HP, rewards, and taunts are
   all just data.
+- **Write story episodes** under `CAMPAIGN` — same page format as books, plus
+  an unlock gate (`unlock.rounds`) and a `cliff` cliffhanger line.
+- **Add base decorations** under `BASE.items` and **event weeks** under
+  `EVENTS` — all just data too.
 - Add your kids' favorite things — words they love stick faster.
 
 Speech uses the device's built-in text-to-speech (Web Speech API), so there are
@@ -175,7 +215,10 @@ system emoji. To use your own custom artwork instead, drop files in
 
 - Speed Reader is honor-system by design: the app times the reading, **you**
   are the judge of whether the words were read. Reading out loud to a person
-  is the point.
+  is the point. **Listen mode** (⚙️ settings) can add hands-free cheering on
+  devices that support speech recognition, but it only ever celebrates — the
+  honor system stays the baseline everywhere, and the iOS app (where
+  recognition isn't available) behaves exactly as before.
 - **Voice quality matters a lot.** The app auto-picks the best English voice on
   the device (and blocklists the robotic macOS novelty voices), but the single
   biggest upgrade is downloading an **Enhanced/Premium voice**: on iPad/iPhone,

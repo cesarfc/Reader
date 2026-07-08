@@ -178,6 +178,7 @@ RR.nav = RR.nav || {};
     let combo = 0;
     let qTimer = null;
     let lastChoices = null, lastGetCorrect = null;
+    let shieldOn = false, doubleOn = false, freezeOn = false; /* armed power-ups */
     const timers = [];
     const after = (ms, fn) => timers.push(setTimeout(() => { if (!over || fn.allow) fn(); }, ms));
 
@@ -206,12 +207,51 @@ RR.nav = RR.nav || {};
             <div class="fname">${boss.name}</div>
           </div>
         </div>
+        <div class="putray" id="putray"></div>
         <div class="qtimer" id="qtimer" hidden><i></i></div>
         <div class="battleq" id="battleq"></div>
       </section>`;
 
     const $ = sel => app.querySelector(sel);
     const battleq = $('#battleq');
+
+    /* ----- power-ups (earned with perfect training rounds) ----- */
+    const POWERUPS = {
+      shield: { e: '🛡️', name: 'Shield', say: 'Shield up! The next hit is blocked.' },
+      double: { e: '⚡', name: 'Double', say: 'Double power! Your next hit hits twice as hard.' },
+      freeze: { e: '⏳', name: 'Freeze', say: 'Time freeze! The next question is nice and slow.' }
+    };
+    const armed = { shield: () => shieldOn, double: () => doubleOn, freeze: () => freezeOn };
+
+    function renderTray() {
+      const tray = $('#putray');
+      if (!tray) return;
+      const ids = Object.keys(POWERUPS).filter(id => id !== 'freeze' || dcfg.timer); /* freeze only matters with a timer */
+      tray.innerHTML = ids.map(id => {
+        const n = p.powerups[id] || 0;
+        const on = armed[id]();
+        return `
+          <button class="pubtn ${on ? 'armed' : ''}" data-pu="${id}" ${(!n && !on) || over ? 'disabled' : ''}>
+            ${POWERUPS[id].e} ${POWERUPS[id].name}
+            <span class="pucount">${on ? 'ON' : '×' + n}</span>
+          </button>`;
+      }).join('');
+      tray.querySelectorAll('[data-pu]').forEach(btn =>
+        btn.addEventListener('click', () => {
+          const id = btn.dataset.pu;
+          if (over || armed[id]() || !(p.powerups[id] > 0)) return;
+          p.powerups[id]--;
+          if (id === 'shield') shieldOn = true;
+          if (id === 'double') doubleOn = true;
+          if (id === 'freeze') freezeOn = true;
+          S.save();
+          A.sfx.gem();
+          buzz(30);
+          floatText($('.fighter.hero'), POWERUPS[id].e + ' ' + POWERUPS[id].name + '!', 'combo');
+          A.speak(POWERUPS[id].say);
+          renderTray();
+        }));
+    }
 
     app.querySelector('[data-act="back"]').addEventListener('click', () => {
       over = true;
@@ -224,6 +264,7 @@ RR.nav = RR.nav || {};
       $('#hearts').innerHTML = '❤️'.repeat(heartsLeft) + '🤍'.repeat(maxHearts - heartsLeft);
     }
     renderHearts();
+    renderTray();
 
     /* ----- intro ----- */
     battleq.innerHTML = `
@@ -245,7 +286,8 @@ RR.nav = RR.nav || {};
     for (const w of rhymePool) (families[u.rimeOf(w.w)] = families[u.rimeOf(w.w)] || []).push(w);
     const rhymable = rhymePool.filter(w => families[u.rimeOf(w.w)].length >= 2);
 
-    let typeCycle = u.shuffle(['first', 'match', 'blend', 'rhyme']);
+    const sightPool = (D.SIGHT[grade] || []).map(w => ({ w }));
+    let typeCycle = u.shuffle(['first', 'match', 'blend', 'rhyme', 'sight', 'missing']);
     let ti = 0;
 
     function nextQ() {
@@ -264,7 +306,12 @@ RR.nav = RR.nav || {};
       if (!bar) return;
       if (!dcfg.timer) { bar.hidden = true; return; }
       const enraged = bossHp <= bossMaxHp * 0.3;
-      const dur = (enraged ? dcfg.timer * 0.6 : dcfg.timer) * 1000;
+      let dur = (enraged ? dcfg.timer * 0.6 : dcfg.timer) * 1000;
+      if (freezeOn) { /* armed Time Freeze: this question runs slow */
+        freezeOn = false;
+        dur *= 2.5;
+        renderTray();
+      }
       const fill = bar.querySelector('i');
       bar.hidden = false;
       bar.classList.toggle('enraged', enraged);
@@ -391,6 +438,54 @@ RR.nav = RR.nav || {};
         wire(choices, c => c === target, 'w:' + target.w);
       },
 
+      /* Hear a sight word, find it written. */
+      sight() {
+        const target = u.smartSample(p, sightPool, 1, x => 's:' + x.w)[0];
+        const choices = u.withDistractors(target, sightPool, dcfg.choices, x => x.w, dcfg.hard ? u.wordSim : null);
+        battleq.innerHTML = `
+          <div class="bq" data-qtype="sight">
+            <div class="bqprompt"><button class="bigpic small" data-act="say" aria-label="Hear the word">🔊</button>
+            <h3>Find the word you hear!</h3></div>
+            <div class="choices words">
+              ${choiceButtons(choices, (c, i) => `<button class="choice wordchoice" data-i="${i}">${c.w}</button>`)}
+            </div>
+          </div>`;
+        const say = () => A.speak(target.w, { rate: 0.8 });
+        battleq.querySelector('[data-act="say"]').addEventListener('click', say);
+        after(250, say);
+        wire(choices, c => c === target, 's:' + target.w);
+      },
+
+      /* One sound is missing from the word — which is it? */
+      missing() {
+        const target = u.smartSample(p, wordPool, 1, w => 'w:' + w.w)[0];
+        const idx = (Math.random() * target.t.length) | 0;
+        const gapTile = target.t[idx];
+        const pool = [];
+        for (const w of wordPool) for (const t of w.t) {
+          if (t !== gapTile && !pool.includes(t)) pool.push(t);
+        }
+        const sim = dcfg.hard ? ((a, b) => RR.progress.confusablesOf(a).includes(b) ? 4 : 0) : null;
+        const choices = u.withDistractors(gapTile, pool, dcfg.choices, x => x, sim);
+        battleq.innerHTML = `
+          <div class="bq" data-qtype="missing">
+            <div class="bqprompt">
+              <button class="bigpic small" data-act="say" aria-label="${target.w}">${target.e}</button>
+              <div class="tiles small">
+                ${target.t.map((t, i) => `<span class="tile gaptile ${i === idx ? 'gap' : ''}">${i === idx ? '❓' : t}</span>`).join('')}
+              </div>
+              <h3>Which sound is missing?</h3>
+            </div>
+            <div class="choices letters">
+              ${choiceButtons(choices, (c, i) => `<button class="choice letter" data-i="${i}">${c}</button>`)}
+            </div>
+          </div>`;
+        const say = () => A.speak(target.w, { rate: 0.75 });
+        battleq.querySelector('[data-act="say"]').addEventListener('click', say);
+        after(250, say);
+        wire(choices, c => c === gapTile, 'w:' + target.w);
+      },
+
       /* Which one rhymes? */
       rhyme() {
         const target = u.sample(rhymable, 1)[0];
@@ -430,13 +525,15 @@ RR.nav = RR.nav || {};
       correctCount++;
       const comboMul = combo >= 5 ? 2 : combo >= 3 ? 1.5 : combo >= 2 ? 1.25 : 1;
       const crit = Date.now() - qShownAt < 5000;
-      const dmg = Math.round(S.attack(p) * comboMul * (crit ? 1.5 : 1));
+      const doubled = doubleOn;
+      if (doubled) { doubleOn = false; renderTray(); }
+      const dmg = Math.round(S.attack(p) * comboMul * (crit ? 1.5 : 1) * (doubled ? 2 : 1));
       bossHp = Math.max(0, bossHp - dmg);
       $('#hero-emoji').classList.add('lunge');
       after(180, () => {
         const bossSide = $('.bossside');
         $('#boss-emoji').classList.add('hit');
-        const tag = (crit ? '⚡CRIT! ' : '') + '-' + dmg;
+        const tag = (doubled ? '⚡x2! ' : '') + (crit ? '⚡CRIT! ' : '') + '-' + dmg;
         floatText(bossSide, tag, crit ? 'crit' : '');
         if (combo >= 2) floatText($('.fighter.hero'), '🔥 x' + combo, 'combo');
         $('#boss-hp').style.width = (bossHp / bossMaxHp * 100) + '%';
@@ -476,6 +573,15 @@ RR.nav = RR.nav || {};
     }
 
     function bossStrike() {
+      if (shieldOn) { /* the shield eats this hit */
+        shieldOn = false;
+        renderTray();
+        floatText($('.fighter.hero'), '🛡️ Blocked!', 'combo');
+        A.sfx.ding();
+        buzz(30);
+        after(1300, nextQ);
+        return;
+      }
       heartsLeft--;
       $('#boss-emoji').classList.add('lungeback');
       after(180, () => {
@@ -501,14 +607,16 @@ RR.nav = RR.nav || {};
       A.sfx.victory();
       RR.confetti.burst(200);
       buzz([60, 60, 60, 60, 160]);
+      const event = RR.progress.weeklyEvent();
       const base = (rematch ? Math.floor(boss.reward / 2) : boss.reward) + correctCount * 2;
-      const earned = S.earn(p, Math.round(base * dcfg.reward));
+      const earned = S.earn(p, Math.round(base * Math.min(2.5, dcfg.reward * (event.bossCoinMul || 1))));
       const advanced = !rematch && stageIdx === p.stage;
       let gems = 0;
       if (advanced) {
         p.stage++;
         p.stageWins = 0;
         gems = 3 + (p.stage >= D.STAGES.length ? 10 : 0); /* champion bonus */
+        gems = Math.min(gems * (event.bossGemMul || 1), gems + 13); /* event boost, capped */
         p.gems += gems;
         p.lifetime.gems += gems;
       }

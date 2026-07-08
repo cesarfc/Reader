@@ -32,6 +32,10 @@ RR.state = (function () {
     p.diffMode = p.diffMode || 'auto'; /* 'auto' or 'locked' */
     p.consecHigh = p.consecHigh || 0;
     p.consecLow = p.consecLow || 0;
+    p.powerups = p.powerups || { shield: 0, double: 0, freeze: 0 }; /* battle boosts from perfect rounds */
+    p.petState = p.petState || { xp: 0, happy: 100, lastTick: '' }; /* buddy growth + mood */
+    p.base = p.base || { owned: [], placed: {} }; /* rocket-base decorations */
+    p.duelWins = p.duelWins || 0;
     return p;
   }
 
@@ -120,6 +124,24 @@ RR.state = (function () {
     save();
   }
 
+  /* ---------- rocket base ---------- */
+  function baseItem(id) { return RR.DATA.BASE.items.find(i => i.id === id) || null; }
+  function buyBase(p, id) {
+    const it = baseItem(id);
+    if (!it || p.base.owned.includes(id) || p.coins < it.price) return false;
+    p.coins -= it.price;
+    p.base.owned.push(id);
+    p.base.placed[it.slot] = id;
+    save();
+    return true;
+  }
+  function placeBase(p, id) { /* tap an owned item to place it; tap again to clear the spot */
+    const it = baseItem(id);
+    if (!it || !p.base.owned.includes(id)) return;
+    p.base.placed[it.slot] = p.base.placed[it.slot] === id ? null : id;
+    save();
+  }
+
   /* ---------- mastery ---------- */
   /* Returns true when this bump just crossed the mastery line. */
   function bump(p, key, ok) {
@@ -174,7 +196,10 @@ RR.state = (function () {
     const roundAcc = result.total ? (result.correct || 0) / result.total : null;
     const diffBump = roundAcc != null ? RR.progress.tuneDifficulty(profile, roundAcc) : null;
 
-    const coinsEarned = earn(profile, Math.round((result.coins || 0) * rewardMul));
+    /* this week's event may boost coins — combined multiplier is capped */
+    const event = RR.progress.weeklyEvent();
+    const totalMul = Math.min(2.5, rewardMul * (event.coinMul || 1));
+    const coinsEarned = earn(profile, Math.round((result.coins || 0) * totalMul));
 
     /* gems: 1 for a 3-star round, +1 more for a perfect round */
     let gemsEarned = 0;
@@ -182,6 +207,18 @@ RR.state = (function () {
     if (result.total && result.correct === result.total) gemsEarned += 1;
     profile.gems += gemsEarned;
     profile.lifetime.gems += gemsEarned;
+
+    /* a perfect round also earns one battle power-up (whichever is lowest,
+       capped at 3 each so the economy stays honest) */
+    let powerupEarned = null;
+    if (result.total && result.correct === result.total) {
+      const pick = ['shield', 'double', 'freeze']
+        .sort((a, b) => profile.powerups[a] - profile.powerups[b])[0];
+      if (profile.powerups[pick] < 3) {
+        profile.powerups[pick] += 1;
+        powerupEarned = pick;
+      }
+    }
 
     /* Reader XP (same base as coins, but never spent) */
     const before = RR.progress.levelOf(profile.xp).level;
@@ -194,8 +231,11 @@ RR.state = (function () {
       type: 'round', gameId, stars: result.stars, score: result.score, coins: coinsEarned
     });
 
-    /* sticker reward for a solid round */
-    const sticker = (result.stars || 0) >= 2 ? RR.progress.rollSticker(profile) : null;
+    /* sticker reward for a solid round (Sticker Fest week: every round) */
+    const sticker = ((result.stars || 0) >= 2 || event.stickerAll) ? RR.progress.rollSticker(profile) : null;
+
+    /* the pet buddy grows a little with every finished round */
+    if (profile.petState) profile.petState.xp += 4 + (result.stars || 0);
 
     /* progress toward waking the current boss */
     let bossJustReady = false;
@@ -207,7 +247,7 @@ RR.state = (function () {
     save();
     return {
       coinsEarned, gemsEarned, bossJustReady, newlyMastered, questsDone, sticker,
-      xpGained, diffBump, rewardMul,
+      xpGained, diffBump, rewardMul, powerupEarned,
       levelUp: after > before ? after : null,
       graduate: RR.progress.readyToGraduate(profile)
     };
@@ -217,6 +257,7 @@ RR.state = (function () {
     get profiles() { return data.profiles; },
     current, setCurrent, addProfile, removeProfile, recordRound, save,
     item, gear, attack, hearts, coinBoost, streakBoost, heroEmoji, earn, buy, equip,
+    baseItem, buyBase, placeBase,
     bump, rollWeek, familyGoal, setFamilyGoal, familyWeekStars
   };
 })();

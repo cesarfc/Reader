@@ -27,6 +27,16 @@ RR.nav = RR.nav || {};
   function muteButton() {
     return `<button class="iconbtn" data-act="mute" aria-label="Sound on or off">${A.muted ? '🔇' : '🔊'}</button>`;
   }
+
+  /* Hero figure: equipped skin wearing its weapon/armor/pet as little pips,
+     so shop purchases show off everywhere — not just in battles. */
+  function heroFigureHtml(p) {
+    const pips = ['weapon', 'armor', 'pet'].map(slot => {
+      const g = S.gear(p, slot);
+      return g ? `<span class="heropip pip-${slot}">${g.e}</span>` : '';
+    }).join('');
+    return `<span class="herofig"><span class="herofig-main">${S.heroEmoji(p)}</span>${pips}</span>`;
+  }
   function wireMute(scope) {
     const btn = scope.querySelector('[data-act="mute"]');
     if (btn) btn.addEventListener('click', () => {
@@ -35,7 +45,34 @@ RR.nav = RR.nav || {};
     });
   }
 
-  /* ---------------- Pet buddy (reacts to gameplay sounds) ---------------- */
+  /* ---------------- Pet buddy (reacts to gameplay, grows with reading) ---------------- */
+  const PET_STAGES = [
+    { at: 0,   name: 'Hatchling', scale: 0.8 },
+    { at: 50,  name: 'Kid',       scale: 0.95 },
+    { at: 150, name: 'Grown',     scale: 1.1 },
+    { at: 400, name: 'Star Form', scale: 1.25, aura: true }
+  ];
+  const FEED_COST = 15;
+  function petStage(ps) {
+    let s = PET_STAGES[0];
+    for (const st of PET_STAGES) if ((ps.xp || 0) >= st.at) s = st;
+    return s;
+  }
+  function petNextStage(ps) { return PET_STAGES.find(st => st.at > (ps.xp || 0)) || null; }
+
+  /* Gentle daily mood decay — cosmetic only, floors at a friendly 40. */
+  function petTick(p) {
+    const ps = p.petState;
+    const today = P.localDate();
+    if (ps.lastTick === today) return;
+    if (ps.lastTick) {
+      const days = Math.max(0, Math.round((new Date(today) - new Date(ps.lastTick)) / 864e5));
+      ps.happy = Math.max(40, (ps.happy != null ? ps.happy : 100) - 5 * days);
+    }
+    ps.lastTick = today;
+    S.save();
+  }
+
   let petEl = null;
   function petShow() {
     const p = S.current();
@@ -48,6 +85,9 @@ RR.nav = RR.nav || {};
       document.body.appendChild(petEl);
     }
     petEl.textContent = pet.e;
+    const st = petStage(p.petState || { xp: 0 });
+    petEl.style.fontSize = Math.round(44 * st.scale) + 'px';
+    petEl.classList.toggle('petaura', !!st.aura);
   }
   function petHide() {
     if (petEl) { petEl.remove(); petEl = null; }
@@ -122,7 +162,7 @@ RR.nav = RR.nav || {};
             return `
             <div class="profilecard" data-id="${p.id}">
               <button class="profilemain" data-act="pick" data-id="${p.id}">
-                <span class="pavatar">${S.heroEmoji(p)}</span>
+                <span class="pavatar">${heroFigureHtml(p)}</span>
                 <span class="pname">${esc(p.name)}</span>
                 <span class="pgrade">${D.GRADE_LABEL[p.grade]} · Lv ${lv}</span>
                 <span class="pstars">🪙 ${p.coins} · 💎 ${p.gems} · ⭐ ${p.stars || 0}</span>
@@ -138,6 +178,7 @@ RR.nav = RR.nav || {};
               </button>
             </div>` : ''}
         </div>
+        ${S.profiles.length >= 2 ? '<div class="duelrow"><button class="btn ghost duelbtn" data-act="duel">⚔️ Sibling Duel — reader vs reader!</button></div>' : ''}
         ${familyCardHtml()}
         <div class="parentrow"><button class="parentlink" data-act="parent">👨‍👩‍👧 Grown-up corner</button></div>
       </section>`;
@@ -155,6 +196,8 @@ RR.nav = RR.nav || {};
       b.addEventListener('click', () => editProfile(S.profiles.find(p => p.id === b.dataset.id))));
     const add = app.querySelector('[data-act="add"]');
     if (add) add.addEventListener('click', () => editProfile(null));
+    const duel = app.querySelector('[data-act="duel"]');
+    if (duel) duel.addEventListener('click', () => { A.sfx.whoosh(); RR.nav.duel(); });
 
     /* celebrate the family goal once per week */
     if (goal) {
@@ -201,6 +244,120 @@ RR.nav = RR.nav || {};
       </button>`;
   }
 
+  /* Pet growth panel — only shows once a pet buddy is equipped. */
+  function petPanelHtml(p) {
+    const pet = S.gear(p, 'pet');
+    if (!pet) return '';
+    petTick(p);
+    const ps = p.petState;
+    const st = petStage(ps);
+    const next = petNextStage(ps);
+    const prevAt = st.at;
+    const xpPct = next ? Math.round((ps.xp - prevAt) / (next.at - prevAt) * 100) : 100;
+    return `
+      <div class="petcard">
+        <button class="petface" data-act="petpet" aria-label="Pet your buddy">
+          <span class="petemoji ${st.aura ? 'petaura' : ''}" style="font-size:${Math.round(46 * st.scale)}px">${pet.e}</span>
+        </button>
+        <div class="petmid">
+          <div class="petname">${pet.name} · <b>${st.name}</b></div>
+          <div class="petbar" title="Happiness"><span>💗</span><div class="timebar petmeter"><i style="width:${ps.happy}%"></i></div></div>
+          ${next
+            ? `<div class="petbar" title="Growth"><span>🌟</span><div class="timebar petmeter petxp"><i style="width:${xpPct}%"></i></div><small class="petnum">${ps.xp}/${next.at}</small></div>`
+            : '<div class="petmax">⭐ A fully grown superstar!</div>'}
+        </div>
+        <button class="btn good feedbtn" data-act="feed">🍎 Feed<br><small>${FEED_COST} 🪙</small></button>
+      </div>`;
+  }
+
+  function wirePetPanel(p) {
+    const face = app.querySelector('[data-act="petpet"]');
+    if (!face) return;
+    face.addEventListener('click', () => {
+      A.sfx.pop();
+      RR.onFeedback('happy');
+      const em = face.querySelector('.petemoji');
+      em.classList.remove('petpetted');
+      void em.offsetWidth;
+      em.classList.add('petpetted');
+    });
+    app.querySelector('[data-act="feed"]').addEventListener('click', () => {
+      const ps = p.petState;
+      if (p.coins < FEED_COST) {
+        A.sfx.buzz();
+        A.speak('Earn a few more coins first, then we can feed your buddy!');
+        return;
+      }
+      const before = petStage(ps);
+      p.coins -= FEED_COST;
+      ps.happy = Math.min(100, (ps.happy || 0) + 20);
+      ps.xp += 8;
+      S.save();
+      A.sfx.coin();
+      RR.onFeedback('happy');
+      const after = petStage(ps);
+      if (after !== before) {
+        A.sfx.fanfare();
+        RR.confetti.burst(120);
+        A.speak(`Wow! Your buddy grew! It's a ${after.name} now!`);
+      } else {
+        A.speak(['Yum!', 'So tasty!', 'Nom nom nom!'][(Math.random() * 3) | 0]);
+      }
+      renderPlayer();
+    });
+  }
+
+  /* This week's event banner (tap for details). */
+  function eventBannerHtml() {
+    const ev = P.weeklyEvent();
+    if (!ev || !ev.id) return '';
+    const d = P.eventDaysLeft();
+    return `
+      <button class="eventbanner" data-act="event">
+        <span class="evemoji">${ev.e}</span>
+        <span class="evtext"><b>${ev.name} week!</b> ${ev.blurb}</span>
+        <span class="evdays">${d} day${d === 1 ? '' : 's'} left</span>
+      </button>`;
+  }
+
+  function eventModal() {
+    const ev = P.weeklyEvent();
+    const d = P.eventDaysLeft();
+    const overlay = document.createElement('div');
+    overlay.className = 'overlay';
+    overlay.innerHTML = `
+      <div class="modal giftmodal">
+        <div class="intro-emoji">${ev.e}</div>
+        <h2>${ev.name} week!</h2>
+        <p class="muted">${ev.blurb}</p>
+        <p class="gemhint">A new event starts every Monday — ${d} day${d === 1 ? '' : 's'} left in this one!</p>
+        <div class="modalbtns"><button class="btn big" data-act="go">⭐ Let's go!</button></div>
+      </div>`;
+    document.body.appendChild(overlay);
+    overlay.querySelector('[data-act="go"]').addEventListener('click', () => overlay.remove());
+  }
+
+  /* Story campaign teaser card. */
+  function storyCardHtml(p) {
+    const eps = D.CAMPAIGN || [];
+    if (!eps.length) return '';
+    const read = P.episodesRead(p);
+    const next = eps.find(ep => !P.episodeRead(p, ep.id));
+    const status = next ? P.campaignStatus(p, next) : null;
+    const line = !next ? '🌟 The End — read your favorites again!'
+      : status.open ? `✨ Episode ${eps.indexOf(next) + 1} is ready: “${next.title}”`
+      : status.reason;
+    return `
+      <button class="storycard ${next && status.open ? 'fresh' : ''}" data-act="story">
+        <span class="storycover big">${next ? next.cover : '🌟'}</span>
+        <span class="storyinfo">
+          <span class="storytitle">🌠 Milo and the Lost Star</span>
+          <span class="storymeta">${line}</span>
+        </span>
+        <span class="storycount">${read}/${eps.length}</span>
+      </button>`;
+  }
+
   function questCardHtml(p) {
     P.ensureQuests(p);
     S.save();
@@ -227,7 +384,7 @@ RR.nav = RR.nav || {};
     const p = S.current();
     if (!p) { renderHome(); return; }
     S.rollWeek(p);
-    document.body.className = 'stage-' + Math.min(p.stage, 7);
+    document.body.className = 'stage-' + Math.min(p.stage, 9);
     petShow();
     const tip = D.TIPS[(Math.random() * D.TIPS.length) | 0];
     const stage = RR.adventure.stageOf(p);
@@ -255,11 +412,12 @@ RR.nav = RR.nav || {};
           ${muteButton()}
         </header>
         ${xpBarHtml(p)}
+        ${eventBannerHtml()}
 
         <button class="playbig" data-act="play">▶ PLAY!</button>
 
         <div class="herocard">
-          <span class="heroemoji">${S.heroEmoji(p)}</span>
+          <span class="heroemoji">${heroFigureHtml(p)}</span>
           <div class="heromid">
             <div class="statchips">
               <span class="statchip">⚔️ ${S.attack(p)}</span>
@@ -271,10 +429,13 @@ RR.nav = RR.nav || {};
           </div>
           <div class="herobtns">
             <button class="btn shopgo" data-act="shop">🛒<br>Shop</button>
+            <button class="btn ghost shopgo" data-act="base">🚀<br>My Base</button>
             <button class="btn ghost shopgo" data-act="stickers">📔<br>Stickers</button>
             <button class="btn ghost shopgo" data-act="badges">🏅<br>Stuff</button>
           </div>
         </div>
+
+        ${petPanelHtml(p)}
 
         ${champion ? `
           <div class="advcard champ">
@@ -301,6 +462,7 @@ RR.nav = RR.nav || {};
             </div>
           </div>`}
 
+        ${storyCardHtml(p)}
         ${journeyCardHtml(p)}
         ${questCardHtml(p)}
 
@@ -342,8 +504,14 @@ RR.nav = RR.nav || {};
       else startGame(act.id);
     });
     app.querySelector('[data-act="shop"]').addEventListener('click', () => RR.nav.shop());
+    app.querySelector('[data-act="base"]').addEventListener('click', () => RR.nav.base());
     app.querySelector('[data-act="stickers"]').addEventListener('click', renderStickers);
     app.querySelector('[data-act="badges"]').addEventListener('click', renderBadges);
+    wirePetPanel(p);
+    const evBtn = app.querySelector('[data-act="event"]');
+    if (evBtn) evBtn.addEventListener('click', eventModal);
+    const storyBtn = app.querySelector('[data-act="story"]');
+    if (storyBtn) storyBtn.addEventListener('click', () => { A.sfx.whoosh(); RR.nav.story(); });
     guideSay('player', 'Tap the big play button to start!');
     app.querySelector('[data-act="journey"]').addEventListener('click', () => {
       if (P.readyToGraduate(p)) renderCeremony();
@@ -417,8 +585,7 @@ RR.nav = RR.nav || {};
         </div>
       </section>`;
     RR.confetti.burst(220);
-    setTimeout(() => RR.confetti.burst(150), 900);
-    setTimeout(() => RR.confetti.burst(150), 1800);
+    setTimeout(() => RR.confetti.fireworks(6), 700);
     A.sfx.fanfare();
     setTimeout(() => A.speak(`Congratulations ${p.name}! You graduated! Welcome to ${D.GRADE_LABEL[to]}!`, { rate: 0.9 }), 800);
     app.querySelector('[data-act="go"]').addEventListener('click', renderPlayer);
@@ -551,6 +718,15 @@ RR.nav = RR.nav || {};
             `<button class="gradepill ${A.rateMul === +r ? 'on' : ''}" data-r="${r}">${label}</button>`).join('')}
         </div>
         <button class="btn ghost trybtn" data-act="test">🔊 Try the voice</button>
+        ${RR.voice && RR.voice.supported() ? `
+          <label class="mlabel">🎤 Listen mode (beta)</label>
+          <div class="gradepick modalgrades listenopts">
+            <button class="gradepill ${RR.voice.enabled() ? 'on' : ''}" data-l="1">🎤 On</button>
+            <button class="gradepill ${!RR.voice.enabled() ? 'on' : ''}" data-l="0">Off</button>
+          </div>
+          <p class="muted listentip">When on, the app listens while your reader reads out loud in Speed Reader,
+          Sight Words, and books — and cheers when it hears them! It never takes stars away,
+          and the tap buttons always work too. Your browser will ask to use the microphone.</p>` : ''}
         <div class="bubble settip">📱 <b>iPad/iPhone tip:</b> for the most natural voice, open
           <b>Settings → Accessibility → Spoken Content → Voices → English</b>, download an
           <b>Enhanced</b> voice (Ava or Zoe are great), then pick it here. On a Mac it's
@@ -573,6 +749,12 @@ RR.nav = RR.nav || {};
         A.speak("Let's read together!", { rate: 0.9 });
       }));
     overlay.querySelector('[data-act="test"]').addEventListener('click', () => A.sample());
+    overlay.querySelectorAll('.listenopts .gradepill').forEach(b =>
+      b.addEventListener('click', () => {
+        RR.voice.setEnabled(b.dataset.l === '1');
+        overlay.querySelectorAll('.listenopts .gradepill').forEach(x => x.classList.toggle('on', x === b));
+        A.sfx.pop();
+      }));
     overlay.querySelector('[data-act="done"]').addEventListener('click', () => overlay.remove());
   }
 
@@ -731,9 +913,10 @@ RR.nav = RR.nav || {};
     const ready = RR.adventure.bossReady(p);
     app.innerHTML = `
       <section class="screen results">
-        <div class="starsbig">
+        <div class="starsbig ${r.stars === 3 ? 'allstars' : ''}">
           ${[0, 1, 2].map(i => `<span class="star ${i < r.stars ? 'earn' : ''}" style="animation-delay:${0.15 + i * 0.3}s">★</span>`).join('')}
         </div>
+        <div class="reshero">${heroFigureHtml(p)}</div>
         <h1>${msg}</h1>
         ${r.line1 ? `<p class="resline">${r.line1}</p>` : ''}
         ${r.wpm ? `<p class="wpm">⚡ ${r.wpm} <small>words per minute</small></p>` : ''}
@@ -742,6 +925,7 @@ RR.nav = RR.nav || {};
         ${meta.levelUp ? `<p class="levelup seq">⬆️ LEVEL ${meta.levelUp} — ${P.titleOf(meta.levelUp)}!</p>` : ''}
         ${meta.diffBump ? `<p class="difftoast seq">${meta.diffBump.dir === 'up' ? `${meta.diffBump.cfg.e} Difficulty UP — ${meta.diffBump.cfg.label}!` : `${meta.diffBump.cfg.e} Eased to ${meta.diffBump.cfg.label}`}</p>` : ''}
         ${meta.rewardMul > 1 ? `<p class="gemhint seq">⚡ ${P.diffCfg(p).label} bonus ×${meta.rewardMul}</p>` : ''}
+        ${meta.powerupEarned ? `<p class="puwin seq">🎖️ Perfect round! Power-up earned: ${({ shield: '🛡️ Shield', double: '⚡ Double', freeze: '⏳ Freeze' })[meta.powerupEarned]} — use it on a boss!</p>` : ''}
         ${!meta.gemsEarned && r.stars < 3 ? '<p class="gemhint seq">💎 Get 3 stars to win a gem!</p>' : ''}
         ${meta.newlyMastered && meta.newlyMastered.length ? `
           <div class="masteredrow seq">⭐ Mastered: ${meta.newlyMastered.map(w => `<span class="masterychip">${esc(w)}</span>`).join('')}</div>` : ''}
@@ -769,6 +953,14 @@ RR.nav = RR.nav || {};
     /* celebration sequence: stars → coins count up → bonuses → extras */
     if (r.stars >= 2) RR.confetti.burst(r.stars === 3 ? 160 : 80);
     if (r.stars === 3) A.sfx.fanfare(); else A.sfx.star();
+    /* a golden pop where each star lands */
+    app.querySelectorAll('.starsbig .star.earn').forEach((st, i) => {
+      setTimeout(() => {
+        if (!st.isConnected) return;
+        const rc = st.getBoundingClientRect();
+        RR.confetti.starTrail(rc.left + rc.width / 2, rc.top + rc.height / 2);
+      }, 450 + i * 300);
+    });
     setTimeout(() => {
       A.sfx.coins();
       const cc = document.getElementById('coincount');
@@ -784,7 +976,7 @@ RR.nav = RR.nav || {};
       setTimeout(() => el.classList.add('show'), t);
       t += 320;
     });
-    if (meta.levelUp) setTimeout(() => { A.sfx.victory(); RR.confetti.burst(80); }, 2000);
+    if (meta.levelUp) setTimeout(() => { A.sfx.victory(); RR.confetti.fireworks(4); }, 2000);
     if (meta.diffBump && meta.diffBump.dir === 'up') setTimeout(() => { A.sfx.fanfare(); RR.confetti.burst(90); A.speak(`${meta.diffBump.cfg.label} mode unlocked!`); }, 2200);
     const praise = D.PRAISE[(Math.random() * D.PRAISE.length) | 0];
     setTimeout(() => A.speak(`${praise}, ${p.name}!`), 600);

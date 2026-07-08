@@ -148,6 +148,13 @@ RR.progress = (function () {
     return Object.keys(p.stats).filter(k => k.startsWith('book-') && p.stats[k].reads >= 1).length;
   }
 
+  /* Total plays of one game across all grades (stats keys are 'gameId-grade'). */
+  function gamePlays(p, gameId) {
+    return Object.keys(p.stats)
+      .filter(k => k.startsWith(gameId + '-'))
+      .reduce((n, k) => n + (p.stats[k].plays || 0), 0);
+  }
+
   const BADGES = [
     { id: 'book1',    e: '📖', name: 'First Book',       hint: 'Finish a story book',            test: p => bookReads(p) >= 1 },
     { id: 'book5',    e: '📚', name: 'Bookworm',         hint: 'Finish 5 different books',       test: p => bookReads(p) >= 5 },
@@ -170,7 +177,14 @@ RR.progress = (function () {
     { id: 'grad3',    e: '🎓', name: '3rd Grade Grad',   hint: 'Graduate from 3rd grade',        test: p => !!p.celebrated['3'] },
     { id: 'grad4',    e: '🎓', name: '4th Grade Grad',   hint: 'Graduate from 4th grade',        test: p => !!p.celebrated['4'] },
     { id: 'lvl10',    e: '🚀', name: 'Level 10',         hint: 'Reach Reader Level 10',          test: p => levelOf(p.xp || 0).level >= 10 },
-    { id: 'lvl25',    e: '🌌', name: 'Level 25',         hint: 'Reach Reader Level 25',          test: p => levelOf(p.xp || 0).level >= 25 }
+    { id: 'lvl25',    e: '🌌', name: 'Level 25',         hint: 'Reach Reader Level 25',          test: p => levelOf(p.xp || 0).level >= 25 },
+    { id: 'memory10',   e: '🧠', name: 'Memory Master',  hint: 'Play Memory Match 10 times',     test: p => gamePlays(p, 'memory') >= 10 },
+    { id: 'sentence10', e: '📝', name: 'Sentence Smith', hint: 'Play Sentence Builder 10 times', test: p => gamePlays(p, 'sentence') >= 10 },
+    { id: 'petstar',    e: '🐾', name: 'Best Friend',    hint: 'Grow your pet to Star Form',     test: p => ((p.petState || {}).xp || 0) >= 400 },
+    { id: 'decorator',  e: '🛋️', name: 'Decorator',      hint: 'Decorate every spot in your base', test: p => p.base && Object.values(p.base.placed).filter(Boolean).length >= 6 },
+    { id: 'story3',     e: '🌠', name: 'Story Fan',      hint: 'Read 3 story episodes',          test: p => episodesRead(p) >= 3 },
+    { id: 'story8',     e: '🌟', name: 'Star Reader',    hint: 'Finish the whole story',         test: p => episodesRead(p) >= (D().CAMPAIGN || []).length },
+    { id: 'duelist',    e: '⚔️', name: 'Duelist',        hint: 'Win a Sibling Duel',             test: p => (p.duelWins || 0) >= 1 }
   ];
 
   function badges(p) {
@@ -211,6 +225,46 @@ RR.progress = (function () {
     return { id, e: pack.list[idx], packName: pack.name, packE: pack.e, shiny, isNew, upgraded, dupeCoins };
   }
 
+  /* ---------------- Weekly event ---------------- */
+  /* Deterministic pick from the week key: no server, same event for
+     every profile, rotates each Monday. Missing data = no-op event. */
+  function weeklyEvent() {
+    const evs = D().EVENTS || [];
+    if (!evs.length) return {};
+    const wk = weekKey();
+    let h = 0;
+    for (let i = 0; i < wk.length; i++) h = (h * 31 + wk.charCodeAt(i)) | 0;
+    return evs[Math.abs(h) % evs.length];
+  }
+  function eventDaysLeft() {
+    return 7 - ((new Date().getDay() + 6) % 7); /* days until next Monday, counting today */
+  }
+
+  /* ---------------- Story campaign ---------------- */
+  function totalRounds(p) {
+    return Object.values(p.stats).reduce((n, s) => n + (s.plays || 0), 0);
+  }
+  function episodeRead(p, epId) { return ((p.stats['story-' + epId] || {}).reads || 0) > 0; }
+  function episodesRead(p) {
+    return (D().CAMPAIGN || []).filter(ep => episodeRead(p, ep.id)).length;
+  }
+  /* An episode opens when the one before it is read AND the rounds gate is met.
+     Returns { open, reason } where reason explains a lock in kid words. */
+  function campaignStatus(p, ep) {
+    const eps = D().CAMPAIGN || [];
+    const i = eps.indexOf(ep);
+    if (i > 0 && !episodeRead(p, eps[i - 1].id)) {
+      return { open: false, reason: `Read "${eps[i - 1].title}" first!` };
+    }
+    const need = (ep.unlock && ep.unlock.rounds) || 0;
+    const have = totalRounds(p);
+    if (have < need) {
+      const left = need - have;
+      return { open: false, reason: `Play ${left} more round${left === 1 ? '' : 's'} to unlock` };
+    }
+    return { open: true };
+  }
+
   /* ---------------- Smart "PLAY" routing ---------------- */
   /* Picks the next best activity: unfinished quest first, then the game
      with the most unmastered content. Returns {kind:'game'|'battle', id}. */
@@ -230,6 +284,7 @@ RR.progress = (function () {
       if (available('build')) cand.push({ id: 'build', n: unmastered(d.WORDS[grade], 'w:', w => w.w) - 1 });
       if (available('sounds')) cand.push({ id: 'sounds', n: unmastered(d.LETTERS, 'l:', l => l.l) });
       if (available('sight')) cand.push({ id: 'sight', n: unmastered(d.SIGHT[grade], 's:', s => s) });
+      if (available('memory')) cand.push({ id: 'memory', n: unmastered(d.WORDS[grade], 'w:', w => w.w) - 2 });
       cand.sort((a, b) => b.n - a.n);
       return cand[0] && cand[0].n > 0 ? cand[0].id : 'books';
     };
@@ -299,6 +354,8 @@ RR.progress = (function () {
     ensureQuests, questDef, applyEvent,
     badges,
     stickerCount, stickerTotal, rollSticker, nextActivity,
-    diffId, diffCfg, tuneDifficulty, confusablesOf
+    diffId, diffCfg, tuneDifficulty, confusablesOf,
+    weeklyEvent, eventDaysLeft,
+    totalRounds, episodeRead, episodesRead, campaignStatus
   };
 })();

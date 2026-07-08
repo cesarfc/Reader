@@ -4,13 +4,14 @@
    voice code). Network-first means every online load gets fresh, consistent
    files; the cache only steps in when offline. */
 
-const CACHE = 'reading-rocket-v9';
+const CACHE = 'reading-rocket-v14';
 const CORE = [
   './',
   'index.html',
   'css/styles.css',
   'js/data.js',
   'js/audio.js',
+  'js/voice.js',
   'js/confetti.js',
   'js/state.js',
   'js/progress.js',
@@ -18,11 +19,32 @@ const CORE = [
   'js/img.js',
   'js/games.js',
   'js/adventure.js',
+  'js/base.js',
+  'js/story.js',
+  'js/duel.js',
   'js/app.js',
   'manifest.webmanifest',
   'icons/icon.svg'
 ];
 const OPTIONAL = ['icons/icon-192.png', 'icons/icon-512.png', 'icons/apple-touch-icon.png', 'fonts/Fredoka.woff2'];
+
+/* Best-effort precache of the OpenMoji art referenced by imgmap.js, so the
+   illustrated emoji work offline from the very first install. The map is
+   parsed as text — imgmap.js references window and can't run in a worker. */
+function precacheOpenmoji(cache) {
+  return fetch(new Request('js/imgmap.js', { cache: 'no-cache' }))
+    .then(res => (res.ok ? res.text() : ''))
+    .then(text => {
+      const codes = Array.from(text.matchAll(/:"([0-9A-F][0-9A-F-]*)"/g), m => m[1]);
+      return Promise.all(codes.map(code => {
+        const url = 'img/openmoji/' + code + '.svg';
+        return fetch(new Request(url, { cache: 'no-cache' }))
+          .then(res => { if (res.ok) return cache.put(url, res); })
+          .catch(() => { /* art is optional — text emoji is the fallback */ });
+      }));
+    })
+    .catch(() => { /* offline install: runtime caching will pick these up */ });
+}
 
 /* Pre-cache fresh copies, bypassing the HTTP cache so we never seed the
    service worker cache with stale files. */
@@ -34,7 +56,7 @@ self.addEventListener('install', e => {
           fetch(new Request(url, { cache: 'no-cache' }))
             .then(res => { if (res.ok) return cache.put(url, res); })
             .catch(() => { /* optional assets may be missing */ })
-        )
+        ).concat(precacheOpenmoji(cache))
       )
     ).then(() => self.skipWaiting())
   );
