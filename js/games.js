@@ -169,19 +169,29 @@ window.RR = window.RR || {};
     shell.after(8000, go);
   }
 
-  /* Pretty intro card shown before timed games. */
-  function introCard(shell, { emoji, title, lines, buttonText, onStart, extraButtons = '' }) {
+  /* Pretty intro card shown before timed games. Pass ctx + skipKey and the
+     full explanation only shows the FIRST time — after that it collapses to a
+     quick GO (kids hammer through repeat intros without reading them). */
+  function introCard(shell, { emoji, title, lines, buttonText, onStart, extraButtons = '', ctx = null, skipKey = null }) {
+    const seen = !!(ctx && skipKey && ctx.profile.seenIntros && ctx.profile.seenIntros[skipKey]);
     shell.area.innerHTML = `
-      <div class="card intro">
+      <div class="card intro ${seen ? 'compact' : ''}">
         <div class="intro-emoji">${emoji}</div>
         <h2>${title}</h2>
-        ${lines.map(l => `<p>${l}</p>`).join('')}
+        ${seen ? '' : lines.map(l => `<p>${l}</p>`).join('')}
         <div class="introbtns">
-          <button class="btn big" data-act="start">${buttonText}</button>
-          ${extraButtons}
+          <button class="btn big" data-act="start">${seen ? '🚦 GO!' : buttonText}</button>
+          ${seen ? '' : extraButtons}
         </div>
+        ${seen && extraButtons ? `<div class="introbtns">${extraButtons}</div>` : ''}
       </div>`;
-    shell.area.querySelector('[data-act="start"]').addEventListener('click', onStart);
+    shell.area.querySelector('[data-act="start"]').addEventListener('click', () => {
+      if (ctx && skipKey) {
+        ctx.profile.seenIntros = ctx.profile.seenIntros || {};
+        if (!ctx.profile.seenIntros[skipKey]) { ctx.profile.seenIntros[skipKey] = 1; S.save(); }
+      }
+      onStart();
+    });
   }
 
   /* =========================================================
@@ -1151,7 +1161,9 @@ window.RR = window.RR || {};
           'Read each one and decide — fast!'
         ],
         buttonText: '🚦 Ready, set, read!',
-        onStart: run
+        onStart: run,
+        ctx,
+        skipKey: 'nonsense'
       });
 
       function run() {
@@ -1683,7 +1695,9 @@ window.RR = window.RR || {};
           'then answer 4 questions from memory!'
         ],
         buttonText: '🤿 Dive in!',
-        onStart: read
+        onStart: read,
+        ctx,
+        skipKey: 'deepdive'
       });
 
       function read() {
@@ -2318,7 +2332,9 @@ window.RR = window.RR || {};
           '👨‍👩‍👧 Grown-ups: listen along and cheer!'
         ],
         buttonText: '🚦 Ready, set, read!',
-        onStart: run
+        onStart: run,
+        ctx,
+        skipKey: 'flash'
       });
 
       function run() {
@@ -2410,7 +2426,9 @@ window.RR = window.RR || {};
         ],
         buttonText: '⚡ Lightning Round',
         extraButtons: '<button class="btn ghost big" data-act="warmup">👂 Warm-up</button>',
-        onStart: lightning
+        onStart: lightning,
+        ctx,
+        skipKey: 'sight'
       });
       shell.area.querySelector('[data-act="warmup"]').addEventListener('click', warmup);
 

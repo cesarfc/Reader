@@ -1203,7 +1203,20 @@ RR.DATA = {
     { w: 'avocado', e: '🥑', syls: ['av', 'o', 'ca', 'do'] }
   ],
 
-  PRAISE: ['Great job', 'You did it', 'Awesome reading', 'Super star', 'Way to go', 'Out of this world', 'Fantastic'],
+  PRAISE: [
+    'Great job', 'You did it', 'Awesome reading', 'Super star', 'Way to go',
+    'Out of this world', 'Fantastic', 'Nice reading', 'You worked hard on that one',
+    'Look at you go', 'Your brain is growing', 'Strong reading', 'That was brave trying',
+    'High five', 'You kept going and it worked', 'Rocket power', 'So proud of you',
+    'You are getting faster', 'Sharp eyes', 'Great listening', 'You never gave up'
+  ],
+  /* extra-shiny lines saved for 3-star rounds */
+  PRAISE_BIG: [
+    'Perfect flying', 'Three stars — unstoppable', 'Champion reading',
+    'That was amazing', 'Galaxy-level reading', 'Wow, just wow',
+    'You crushed it', 'A superstar round', 'Absolutely brilliant',
+    'The bosses should be worried', 'Best round ever', 'Ollie is doing a happy dance'
+  ],
 
   TIPS: [
     'Ask your reader to say each sound out loud — then squish the sounds together!',

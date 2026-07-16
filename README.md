@@ -120,6 +120,20 @@ and the 3rd grader both get fair fights from the same bosses.
 - **K/1 rounds are shorter** (6 questions instead of 8), and tapping any
   daily quest reads it aloud.
 
+### Finding your game (quality of life)
+
+- The Play tab opens with a **"❤️ Play again" row** (recent + hearted games —
+  tap the heart on any card), **"✨ Today's picks"** (three games curated
+  daily, one per skill area), and a **🎲 Surprise me** button.
+- Sections **fold** with a tap and show **star totals** ("🔤 Sounds &
+  letters · 9/15 ⭐").
+- After every round the results screen offers **"▶ Next:"** — the smart pick
+  for what to play now — and the big PLAY button has Ollie explain *why* he
+  picked what he picked. Game intros show their full explanation only the
+  first time; after that it's a quick GO.
+- The app now works in **landscape** too — iPad-sideways gets a wider,
+  denser layout.
+
 ## Learning at their own pace
 
 - **Mastery tracking** — every word, sight word, and letter sound is tracked

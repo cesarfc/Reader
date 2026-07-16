@@ -304,24 +304,32 @@ RR.progress = (function () {
       return cand[0] && cand[0].n > 0 ? cand[0].id : 'books';
     };
 
+    /* short spoken reason so the big PLAY button never feels random */
+    const why = id => id === 'rescue' ? 'You have tricky words to rescue!'
+      : id === 'books' ? 'A story is waiting for you!'
+      : 'Lots of new things to learn in this one!';
     ensureQuests(p);
     const open = p.quests.items.find(i => !i.done);
     if (open) {
       switch (open.id) {
-        case 'book': return { kind: 'game', id: 'books' };
-        case 'sight10': return { kind: 'game', id: 'sight' };
+        case 'book': return { kind: 'game', id: 'books', reason: 'Your quest today is to finish a story book!' };
+        case 'sight10': return { kind: 'game', id: 'sight', reason: 'Your quest: read ten words in one lightning round!' };
         case 'boss': {
           const stage = D().STAGES[p.stage];
-          if (stage && p.stageWins >= stage.wins) return { kind: 'battle' };
-          return { kind: 'game', id: trainingPick() };
+          if (stage && p.stageWins >= stage.wins) return { kind: 'battle', reason: 'The boss is awake!' };
+          return { kind: 'game', id: trainingPick(), reason: 'A few more rounds to wake the boss!' };
         }
-        default: return { kind: 'game', id: trainingPick() };
+        default: {
+          const id = trainingPick();
+          return { kind: 'game', id, reason: why(id) };
+        }
       }
     }
     /* no open quests: unread book beats training */
     const unread = (d.BOOKS[grade] || []).some(b => !(p.stats['book-' + b.id] || {}).reads);
-    if (unread && Math.random() < 0.4) return { kind: 'game', id: 'books' };
-    return { kind: 'game', id: trainingPick() };
+    if (unread && Math.random() < 0.4) return { kind: 'game', id: 'books', reason: 'A brand new book is waiting for you!' };
+    const id = trainingPick();
+    return { kind: 'game', id, reason: why(id) };
   }
 
   /* ---------------- Difficulty ---------------- */

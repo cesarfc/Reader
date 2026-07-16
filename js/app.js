@@ -575,8 +575,18 @@ RR.nav = RR.nav || {};
       const act = P.nextActivity(p);
       S.save();
       A.sfx.whoosh();
-      if (act.kind === 'battle') RR.nav.battle(p.stage);
-      else startGame(act.id);
+      if (act.kind === 'battle') { RR.nav.battle(p.stage); return; }
+      /* a beat of Ollie explaining WHY, so the big button never feels random */
+      if (act.reason) {
+        const toast = document.createElement('div');
+        toast.className = 'ollietoast';
+        toast.innerHTML = `<span class="owl">🦉</span><div><b>${RR.games[act.id].title}!</b><br>${act.reason}</div>`;
+        document.body.appendChild(toast);
+        A.speak(`${RR.games[act.id].title}! ${act.reason}`, { rate: 0.95 });
+        setTimeout(() => { toast.remove(); startGame(act.id); }, 1500);
+      } else {
+        startGame(act.id);
+      }
     });
     app.querySelector('[data-act="journey"]').addEventListener('click', () => {
       if (P.readyToGraduate(p)) renderCeremony();
@@ -603,6 +613,22 @@ RR.nav = RR.nav || {};
     { label: '🎓 Challenge Zone', ids: ['analogy', 'cloze', 'fixit', 'mainidea', 'factop', 'homophones', 'deepdive'] }
   ];
 
+  /* Three date-seeded picks, one per skill section, rotating daily. */
+  function todaysPicks(p, available) {
+    const seedStr = P.localDate() + p.grade;
+    let h = 0;
+    for (const c of seedStr) h = (h * 31 + c.charCodeAt(0)) | 0;
+    const rng = () => { h = (h * 1103515245 + 12345) & 0x7fffffff; return h / 0x7fffffff; };
+    const secs = GAME_SECTIONS.filter(s => s.ids.some(available));
+    const picks = [];
+    const start = Math.abs(h) % Math.max(1, secs.length);
+    for (let k = 0; k < secs.length && picks.length < 3; k++) {
+      const ids = secs[(start + k) % secs.length].ids.filter(available).filter(id => !picks.includes(id));
+      if (ids.length) picks.push(ids[(rng() * ids.length) | 0]);
+    }
+    return picks;
+  }
+
   function renderPlayTab() {
     const p = S.current();
     if (!p) { renderHome(); return; }
@@ -616,13 +642,28 @@ RR.nav = RR.nav || {};
       const best = (p.stats[id + '-' + p.grade] || {}).best || 0;
       return `
         <button class="gamecard" data-game="${id}">
+          <span class="favbtn" data-fav="${id}" role="button" aria-label="Favorite">${p.favs.includes(id) ? '❤️' : '🤍'}</span>
           <span class="gicon">${g.icon}</span>
           <span class="gtitle">${g.title}</span>
           <span class="gdesc">${g.desc}</span>
           ${starRow(best)}
         </button>`;
     };
-    /* games registered but missing from the section map still show up */
+    const chip = id => `<button class="chipgame" data-game="${id}">${RR.games[id].icon} ${RR.games[id].title}</button>`;
+    /* fold state + per-section star tallies */
+    const section = (label, ids) => {
+      const folded = !!p.folds[label];
+      const got = ids.reduce((n, id) => n + ((p.stats[id + '-' + p.grade] || {}).best || 0), 0);
+      return `
+        <button class="sechead" data-sec="${label}">
+          <span class="seclabel">${label}</span>
+          <span class="secstars">${got}/${ids.length * 3} ⭐</span>
+          <span class="secchev">${folded ? '▸' : '▾'}</span>
+        </button>
+        <div class="gamegrid ${folded ? 'foldhide' : ''}">${ids.map(card).join('')}</div>`;
+    };
+    const quick = [...new Set(p.favs.concat(p.recent))].filter(available).slice(0, 6);
+    const today = todaysPicks(p, available);
     const listed = GAME_SECTIONS.flatMap(s => s.ids);
     const extras = RR.gameOrder.filter(id => !listed.includes(id) && available(id));
     app.innerHTML = `
@@ -632,16 +673,18 @@ RR.nav = RR.nav || {};
         <div class="gradepick">
           ${GRADES.map(g => `<button class="gradepill ${g === p.grade ? 'on' : ''}" data-g="${g}">${gradePill(g)}</button>`).join('')}
         </div>
+        ${quick.length ? `
+          <span class="eyebrow section">❤️ Play again</span>
+          <div class="quickrow">${quick.map(chip).join('')}</div>` : ''}
+        ${today.length ? `
+          <span class="eyebrow section">✨ Today's picks</span>
+          <div class="gamegrid today">${today.map(card).join('')}</div>` : ''}
+        <button class="btn ghost surprise" data-act="surprise">🎲 Surprise me!</button>
         ${GAME_SECTIONS.map(sec => {
           const ids = sec.ids.filter(available);
-          if (!ids.length) return '';
-          return `
-            <span class="eyebrow section">${sec.label}</span>
-            <div class="gamegrid">${ids.map(card).join('')}</div>`;
+          return ids.length ? section(sec.label, ids) : '';
         }).join('')}
-        ${extras.length ? `
-          <span class="eyebrow section">🎲 More games</span>
-          <div class="gamegrid">${extras.map(card).join('')}</div>` : ''}
+        ${extras.length ? section('🎲 More games', extras) : ''}
       </section>`;
     wireAppBar();
     showTabs('play');
@@ -652,8 +695,39 @@ RR.nav = RR.nav || {};
         A.sfx.pop();
         renderPlayTab();
       }));
-    app.querySelectorAll('.gamecard').forEach(b =>
+    app.querySelectorAll('.sechead').forEach(b =>
+      b.addEventListener('click', () => {
+        p.folds[b.dataset.sec] = !p.folds[b.dataset.sec];
+        S.save();
+        A.sfx.pop();
+        const y = window.scrollY;
+        renderPlayTab();
+        window.scrollTo(0, y);
+      }));
+    app.querySelector('[data-act="surprise"]').addEventListener('click', () => {
+      const all = RR.gameOrder.filter(available);
+      const id = all[(Math.random() * all.length) | 0];
+      A.sfx.whoosh();
+      A.speak(`Let's play ${RR.games[id].title}!`, { rate: 0.95 });
+      startGame(id);
+    });
+    app.querySelectorAll('.chipgame').forEach(b =>
       b.addEventListener('click', () => startGame(b.dataset.game)));
+    app.querySelectorAll('.gamecard').forEach(b =>
+      b.addEventListener('click', e => {
+        const fav = e.target.closest('.favbtn');
+        if (fav) {
+          const id = fav.dataset.fav;
+          p.favs = p.favs.includes(id) ? p.favs.filter(x => x !== id) : p.favs.concat(id);
+          S.save();
+          A.sfx.pop();
+          const y = window.scrollY;
+          renderPlayTab();
+          window.scrollTo(0, y);
+          return;
+        }
+        startGame(b.dataset.game);
+      }));
   }
 
   /* ---------------- Me tab: hero, pet, and everything you own ---------------- */
@@ -1403,7 +1477,13 @@ RR.nav = RR.nav || {};
             ? `<button class="btn big fightbtn pulse" data-act="fight">⚔️ THE BOSS IS AWAKE — FIGHT!</button>`
             : (stage ? `<p class="advnote">🗺️ ${Math.min(p.stageWins, stage.wins)}/${stage.wins} rounds toward ${stage.boss.name} ${stage.boss.e}</p>` : ''))}
         <div class="resbtns">
-          <button class="btn ${ready || meta.graduate ? 'ghost' : ''} big" data-act="again">🔁 Play again</button>
+          ${(() => {
+            const act = P.nextActivity(p);
+            return act.kind === 'game' && act.id !== gameId && !ready && !meta.graduate
+              ? `<button class="btn big good" data-act="nextgame" data-next="${act.id}">▶ Next: ${RR.games[act.id].title}</button>`
+              : '';
+          })()}
+          <button class="btn ghost big" data-act="again">🔁 Play again</button>
           <button class="btn ghost big" data-act="menu">🎮 All games</button>
         </div>
       </section>`;
@@ -1435,7 +1515,8 @@ RR.nav = RR.nav || {};
     });
     if (meta.levelUp) setTimeout(() => { A.sfx.victory(); RR.confetti.fireworks(4); }, 2000);
     if (meta.diffBump && meta.diffBump.dir === 'up') setTimeout(() => { A.sfx.fanfare(); RR.confetti.burst(90); A.speak(`${meta.diffBump.cfg.label} mode unlocked!`); }, 2200);
-    const praise = D.PRAISE[(Math.random() * D.PRAISE.length) | 0];
+    const pool = (r.stars === 3 && D.PRAISE_BIG) ? D.PRAISE_BIG : D.PRAISE;
+    const praise = pool[(Math.random() * pool.length) | 0];
     setTimeout(() => A.speak(`${praise}, ${p.name}!`), 600);
 
     /* sticker pack peel */
@@ -1474,6 +1555,8 @@ RR.nav = RR.nav || {};
     if (fight) fight.addEventListener('click', () => RR.nav.battle(p.stage));
     app.querySelector('[data-act="again"]').addEventListener('click', () => startGame(gameId));
     app.querySelector('[data-act="menu"]').addEventListener('click', renderPlayTab);
+    const nextBtn = app.querySelector('[data-act="nextgame"]');
+    if (nextBtn) nextBtn.addEventListener('click', () => { A.sfx.whoosh(); startGame(nextBtn.dataset.next); });
     app.querySelectorAll('.results .trickyword').forEach(b =>
       b.addEventListener('click', () => A.speak(b.dataset.w, { rate: 0.8 })));
   }

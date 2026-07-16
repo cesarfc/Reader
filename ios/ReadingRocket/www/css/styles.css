@@ -1893,3 +1893,159 @@ body.bedtime .minput { background: var(--surface-2); border-color: var(--bg-2); 
   .safarigrid { grid-template-columns: repeat(3, 1fr); }
   .drumbtn { width: 108px; height: 108px; font-size: 54px; }
 }
+
+/* ---------- Play-tab quality of life ---------- */
+.quickrow { display: flex; gap: 8px; flex-wrap: wrap; }
+.chipgame {
+  border: 1px solid var(--hairline);
+  cursor: pointer;
+  font: inherit;
+  font-weight: 600;
+  font-size: 14px;
+  color: var(--ink);
+  background: var(--surface);
+  border-radius: var(--r-pill);
+  padding: 10px 14px;
+  box-shadow: var(--sh-sm);
+  min-height: 44px;
+}
+.chipgame:active { transform: scale(0.97); }
+
+.gamegrid.today { grid-template-columns: repeat(3, 1fr); }
+.gamegrid.today .gicon { width: 48px; height: 48px; font-size: 26px; }
+.gamegrid.today .gamecard { min-height: 128px; padding: 12px 6px 10px; }
+.gamegrid.today .gdesc { display: none; }
+
+.favbtn {
+  position: absolute;
+  top: 8px;
+  right: 10px;
+  font-size: 16px;
+  line-height: 1;
+  opacity: 0.9;
+  padding: 4px;
+}
+.gamecard { position: relative; }
+
+.sechead {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  border: 0;
+  background: none;
+  cursor: pointer;
+  font: inherit;
+  padding: 6px 2px;
+  margin-top: 18px;
+  color: var(--ink-soft);
+}
+.seclabel { font-size: 12.5px; font-weight: 600; letter-spacing: 0.6px; text-transform: uppercase; }
+.secstars {
+  font-size: 11.5px;
+  font-weight: 700;
+  background: var(--yellow-tint);
+  color: var(--ink);
+  border-radius: var(--r-pill);
+  padding: 3px 9px;
+}
+.secchev { margin-left: auto; font-size: 14px; color: var(--ink-faint); }
+.foldhide { display: none; }
+
+.surprise { width: 100%; margin-top: 14px; font-size: 16px; }
+
+/* Ollie's "here's why" toast between PLAY and the game */
+.ollietoast {
+  position: fixed;
+  left: 50%;
+  top: 38%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: var(--surface);
+  border: 1px solid var(--hairline);
+  border-radius: var(--r-lg);
+  box-shadow: var(--sh-lg);
+  padding: 16px 20px;
+  z-index: 60;
+  max-width: 320px;
+  font-size: 15px;
+  font-weight: 500;
+  animation: rise 0.25s ease both;
+  pointer-events: none;
+}
+.ollietoast .owl { font-size: 36px; }
+.ollietoast b { font-weight: 700; }
+
+.card.intro.compact { padding: 18px; }
+.card.intro.compact .intro-emoji { font-size: 44px; }
+
+/* =========================================================================
+   WIDE-SCREEN / LANDSCAPE SUPPORT
+   Kids hold iPads sideways. Below 700px NOTHING here applies — the portrait
+   phone layout stays pixel-identical. On wide screens we widen the single
+   column, densify the card grids, and cap reading measures so lines and
+   game boards never stretch into an unreadable slab. Short (landscape-phone)
+   viewports get their own de-crush pass at the bottom.
+   ========================================================================= */
+
+/* ---- Tablet & wider (>=700px) ---- */
+@media (min-width: 700px) {
+  /* Wider column; keep the floating tab bar the same 14px-per-side inset it
+     has in portrait (app 880 outer -> tabbar 852). */
+  #app { max-width: 880px; padding-left: 24px; padding-right: 24px; }
+  #tabbar { max-width: 852px; }
+
+  /* Denser card grids. (.gamegrid.today holds exactly 3 curated picks, so it
+     stays 3-up at every width — a wider count would leave empty columns.) */
+  .gamegrid { grid-template-columns: repeat(3, 1fr); }
+  .shopgrid, .megrid, .bookshelf { grid-template-columns: repeat(3, 1fr); }
+  .profilegrid { grid-template-columns: repeat(3, 1fr); }
+  .badgegrid { grid-template-columns: repeat(4, 1fr); }
+  .stickgrid { grid-template-columns: repeat(8, 1fr); }
+  /* answer choices can breathe 4-up when they're single tokens */
+  .choices.pics, .choices.letters { grid-template-columns: repeat(4, 1fr); }
+
+  /* PLAY hero: grow taller instead of becoming a mile-wide thin slab */
+  .playbig { min-height: 116px; }
+
+  /* Read + Adventure are single reading columns. Cap the measure and centre
+     everything UNDER the (still full-width) top app bar, so the bar stays
+     identical across tabs while the content narrows to a comfy column. */
+  .screen:has(> .storylist) > :not(.appbar),
+  .screen:has(> .mappath) > :not(.appbar) {
+    max-width: 600px;
+    margin-inline: auto;
+  }
+
+  /* Cap game / reading content so boards & cards don't over-stretch. The
+     game/back header (.gamebar) stays full width; the content centres below. */
+  .bookpage { max-width: 640px; margin-inline: auto; }
+  .booktext { max-width: 38ch; }
+  .flashcard { max-width: 560px; }
+  .battlefield { max-width: 600px; margin-inline: auto; }
+  .memgrid { max-width: 520px; margin-inline: auto; }
+  .choices { max-width: 640px; margin-inline: auto; }
+  .bigjudge, .scramlist { max-width: 560px; margin-inline: auto; }
+  .riddlecard, .card.intro { max-width: 600px; margin-inline: auto; }
+}
+
+/* ---- Large tablet / desktop (>=1000px): one step denser where it helps ----
+   NOTE: .gamegrid stays 3-up even here. The Play sections hold 2-7 games each,
+   so 3 columns fills their rows cleanly; 4 columns would leave ragged, half-
+   empty rows on the common 2- and 3-game sections. Badges (many, uniform) do
+   benefit from a 5th column. */
+@media (min-width: 1000px) {
+  .badgegrid { grid-template-columns: repeat(5, 1fr); }
+}
+
+/* ---- Landscape phones (short viewport): don't crush the content ---- */
+@media (max-height: 450px) {
+  .playbig { min-height: 60px; margin-top: 10px; font-size: 22px; }
+  #tabbar { height: 56px; }
+  .tabicon { font-size: 20px; }
+  .tablabel { font-size: 10px; }
+  body.tabs-on #app { padding-bottom: calc(72px + env(safe-area-inset-bottom)); }
+  body.tabs-on #petbuddy { bottom: calc(env(safe-area-inset-bottom) + 66px); }
+}

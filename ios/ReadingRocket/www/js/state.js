@@ -36,6 +36,10 @@ RR.state = (function () {
     p.petState = p.petState || { xp: 0, happy: 100, lastTick: '' }; /* buddy growth + mood */
     p.base = p.base || { owned: [], placed: {} }; /* rocket-base decorations */
     p.duelWins = p.duelWins || 0;
+    p.favs = p.favs || [];           /* hearted games on the Play tab */
+    p.recent = p.recent || [];       /* recently played game ids, newest first */
+    p.seenIntros = p.seenIntros || {}; /* game intros already explained once */
+    p.folds = p.folds || {};         /* collapsed Play-tab sections */
     return p;
   }
 
@@ -226,6 +230,7 @@ RR.state = (function () {
   /* ---------- record a finished training round ---------- */
   function recordRound(profile, gameId, grade, result) {
     rollWeek(profile);
+    profile.recent = [gameId].concat((profile.recent || []).filter(g => g !== gameId)).slice(0, 4);
 
     const key = gameId + '-' + grade;
     const s = profile.stats[key] || { best: 0, plays: 0, bestWpm: 0, bestScore: 0 };
