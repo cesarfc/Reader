@@ -25,11 +25,26 @@ final class ViewController: UIViewController {
         view.addSubview(webView)
 
         webView.navigationDelegate = self
+        webView.uiDelegate = self
         webView.load(URLRequest(url: URL(string: "rocket://app/index.html")!))
     }
 
     override var prefersHomeIndicatorAutoHidden: Bool { true }
     override var preferredStatusBarStyle: UIStatusBarStyle { .darkContent }
+}
+
+extension ViewController: WKUIDelegate {
+    /* Family Voice recording: the web view asks for the microphone on the
+       parent's behalf; iOS already showed its own system mic prompt (see
+       NSMicrophoneUsageDescription), so a second WebKit prompt would only
+       confuse — grant it. */
+    func webView(_ webView: WKWebView,
+                 requestMediaCapturePermissionFor origin: WKSecurityOrigin,
+                 initiatedByFrame frame: WKFrameInfo,
+                 type: WKMediaCaptureType,
+                 decisionHandler: @escaping (WKPermissionDecision) -> Void) {
+        decisionHandler(type == .microphone ? .grant : .deny)
+    }
 }
 
 extension ViewController: WKNavigationDelegate {

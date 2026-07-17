@@ -117,6 +117,13 @@ and the 3rd grader both get fair fights from the same bosses.
 - **Your voice in their books** — in the Book Maker, record yourself reading
   each page of a saved custom book; a "💜 Our voice" button appears on those
   pages so kids can hear the family voice instead of the robot.
+- **🎙️ Family Voice studio** (Grown-up Corner) — record all 38 letter sounds
+  ("mmm", "kuh", "ay"…) in your own voice once, and every phonics game plays
+  YOU instead of the robot: the letter-sounds game, word-builder tiles,
+  sound-it-out sequences, spelling hints — anywhere a pure sound is spoken.
+  TTS is famously bad at isolated phonemes; a parent's voice is both more
+  accurate and more fun. Recordings live on the device they're made on
+  (record on the one the kids actually use).
 - **K/1 rounds are shorter** (6 questions instead of 8), and tapping any
   daily quest reads it aloud.
 

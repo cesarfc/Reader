@@ -2,7 +2,11 @@
    Grown-ups record themselves reading Book Maker pages; kids play the real
    family voice instead of TTS. Audio blobs live in IndexedDB (localStorage
    is far too small for audio) keyed '<bookId>:<pageIndex>'.
-   Recording needs getUserMedia + MediaRecorder — supported() gates all UI. */
+   Letter-sound clips from the Family Voice studio use keys 'snd:<sound>'
+   (e.g. 'snd:kuh') and are preloaded into an in-memory bank at boot so
+   audio.speak() can check for them synchronously.
+   Recording needs getUserMedia + MediaRecorder — supported() gates recording
+   UI only; playback of existing clips works on mic-less devices too. */
 
 window.RR = window.RR || {};
 
@@ -50,6 +54,40 @@ RR.rec = (function () {
       window.MediaRecorder && window.indexedDB);
   }
 
+  /* ---------- Family Voice sound bank ----------
+     All 'snd:*' clips held in memory as object URLs, keyed by the bare sound
+     string ('kuh'), so speak() can consult the bank without an async hop. */
+  const SND = 'snd:';
+  let bank = {};
+
+  function loadSounds() {
+    if (!window.indexedDB) return Promise.resolve(bank);
+    return db().then(d => new Promise(res => {
+      const store = d.transaction(STORE).objectStore(STORE);
+      const keysRq = store.getAllKeys();
+      const valsRq = store.getAll();
+      let keys = null, vals = null;
+      const finish = () => {
+        if (!keys || !vals) return;
+        Object.keys(bank).forEach(k => URL.revokeObjectURL(bank[k]));
+        bank = {};
+        keys.forEach((k, i) => {
+          if (typeof k === 'string' && k.startsWith(SND) && vals[i]) {
+            bank[k.slice(SND.length)] = URL.createObjectURL(vals[i]);
+          }
+        });
+        res(bank);
+      };
+      keysRq.onsuccess = () => { keys = keysRq.result || []; finish(); };
+      valsRq.onsuccess = () => { vals = valsRq.result || []; finish(); };
+      keysRq.onerror = valsRq.onerror = () => res(bank);
+    })).catch(() => bank);
+  }
+  loadSounds();
+
+  function sound(str) { return bank[str] || null; }
+  function soundCount() { return Object.keys(bank).length; }
+
   let rec = null;
   let stream = null;
   let chunks = [];
@@ -81,5 +119,9 @@ RR.rec = (function () {
     });
   }
 
-  return { supported, save, get, remove, start, stop, get recording() { return !!rec; } };
+  return {
+    supported, save, get, remove, start, stop,
+    loadSounds, sound, soundCount, SND,
+    get recording() { return !!rec; }
+  };
 })();

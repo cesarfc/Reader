@@ -67,13 +67,50 @@ RR.audio = (function () {
      them mid-sentence, which cuts speech off and drops onend. */
   const pending = new Set();
 
+  /* Family Voice clips: one shared element; _fin lets stop() settle the
+     in-flight onend the same way speechSynthesis.cancel() settles TTS. */
+  let clipEl = null;
+
+  function playClip(url, interrupt, onend) {
+    if (interrupt) stop();
+    if (!clipEl) clipEl = new Audio();
+    const el = clipEl;
+    let done = false;
+    const fin = () => {
+      if (done) return;
+      done = true;
+      if (el._fin === fin) el._fin = null;
+      if (onend) onend();
+    };
+    el._fin = fin;
+    el.onended = fin;
+    el.onerror = fin;
+    el.src = url;
+    const p = el.play();
+    if (p && p.catch) p.catch(fin);
+    setTimeout(fin, 6000); /* safety net — sound clips are seconds long */
+  }
+
   /* pitch defaults to 1.0 — raising it makes every voice sound more synthetic */
   function speak(text, opts = {}) {
     const { rate = 0.85, pitch = 1.0, interrupt = true, onend = null, onboundary = null } = opts;
-    if (muted || !('speechSynthesis' in window) || !text) {
+    if (!text) {
+      if (onend) setTimeout(onend, 250);
+      return 'silent';
+    }
+    /* A recorded family clip that exactly matches the text (letter sounds like
+       'kuh') replaces TTS everywhere. noClip lets the studio demo the robot. */
+    if (!muted && !opts.noClip && RR.rec && RR.rec.sound) {
+      const clip = RR.rec.sound(text);
+      if (clip) {
+        playClip(clip, interrupt, onend);
+        return 'clip';
+      }
+    }
+    if (muted || !('speechSynthesis' in window)) {
       /* No audio, but callers waiting on speech still need their callback. */
       if (onend) setTimeout(onend, 250);
-      return;
+      return 'silent';
     }
     const u = new SpeechSynthesisUtterance(text);
     if (voice) u.voice = voice;
@@ -103,6 +140,10 @@ RR.audio = (function () {
       speechSynthesis.resume();
       speechSynthesis.speak(u);
     };
+    if (interrupt && clipEl && !clipEl.paused) {
+      clipEl.pause();
+      if (clipEl._fin) clipEl._fin();
+    }
     if (interrupt && (speechSynthesis.speaking || speechSynthesis.pending)) {
       /* iOS clips the start of an utterance spoken immediately after cancel —
          give the engine a beat to reset. */
@@ -111,6 +152,7 @@ RR.audio = (function () {
     } else {
       fire();
     }
+    return 'tts';
   }
 
   /* Speak a list of items one after another with a small gap.
@@ -137,6 +179,10 @@ RR.audio = (function () {
   }
 
   function stop() {
+    if (clipEl && !clipEl.paused) {
+      try { clipEl.pause(); } catch (e) { /* already stopped */ }
+      if (clipEl._fin) clipEl._fin();
+    }
     if ('speechSynthesis' in window) speechSynthesis.cancel();
   }
 

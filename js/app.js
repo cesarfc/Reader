@@ -1153,6 +1153,15 @@ RR.nav = RR.nav || {};
         </div>
 
         <div class="parentcard">
+          <h3 class="famh">🎙️ Family Voice</h3>
+          <p class="muted">Record the letter sounds in YOUR voice — every phonics game swaps the robot for you. Kids learn sounds better from a familiar voice.</p>
+          <div class="pstatsrow">🔊 <b>${RR.rec ? RR.rec.soundCount() : 0}</b> of ${soundInventory().length} sounds recorded on this device</div>
+          ${RR.rec && RR.rec.supported()
+            ? '<div class="modalbtns"><button class="btn" data-act="soundstudio">🎙️ Open the studio</button></div>'
+            : '<p class="pstatsrow muted">This device can’t record — open Reading Rocket on one with a microphone. Recordings stay on the device they’re made on.</p>'}
+        </div>
+
+        <div class="parentcard">
           <h3 class="famh">💾 Backup & transfer</h3>
           <p class="muted">Progress lives only on this device. Copy this code somewhere safe, or paste a code from another device.</p>
           <label class="mlabel">This device's backup code</label>
@@ -1247,6 +1256,10 @@ RR.nav = RR.nav || {};
       });
     });
 
+    /* ----- Family Voice ----- */
+    const studioBtn = app.querySelector('[data-act="soundstudio"]');
+    if (studioBtn) studioBtn.addEventListener('click', renderSoundStudio);
+
     /* ----- Book Maker ----- */
     app.querySelector('[data-act="newbook"]').addEventListener('click', () => bookMakerEditor(null));
     app.querySelectorAll('[data-editbook]').forEach(btn =>
@@ -1282,6 +1295,153 @@ RR.nav = RR.nav || {};
     document.body.appendChild(overlay);
     overlay.querySelector('[data-act="remove"]').addEventListener('click', () => { overlay.remove(); onConfirm(); });
     overlay.querySelector('[data-act="cancel"]').addEventListener('click', () => overlay.remove());
+  }
+
+  /* ---------------- Family Voice studio ---------------- */
+  /* Every distinct speakable sound in the app: the alphabet + digraphs plus
+     the extra phonemes (vowel teams etc.) that word tiles use in grades K-2.
+     Keyed by the exact string speak() receives, so one recording of 'kuh'
+     covers the c in cat, the k in kite AND the ck in duck. */
+  let SOUND_INV = null;
+  function soundInventory() {
+    if (SOUND_INV) return SOUND_INV;
+    const map = new Map();
+    const add = (s, g, w, e) => {
+      if (!s) return;
+      if (!map.has(s)) map.set(s, { s, graphemes: [], w, e });
+      const it = map.get(s);
+      if (g && !it.graphemes.includes(g)) it.graphemes.push(g);
+    };
+    D.LETTERS.forEach(L => add(L.s, L.l, L.w, L.e));
+    D.DIGRAPHS.forEach(L => add(L.s, L.l, L.w, L.e));
+    ['K', '1', '2'].forEach(gr => (D.WORDS[gr] || []).forEach(wd =>
+      (wd.s || []).forEach((ph, i) => add(ph, (wd.t || [])[i], wd.w, wd.e))));
+    SOUND_INV = [...map.values()];
+    return SOUND_INV;
+  }
+
+  function renderSoundStudio() {
+    hideTabs();
+    const inv = soundInventory();
+    app.innerHTML = `
+      <section class="screen">
+        <header class="gamebar">
+          <button class="iconbtn" data-act="back" aria-label="Back">←</button>
+          <div class="gametitle">🎙️ Family Voice</div>
+        </header>
+        <div class="card sndintro">
+          <p><b>Say the sound, not the letter name</b> — “mmm”, not “em”. Short and
+          clear, about one second, close to the device. Tap a card to hear the
+          robot’s version, then record yours. Recordings stay on this device.</p>
+        </div>
+        <div class="sndprogress"><span class="sndcount"></span><span class="sndbar"><i></i></span></div>
+        <div class="sndgrid"></div>
+      </section>`;
+    app.querySelector('[data-act="back"]').addEventListener('click', renderParent);
+    const grid = app.querySelector('.sndgrid');
+    const refresh = () => {
+      const done = inv.filter(it => RR.rec.sound(it.s)).length;
+      app.querySelector('.sndcount').textContent = `${done} / ${inv.length}`;
+      app.querySelector('.sndbar i').style.width = Math.round(done / inv.length * 100) + '%';
+      grid.innerHTML = inv.map((it, i) => `
+        <button class="sndcard ${RR.rec.sound(it.s) ? 'got' : ''}" data-i="${i}">
+          <span class="snddot">${RR.rec.sound(it.s) ? '✓' : ''}</span>
+          <span class="sndg">${esc(it.graphemes.slice(0, 3).join(' '))}</span>
+          <span class="sndhint">“${esc(it.s)}”</span>
+          <span class="sndex">${esc(it.e)} ${esc(it.w)}</span>
+        </button>`).join('');
+      grid.querySelectorAll('.sndcard').forEach(b =>
+        b.addEventListener('click', () => soundModal(inv[+b.dataset.i], refresh)));
+    };
+    refresh();
+  }
+
+  /* Record one sound: hear the robot, record (auto-stops after 3s), instant
+     playback of the take, then hop straight to the next unrecorded sound. */
+  function soundModal(item, onChange) {
+    const overlay = document.createElement('div');
+    overlay.className = 'overlay';
+    document.body.appendChild(overlay);
+    let live = false;
+    let autoT = null;
+
+    const close = () => {
+      if (live) RR.rec.stop();
+      clearTimeout(autoT);
+      overlay.remove();
+    };
+
+    const finishTake = recBtn => {
+      clearTimeout(autoT);
+      if (!live) return;
+      live = false;
+      recBtn.disabled = true;
+      RR.rec.stop().then(blob => {
+        if (!blob) { draw(); return; }
+        RR.rec.save(RR.rec.SND + item.s, blob)
+          .then(() => RR.rec.loadSounds())
+          .then(() => {
+            A.sfx.coin();
+            A.speak(item.s); /* instant playback — exercises the real clip path */
+            onChange();
+            draw();
+          });
+      });
+    };
+
+    function draw() {
+      const have = RR.rec.sound(item.s);
+      const next = soundInventory().find(x => x !== item && !RR.rec.sound(x.s));
+      overlay.innerHTML = `
+        <div class="modal sndmodal">
+          <div class="sndbig">${esc(item.graphemes.join(' · '))}</div>
+          <p class="muted sndsay">Say <b>“${esc(item.s)}”</b> — like the <b>${esc(item.graphemes[0])}</b> in ${esc(item.w)} ${esc(item.e)}</p>
+          <div class="modalbtns">
+            <button class="btn ghost" data-act="robot">🤖 Robot</button>
+            ${have ? '<button class="btn ghost" data-act="mine">💜 Your voice</button>' : ''}
+            ${have ? '<button class="btn ghost" data-act="del">🗑</button>' : ''}
+          </div>
+          <div class="modalbtns">
+            <button class="btn recbtn" data-act="rec">${have ? '🎙️ Record again' : '🎙️ Record'}</button>
+          </div>
+          <div class="modalbtns">
+            ${have && next ? `<button class="btn" data-act="next">Next sound: ${esc(next.graphemes[0])} ➡</button>` : ''}
+            <button class="btn ghost" data-act="close">Done</button>
+          </div>
+        </div>`;
+      overlay.querySelector('[data-act="robot"]').addEventListener('click', () =>
+        A.speak(item.s, { noClip: true, rate: 0.8 }));
+      const mine = overlay.querySelector('[data-act="mine"]');
+      if (mine) mine.addEventListener('click', () => A.speak(item.s));
+      const del = overlay.querySelector('[data-act="del"]');
+      if (del) del.addEventListener('click', () => {
+        RR.rec.remove(RR.rec.SND + item.s)
+          .then(() => RR.rec.loadSounds())
+          .then(() => { A.sfx.pop(); onChange(); draw(); });
+      });
+      const recBtn = overlay.querySelector('[data-act="rec"]');
+      recBtn.addEventListener('click', () => {
+        if (!live) {
+          A.stop();
+          RR.rec.start().then(() => {
+            live = true;
+            recBtn.textContent = '⏹ Stop';
+            recBtn.classList.add('recording');
+            /* one-second sounds don't need long takes — stop by itself */
+            autoT = setTimeout(() => finishTake(recBtn), 3000);
+          }).catch(() => { recBtn.textContent = '😕 Mic not available'; });
+        } else {
+          finishTake(recBtn);
+        }
+      });
+      const nextBtn = overlay.querySelector('[data-act="next"]');
+      if (nextBtn) nextBtn.addEventListener('click', () => {
+        const next = soundInventory().find(x => x !== item && !RR.rec.sound(x.s));
+        if (next) { item = next; draw(); } else { close(); }
+      });
+      overlay.querySelector('[data-act="close"]').addEventListener('click', close);
+    }
+    draw();
   }
 
   /* Author or edit a family book. Works on a copy so Cancel discards changes;

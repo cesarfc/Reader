@@ -22,6 +22,8 @@
 	<string>$(CURRENT_PROJECT_VERSION)</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>Grown-ups can record letter sounds and book pages in their own voice for the kids to hear during reading games.</string>
 	<key>UILaunchScreen</key>
 	<dict>
 		<key>UIColorName</key>
