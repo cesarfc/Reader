@@ -1094,6 +1094,20 @@ RR.nav = RR.nav || {};
           const trouble = P.troubleWords(p);
           const totalMastered = P.countMastered(p, 'w:') + P.countMastered(p, 's:');
           const books = Object.keys(p.stats).filter(k => k.startsWith('book-')).length;
+          const weeks = (p.weekHistory || []).slice(-7).map(w => ({
+            week: String(w.week || ''),
+            stars: Math.max(0, Number(w.stars) || 0),
+            mastered: Math.max(0, Number(w.mastered) || 0)
+          }));
+          if (weeks.length) {
+            weeks.push({
+              week: p.weekKey,
+              stars: p.weekStars || 0,
+              mastered: p.weekMastered || 0
+            });
+          }
+          const maxWeekStars = Math.max(1, ...weeks.map(w => w.stars));
+          const maxWeekMastered = Math.max(1, ...weeks.map(w => w.mastered));
           return `
             <div class="parentcard">
               <div class="ptop"><span class="pavatar small">${S.heroEmoji(p)}</span>
@@ -1105,6 +1119,25 @@ RR.nav = RR.nav || {};
                 📚 Books ${g.books.got}/${g.books.total} · ⚡ Best ${g.speed.wpm} wpm
               </div>
               <div class="pstatsrow">⭐ Mastered ${totalMastered} words total · <b>${p.weekMastered} this week</b> · ${books} books opened</div>
+              ${weeks.length ? `
+                <div class="weektrend">
+                  <div class="weektrendhead"><b>Progress over time</b><span class="muted">Last ${weeks.length} weeks</span></div>
+                  <div class="weektrendrow">
+                    <span class="weektrendmetric">⭐ Stars</span>
+                    <div class="weektrendbars">
+                      ${weeks.map((w, i) => `<span class="weektrendbar stars ${i === weeks.length - 1 ? 'current' : ''}" style="height:${Math.max(2, Math.round(w.stars / maxWeekStars * 100))}%" role="img" aria-label="Week of ${esc(w.week)}: ${w.stars} stars" title="Week of ${esc(w.week)}: ${w.stars} stars"></span>`).join('')}
+                    </div>
+                    <b class="weektrendlatest">${weeks[weeks.length - 1].stars}</b>
+                  </div>
+                  <div class="weektrendrow">
+                    <span class="weektrendmetric">🔤 Mastered</span>
+                    <div class="weektrendbars">
+                      ${weeks.map((w, i) => `<span class="weektrendbar mastered ${i === weeks.length - 1 ? 'current' : ''}" style="height:${Math.max(2, Math.round(w.mastered / maxWeekMastered * 100))}%" role="img" aria-label="Week of ${esc(w.week)}: ${w.mastered} words mastered" title="Week of ${esc(w.week)}: ${w.mastered} words mastered"></span>`).join('')}
+                    </div>
+                    <b class="weektrendlatest">${weeks[weeks.length - 1].mastered}</b>
+                  </div>
+                  <div class="weektrenddates"><span>Week of ${esc(weeks[0].week.slice(5).replace('-', '/'))}</span><span>This week</span></div>
+                </div>` : ''}
               ${trouble.length ? `
                 <div class="troublerow"><span class="muted">Tricky words:</span>
                   ${trouble.map(w => `<button class="trickyword" data-w="${esc(w)}">🔊 ${esc(w)}</button>`).join('')}

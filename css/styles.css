@@ -1582,6 +1582,18 @@ body.tabs-on #petbuddy { bottom: calc(env(safe-area-inset-bottom) + 84px); }
 }
 .ptop { display: flex; gap: 10px; align-items: center; font-size: 14.5px; }
 .pstatsrow { font-size: 13px; font-weight: 500; color: var(--ink); margin-top: 8px; }
+.weektrend { margin-top: 10px; padding: 10px 12px; background: var(--bg-2); border-radius: var(--r-md); }
+.weektrendhead { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; font-size: 13px; }
+.weektrendhead .muted { font-size: 11.5px; }
+.weektrendrow { display: grid; grid-template-columns: 78px minmax(0, 1fr) 24px; align-items: end; gap: 8px; height: 34px; margin-top: 7px; }
+.weektrendmetric, .weektrendlatest { align-self: center; font-size: 11.5px; }
+.weektrendlatest { text-align: right; }
+.weektrendbars { height: 100%; display: flex; align-items: end; gap: 4px; border-bottom: 1px solid var(--hairline); }
+.weektrendbar { flex: 1; min-width: 3px; min-height: 2px; border-radius: var(--r-sm) var(--r-sm) 0 0; background: var(--yellow); }
+.weektrendbar.mastered { background: var(--teal); }
+.weektrendbar.current { background: var(--yellow-strong); }
+.weektrendbar.mastered.current { background: var(--teal-strong); }
+.weektrenddates { display: flex; justify-content: space-between; margin: 3px 32px 0 86px; color: var(--ink-soft); font-size: 10.5px; }
 .troublerow { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; margin-top: 8px; font-size: 13px; }
 .famh { margin: 0 0 4px; font-weight: 700; }
 .diffhelp { font-size: 12.5px; }

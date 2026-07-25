@@ -25,6 +25,7 @@ RR.state = (function () {
     p.weekKey = p.weekKey || '';     /* for weekly counters */
     p.weekStars = p.weekStars || 0;
     p.weekMastered = p.weekMastered || 0;
+    p.weekHistory = Array.isArray(p.weekHistory) ? p.weekHistory.slice(-8) : [];
     p.quests = p.quests || null;     /* today's quests, see progress.js */
     p.celebrated = p.celebrated || {}; /* grades graduated, e.g. {K:1} */
     p.stickers = p.stickers || {};   /* sticker id -> 1 normal | 2 shiny */
@@ -172,9 +173,18 @@ RR.state = (function () {
   function rollWeek(p) {
     const wk = RR.progress.weekKey();
     if (p.weekKey !== wk) {
+      if (p.weekKey) {
+        p.weekHistory.push({
+          week: p.weekKey,
+          stars: p.weekStars || 0,
+          mastered: p.weekMastered || 0
+        });
+        p.weekHistory = p.weekHistory.slice(-8);
+      }
       p.weekKey = wk;
       p.weekStars = 0;
       p.weekMastered = 0;
+      save();
     }
   }
 
