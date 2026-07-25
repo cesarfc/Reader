@@ -83,6 +83,66 @@ RR.rec = (function () {
       keysRq.onerror = valsRq.onerror = () => res(bank);
     })).catch(() => bank);
   }
+
+  function exportSounds() {
+    return db().then(d => new Promise((res, rej) => {
+      const rq = d.transaction(STORE).objectStore(STORE).openCursor();
+      const reads = [];
+      rq.onsuccess = () => {
+        const cursor = rq.result;
+        if (!cursor) {
+          Promise.all(reads).then(clips => res({ v: 1, clips }), rej);
+          return;
+        }
+        if (typeof cursor.key === 'string' && cursor.key.startsWith(SND)) {
+          const key = cursor.key;
+          const blob = cursor.value;
+          reads.push(new Promise((readRes, readRej) => {
+            const reader = new FileReader();
+            reader.onload = () => {
+              const result = reader.result;
+              const comma = typeof result === 'string' ? result.indexOf(',') : -1;
+              if (comma < 0) { readRej(new Error('invalid audio clip')); return; }
+              readRes({ key, mime: blob.type || 'application/octet-stream', b64: result.slice(comma + 1) });
+            };
+            reader.onerror = () => readRej(reader.error);
+            reader.readAsDataURL(blob);
+          }));
+        }
+        cursor.continue();
+      };
+      rq.onerror = () => rej(rq.error);
+    }));
+  }
+
+  function importSounds(obj) {
+    if (!obj || obj.v !== 1 || !Array.isArray(obj.clips)) {
+      return Promise.reject(new Error('invalid Family Voice pack'));
+    }
+    let clips;
+    try {
+      clips = obj.clips.map(clip => {
+        if (!clip || typeof clip.key !== 'string' || !clip.key.startsWith(SND) ||
+            typeof clip.mime !== 'string' || typeof clip.b64 !== 'string') {
+          throw new Error('invalid Family Voice clip');
+        }
+        const raw = atob(clip.b64);
+        const bytes = new Uint8Array(raw.length);
+        for (let i = 0; i < raw.length; i++) bytes[i] = raw.charCodeAt(i);
+        return { key: clip.key, blob: new Blob([bytes], { type: clip.mime }) };
+      });
+    } catch (e) {
+      return Promise.reject(e);
+    }
+    return db().then(d => new Promise((res, rej) => {
+      const t = d.transaction(STORE, 'readwrite');
+      const store = t.objectStore(STORE);
+      clips.forEach(clip => store.put(clip.blob, clip.key));
+      t.oncomplete = () => res(clips.length);
+      t.onerror = () => rej(t.error);
+    })).then(count => loadSounds().then(() => count));
+  }
+
   loadSounds();
 
   function sound(str) { return bank[str] || null; }
@@ -121,7 +181,7 @@ RR.rec = (function () {
 
   return {
     supported, save, get, remove, start, stop,
-    loadSounds, sound, soundCount, SND,
+    loadSounds, exportSounds, importSounds, sound, soundCount, SND,
     get recording() { return !!rec; }
   };
 })();
