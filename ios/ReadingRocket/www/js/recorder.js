@@ -2,8 +2,8 @@
    Grown-ups record themselves reading Book Maker pages; kids play the real
    family voice instead of TTS. Audio blobs live in IndexedDB (localStorage
    is far too small for audio) keyed '<bookId>:<pageIndex>'.
-   Letter-sound clips from the Family Voice studio use keys 'snd:<sound>'
-   (e.g. 'snd:kuh') and are preloaded into an in-memory bank at boot so
+   Family Voice studio clips use keys 'snd:<text>' (e.g. 'snd:kuh' and
+   'snd:Great job') and are preloaded into an in-memory bank at boot so
    audio.speak() can check for them synchronously.
    Recording needs getUserMedia + MediaRecorder — supported() gates recording
    UI only; playback of existing clips works on mic-less devices too. */

@@ -98,8 +98,8 @@ RR.audio = (function () {
       if (onend) setTimeout(onend, 250);
       return 'silent';
     }
-    /* A recorded family clip that exactly matches the text (letter sounds like
-       'kuh') replaces TTS everywhere. noClip lets the studio demo the robot. */
+    /* A recorded family clip that exactly matches the text ('kuh', 'Great job')
+       replaces TTS everywhere. noClip lets the studio demo the robot. */
     if (!muted && !opts.noClip && RR.rec && RR.rec.sound) {
       const clip = RR.rec.sound(text);
       if (clip) {
@@ -153,6 +153,16 @@ RR.audio = (function () {
       fire();
     }
     return 'tts';
+  }
+
+  function praise(name, big = false) {
+    const phrases = big && RR.DATA.PRAISE_BIG ? RR.DATA.PRAISE_BIG : RR.DATA.PRAISE;
+    const recorded = RR.rec && RR.rec.sound
+      ? phrases.filter(phrase => RR.rec.sound(phrase))
+      : [];
+    const pool = recorded.length ? recorded : phrases;
+    const phrase = pool[(Math.random() * pool.length) | 0];
+    return speak(recorded.length ? phrase : `${phrase}, ${name}!`);
   }
 
   /* Speak a list of items one after another with a small gap.
@@ -247,7 +257,7 @@ RR.audio = (function () {
   document.addEventListener('pointerdown', unlock, { once: true });
 
   return {
-    speak, speakSeq, stop, sfx, sample, qualityLabel,
+    speak, praise, speakSeq, stop, sfx, sample, qualityLabel,
     voices: ranked,
     get voiceName() { return voice ? voice.name : ''; },
     setVoice(name) {
