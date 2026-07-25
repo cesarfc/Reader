@@ -103,7 +103,7 @@ RR.rec = (function () {
               const result = reader.result;
               const comma = typeof result === 'string' ? result.indexOf(',') : -1;
               if (comma < 0) { readRej(new Error('invalid audio clip')); return; }
-              readRes({ key, mime: blob.type || 'application/octet-stream', b64: result.slice(comma + 1) });
+              readRes({ key, mime: blob.type, b64: result.slice(comma + 1) });
             };
             reader.onerror = () => readRej(reader.error);
             reader.readAsDataURL(blob);
