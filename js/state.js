@@ -19,7 +19,7 @@ RR.state = (function () {
     p.stageWins = p.stageWins || 0;  /* training rounds done in current stage */
     p.lastGift = p.lastGift || '';   /* date of last daily gift */
     p.streak = p.streak || 0;        /* consecutive days played */
-    p.mastery = p.mastery || {};     /* 'w:cat'/'s:the'/'l:a' -> {c, w} */
+    p.mastery = p.mastery || {};     /* 'w:cat'/'s:the'/'l:a' -> {c, w, last} */
     p.xp = p.xp || 0;                /* Reader XP (never spent) */
     p.lifetime = p.lifetime || { coins: 0, gems: 0 };
     p.weekKey = p.weekKey || '';     /* for weekly counters */
@@ -159,7 +159,12 @@ RR.state = (function () {
   /* Returns true when this bump just crossed the mastery line. */
   function bump(p, key, ok) {
     const r = p.mastery[key] || { c: 0, w: 0 };
-    if (ok) r.c++; else r.w++;
+    if (ok) {
+      r.c++;
+      r.last = RR.progress.localDate();
+    } else {
+      r.w++;
+    }
     p.mastery[key] = r;
     return ok && r.c === RR.progress.MASTER_AT;
   }
