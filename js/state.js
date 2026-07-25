@@ -4,6 +4,7 @@ window.RR = window.RR || {};
 
 RR.state = (function () {
   const KEY = 'rr.save.v1';
+  const WEEK_HISTORY_MAX = 8;
 
   function uid() { return 'p' + Math.random().toString(36).slice(2, 9); }
 
@@ -25,7 +26,7 @@ RR.state = (function () {
     p.weekKey = p.weekKey || '';     /* for weekly counters */
     p.weekStars = p.weekStars || 0;
     p.weekMastered = p.weekMastered || 0;
-    p.weekHistory = Array.isArray(p.weekHistory) ? p.weekHistory.slice(-8) : [];
+    p.weekHistory = Array.isArray(p.weekHistory) ? p.weekHistory.slice(-WEEK_HISTORY_MAX) : [];
     p.quests = p.quests || null;     /* today's quests, see progress.js */
     p.celebrated = p.celebrated || {}; /* grades graduated, e.g. {K:1} */
     p.stickers = p.stickers || {};   /* sticker id -> 1 normal | 2 shiny */
@@ -179,7 +180,7 @@ RR.state = (function () {
           stars: p.weekStars || 0,
           mastered: p.weekMastered || 0
         });
-        p.weekHistory = p.weekHistory.slice(-8);
+        p.weekHistory = p.weekHistory.slice(-WEEK_HISTORY_MAX);
       }
       p.weekKey = wk;
       p.weekStars = 0;

@@ -1102,8 +1102,8 @@ RR.nav = RR.nav || {};
           if (weeks.length) {
             weeks.push({
               week: p.weekKey,
-              stars: p.weekStars || 0,
-              mastered: p.weekMastered || 0
+              stars: Math.max(0, Number(p.weekStars) || 0),
+              mastered: Math.max(0, Number(p.weekMastered) || 0)
             });
           }
           const maxWeekStars = Math.max(1, ...weeks.map(w => w.stars));
