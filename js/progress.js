@@ -198,6 +198,8 @@ RR.progress = (function () {
     { id: 'story16',    e: '🔔', name: 'Galaxy Storyteller', hint: 'Finish Season 2 of the story', test: p => episodesRead(p) >= 16 },
     { id: 'duelist',    e: '⚔️', name: 'Duelist',        hint: 'Win a Sibling Duel',             test: p => (p.duelWins || 0) >= 1 },
     { id: 'rescue10',   e: '🛟', name: 'Word Lifeguard',  hint: 'Play Word Rescue 10 times',      test: p => gamePlays(p, 'rescue') >= 10 },
+    { id: 'review3',    e: '🔁', name: 'Review Routine',  hint: 'Review on a 3-day streak',       test: p => (p.streak || 0) >= 3 && gamePlays(p, 'review') >= 3 },
+    { id: 'review10',   e: '🗓️', name: 'Memory Keeper',   hint: 'Finish 10 Daily Reviews',        test: p => gamePlays(p, 'review') >= 10 },
     { id: 'spell10',    e: '✏️', name: 'Spelling Star',   hint: 'Play Spell It 10 times',         test: p => gamePlays(p, 'spell') >= 10 },
     { id: 'silly10',    e: '🤪', name: 'Giggle Guard',   hint: 'Play Silly or Sensible 10 times', test: p => gamePlays(p, 'silly') >= 10 },
     { id: 'riddle10',   e: '🕵️', name: 'Riddle Cracker', hint: 'Play Riddle Time 10 times',      test: p => gamePlays(p, 'riddle') >= 10 },
