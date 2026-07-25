@@ -1154,8 +1154,8 @@ RR.nav = RR.nav || {};
 
         <div class="parentcard">
           <h3 class="famh">🎙️ Family Voice</h3>
-          <p class="muted">Record the letter sounds in YOUR voice — every phonics game swaps the robot for you. Kids learn sounds better from a familiar voice.</p>
-          <div class="pstatsrow">🔊 <b class="soundcount">${RR.rec ? RR.rec.soundCount() : 0}</b> of ${soundInventory().length} sounds recorded on this device</div>
+          <p class="muted">Record letter sounds and cheers in YOUR voice — phonics games and round celebrations swap the robot for you.</p>
+          <div class="pstatsrow">🔊 <b class="soundcount">${RR.rec ? soundInventory().filter(it => RR.rec.sound(it.s)).length : 0}</b> of ${soundInventory().length} sounds · <b class="cheercount">${RR.rec ? cheerInventory().filter(it => RR.rec.sound(it.s)).length : 0}</b> of ${cheerInventory().length} cheers</div>
           ${RR.rec && RR.rec.supported()
             ? '<div class="modalbtns"><button class="btn" data-act="soundstudio">🎙️ Open the studio</button></div>'
             : '<p class="pstatsrow muted">This device can’t record — open Reading Rocket on one with a microphone. Recordings stay on the device they’re made on.</p>'}
@@ -1163,7 +1163,7 @@ RR.nav = RR.nav || {};
 
         <div class="parentcard">
           <h3 class="famh">📁 Family Voice pack</h3>
-          <p class="muted">Save your recorded letter sounds to a file, then load them on another device.</p>
+          <p class="muted">Save your recorded sounds and cheers to a file, then load them on another device.</p>
           <input class="voicepackin" type="file" accept=".json,application/json" hidden>
           <div class="modalbtns">
             <button class="btn ghost" data-act="savevoicepack">Save pack</button>
@@ -1255,7 +1255,8 @@ RR.nav = RR.nav || {};
       file.text()
         .then(text => RR.rec.importSounds(JSON.parse(text)))
         .then(count => {
-          app.querySelector('.soundcount').textContent = RR.rec.soundCount();
+          app.querySelector('.soundcount').textContent = soundInventory().filter(it => RR.rec.sound(it.s)).length;
+          app.querySelector('.cheercount').textContent = cheerInventory().filter(it => RR.rec.sound(it.s)).length;
           packStatus.textContent = `Loaded ${count} ${count === 1 ? 'clip' : 'clips'}.`;
           A.sfx.fanfare();
         })
@@ -1376,45 +1377,61 @@ RR.nav = RR.nav || {};
     return SOUND_INV;
   }
 
-  function renderSoundStudio() {
+  let CHEER_INV = null;
+  function cheerInventory() {
+    if (!CHEER_INV) {
+      CHEER_INV = [...new Set([...(D.PRAISE || []), ...(D.PRAISE_BIG || [])])]
+        .map(s => ({ s, cheer: true }));
+    }
+    return CHEER_INV;
+  }
+
+  function renderSoundStudio(section = 'sounds') {
     hideTabs();
-    const inv = soundInventory();
+    const cheers = section === 'cheers';
+    const inv = cheers ? cheerInventory() : soundInventory();
     app.innerHTML = `
       <section class="screen">
         <header class="gamebar">
           <button class="iconbtn" data-act="back" aria-label="Back">←</button>
           <div class="gametitle">🎙️ Family Voice</div>
         </header>
+        <div class="gradepick modalgrades sndtabs">
+          <button class="gradepill ${cheers ? '' : 'on'}" data-studio="sounds">Sounds</button>
+          <button class="gradepill ${cheers ? 'on' : ''}" data-studio="cheers">Cheers</button>
+        </div>
         <div class="card sndintro">
-          <p><b>Say the sound, not the letter name</b> — “mmm”, not “em”. Short and
-          clear, about one second, close to the device. Tap a card to hear the
-          robot’s version, then record yours. Recordings stay on this device.</p>
+          ${cheers
+            ? '<p><b>Record each cheer exactly as written.</b> Tap a card to hear the robot’s version, then record yours. A finished round will use one of your recorded cheers.</p>'
+            : '<p><b>Say the sound, not the letter name</b> — “mmm”, not “em”. Short and clear, about one second, close to the device. Tap a card to hear the robot’s version, then record yours.</p>'}
         </div>
         <div class="sndprogress"><span class="sndcount"></span><span class="sndbar"><i></i></span></div>
-        <div class="sndgrid"></div>
+        <div class="sndgrid ${cheers ? 'cheers' : ''}"></div>
       </section>`;
     app.querySelector('[data-act="back"]').addEventListener('click', renderParent);
+    app.querySelectorAll('[data-studio]').forEach(btn =>
+      btn.addEventListener('click', () => renderSoundStudio(btn.dataset.studio)));
     const grid = app.querySelector('.sndgrid');
     const refresh = () => {
       const done = inv.filter(it => RR.rec.sound(it.s)).length;
       app.querySelector('.sndcount').textContent = `${done} / ${inv.length}`;
       app.querySelector('.sndbar i').style.width = Math.round(done / inv.length * 100) + '%';
       grid.innerHTML = inv.map((it, i) => `
-        <button class="sndcard ${RR.rec.sound(it.s) ? 'got' : ''}" data-i="${i}">
+        <button class="sndcard ${it.cheer ? 'cheercard' : ''} ${RR.rec.sound(it.s) ? 'got' : ''}" data-i="${i}">
           <span class="snddot">${RR.rec.sound(it.s) ? '✓' : ''}</span>
-          <span class="sndg">${esc(it.graphemes.slice(0, 3).join(' '))}</span>
-          <span class="sndhint">“${esc(it.s)}”</span>
-          <span class="sndex">${esc(it.e)} ${esc(it.w)}</span>
+          ${it.cheer
+            ? `<span class="sndg">${esc(it.s)}</span>`
+            : `<span class="sndg">${esc(it.graphemes.slice(0, 3).join(' '))}</span>
+               <span class="sndhint">“${esc(it.s)}”</span>
+               <span class="sndex">${esc(it.e)} ${esc(it.w)}</span>`}
         </button>`).join('');
       grid.querySelectorAll('.sndcard').forEach(b =>
-        b.addEventListener('click', () => soundModal(inv[+b.dataset.i], refresh)));
+        b.addEventListener('click', () => soundModal(inv[+b.dataset.i], inv, refresh)));
     };
     refresh();
   }
 
-  /* Record one sound: hear the robot, record (auto-stops after 3s), instant
-     playback of the take, then hop straight to the next unrecorded sound. */
-  function soundModal(item, onChange) {
+  function soundModal(item, inv, onChange) {
     const overlay = document.createElement('div');
     overlay.className = 'overlay';
     document.body.appendChild(overlay);
@@ -1447,11 +1464,13 @@ RR.nav = RR.nav || {};
 
     function draw() {
       const have = RR.rec.sound(item.s);
-      const next = soundInventory().find(x => x !== item && !RR.rec.sound(x.s));
+      const next = inv.find(x => x !== item && !RR.rec.sound(x.s));
       overlay.innerHTML = `
         <div class="modal sndmodal">
-          <div class="sndbig">${esc(item.graphemes.join(' · '))}</div>
-          <p class="muted sndsay">Say <b>“${esc(item.s)}”</b> — like the <b>${esc(item.graphemes[0])}</b> in ${esc(item.w)} ${esc(item.e)}</p>
+          <div class="sndbig">${item.cheer ? esc(item.s) : esc(item.graphemes.join(' · '))}</div>
+          <p class="muted sndsay">${item.cheer
+            ? `Say <b>“${esc(item.s)}”</b> with all your best cheering energy.`
+            : `Say <b>“${esc(item.s)}”</b> — like the <b>${esc(item.graphemes[0])}</b> in ${esc(item.w)} ${esc(item.e)}`}</p>
           <div class="modalbtns">
             <button class="btn ghost" data-act="robot">🤖 Robot</button>
             ${have ? '<button class="btn ghost" data-act="mine">💜 Your voice</button>' : ''}
@@ -1461,12 +1480,12 @@ RR.nav = RR.nav || {};
             <button class="btn recbtn" data-act="rec">${have ? '🎙️ Record again' : '🎙️ Record'}</button>
           </div>
           <div class="modalbtns">
-            ${have && next ? `<button class="btn" data-act="next">Next sound: ${esc(next.graphemes[0])} ➡</button>` : ''}
+            ${have && next ? `<button class="btn" data-act="next">Next ${item.cheer ? 'cheer' : 'sound'}: ${esc(item.cheer ? next.s : next.graphemes[0])} ➡</button>` : ''}
             <button class="btn ghost" data-act="close">Done</button>
           </div>
         </div>`;
       overlay.querySelector('[data-act="robot"]').addEventListener('click', () =>
-        A.speak(item.s, { noClip: true, rate: 0.8 }));
+        A.speak(item.s, { noClip: true, rate: item.cheer ? 0.9 : 0.8 }));
       const mine = overlay.querySelector('[data-act="mine"]');
       if (mine) mine.addEventListener('click', () => A.speak(item.s));
       const del = overlay.querySelector('[data-act="del"]');
@@ -1483,8 +1502,7 @@ RR.nav = RR.nav || {};
             live = true;
             recBtn.textContent = '⏹ Stop';
             recBtn.classList.add('recording');
-            /* one-second sounds don't need long takes — stop by itself */
-            autoT = setTimeout(() => finishTake(recBtn), 3000);
+            autoT = setTimeout(() => finishTake(recBtn), item.cheer ? 6000 : 3000);
           }).catch(() => { recBtn.textContent = '😕 Mic not available'; });
         } else {
           finishTake(recBtn);
@@ -1492,7 +1510,7 @@ RR.nav = RR.nav || {};
       });
       const nextBtn = overlay.querySelector('[data-act="next"]');
       if (nextBtn) nextBtn.addEventListener('click', () => {
-        const next = soundInventory().find(x => x !== item && !RR.rec.sound(x.s));
+        const next = inv.find(x => x !== item && !RR.rec.sound(x.s));
         if (next) { item = next; draw(); } else { close(); }
       });
       overlay.querySelector('[data-act="close"]').addEventListener('click', close);
@@ -1731,9 +1749,7 @@ RR.nav = RR.nav || {};
     });
     if (meta.levelUp) setTimeout(() => { A.sfx.victory(); RR.confetti.fireworks(4); }, 2000);
     if (meta.diffBump && meta.diffBump.dir === 'up') setTimeout(() => { A.sfx.fanfare(); RR.confetti.burst(90); A.speak(`${meta.diffBump.cfg.label} mode unlocked!`); }, 2200);
-    const pool = (r.stars === 3 && D.PRAISE_BIG) ? D.PRAISE_BIG : D.PRAISE;
-    const praise = pool[(Math.random() * pool.length) | 0];
-    setTimeout(() => A.speak(`${praise}, ${p.name}!`), 600);
+    setTimeout(() => A.praise(p.name, r.stars === 3), 600);
 
     /* sticker pack peel */
     const pack = app.querySelector('[data-act="pack"]');
