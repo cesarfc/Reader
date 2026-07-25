@@ -76,4 +76,42 @@ for (const [grade, words] of Object.entries(data.WORDS)) {
   });
 }
 
+sandbox.localStorage = {
+  getItem() { return null; },
+  setItem() {}
+};
+sandbox.RR.audio = { stop() {}, speak() {}, sfx: {} };
+for (const file of ['state.js', 'progress.js', 'games.js']) {
+  const source = fs.readFileSync(path.join(root, 'js', file), 'utf8');
+  vm.runInNewContext(source, sandbox, { filename: `js/${file}` });
+}
+
+const profile = sandbox.RR.state.addProfile({ name: 'Review Check', grade: 'K' });
+const dueDate = new Date();
+dueDate.setDate(dueDate.getDate() - sandbox.RR.progress.REVIEW_DAYS);
+profile.mastery['w:cat'] = { c: sandbox.RR.progress.MASTER_AT, w: 0, last: sandbox.RR.progress.localDate(dueDate) };
+profile.quests = {
+  date: sandbox.RR.progress.localDate(),
+  bonus: false,
+  items: [{ id: 'rounds', progress: 0, done: false }]
+};
+
+invariant(sandbox.RR.games.review.available(profile), 'Daily Review must be available when a mastered item is due');
+invariant(
+  sandbox.RR.progress.nextActivity(profile).id === 'review',
+  'PLAY must route to Daily Review when review is due'
+);
+
+sandbox.RR.state.recordRound(profile, 'review', 'K', {
+  stars: 1,
+  correct: 1,
+  total: 1,
+  coins: 0,
+  outcomes: [{ k: 'w:cat', ok: true }]
+});
+invariant(
+  !sandbox.RR.progress.reviewDue(profile).includes('w:cat'),
+  'Daily Review outcomes must refresh mastery through recordRound'
+);
+
 console.log('Static-site invariants passed.');

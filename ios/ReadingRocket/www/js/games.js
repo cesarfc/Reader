@@ -91,6 +91,25 @@ window.RR = window.RR || {};
       .map(x => x.it);
   }
 
+  const MASTERY_GRADES = ['K', '1', '2', '3', '4', '5'];
+
+  function masteryItem(key) {
+    const value = key.slice(2);
+    if (key.startsWith('l:')) {
+      const letter = D.LETTERS.concat(D.DIGRAPHS).find(item => item.l === value);
+      return letter ? { kind: 'letter', letter, key } : null;
+    }
+    for (const grade of MASTERY_GRADES) {
+      if (key.startsWith('w:')) {
+        const word = (D.WORDS[grade] || []).find(item => item.w === value);
+        if (word) return { kind: 'word', word, grade, key };
+      } else if (key.startsWith('s:') && (D.SIGHT[grade] || []).includes(value)) {
+        return { kind: 'sight', word: value, grade, key };
+      }
+    }
+    return null;
+  }
+
   /* In-round combo streak: 3+ first-try corrects in a row pay bonus coins. */
   function comboHit(shell) {
     shell.combo = (shell.combo || 0) + 1;
@@ -2850,59 +2869,26 @@ window.RR = window.RR || {};
      back to least-mastered grade words when nothing is stuck.
      ========================================================= */
   const RESCUE_TOTAL = 6;
-  const RESCUE_GRADES = ['K', '1', '2', '3', '4', '5'];
 
   const rescueGame = {
     title: 'Word Rescue',
     icon: '🛟',
     desc: 'Save your tricky words!',
     start(container, ctx) {
-      /* Resolve a stuck mastery key back to something we can quiz. A word
-         may have been learned in another grade, so we search every grade;
-         a sight word only needs its string and its home grade (for choices). */
-      const findWord = word => {
-        for (const g of RESCUE_GRADES) {
-          const hit = (D.WORDS[g] || []).find(w => w.w === word);
-          if (hit) return { kind: 'word', word: hit, grade: g };
-        }
-        return null;
-      };
-      const findSight = word => {
-        for (const g of RESCUE_GRADES) {
-          if ((D.SIGHT[g] || []).includes(word)) return { kind: 'sight', word, grade: g };
-        }
-        return null;
-      };
-
       const mastery = ctx.profile.mastery || {};
       const MASTER_AT = RR.progress.MASTER_AT;
       const used = new Set();
-      const troubleItems = [];
+      const items = [];
       /* worst-missed first, drop keys that no longer resolve */
       Object.entries(mastery)
         .filter(([k, r]) => r.w >= 2 && r.c < MASTER_AT && (k.startsWith('w:') || k.startsWith('s:')))
         .sort((a, b) => b[1].w - a[1].w)
         .forEach(([k]) => {
-          const resolved = k.startsWith('w:') ? findWord(k.slice(2)) : findSight(k.slice(2));
-          if (resolved && !used.has(k)) { used.add(k); troubleItems.push(resolved); }
+          const resolved = masteryItem(k);
+          if (resolved && !used.has(k)) { used.add(k); items.push(resolved); }
         });
 
-      const reviewItems = [];
-      RR.progress.reviewDue(ctx.profile).forEach(k => {
-        const resolved = k.startsWith('w:') ? findWord(k.slice(2))
-          : k.startsWith('s:') ? findSight(k.slice(2))
-          : null;
-        if (resolved && !used.has(k)) { used.add(k); reviewItems.push(resolved); }
-      });
-
-      const items = [];
-      const candidateCount = Math.max(troubleItems.length, reviewItems.length);
-      for (let i = 0; i < candidateCount && items.length < RESCUE_TOTAL; i++) {
-        if (troubleItems[i]) items.push(troubleItems[i]);
-        if (reviewItems[i] && items.length < RESCUE_TOTAL) items.push(reviewItems[i]);
-      }
-      const troubleCount = troubleItems.length;
-      const reviewCount = reviewItems.length;
+      const troubleCount = items.length;
       /* top up with least-mastered words from this grade (smartSample weights
          struggled/unseen words to the front) */
       if (items.length < RESCUE_TOTAL) {
@@ -2916,7 +2902,6 @@ window.RR = window.RR || {};
       const round = shuffle(items).slice(0, RESCUE_TOTAL);
       const total = round.length || 1;
       const hadTrouble = troubleCount > 0;
-      const hadReview = reviewCount > 0;
 
       const shell = roundShell(container, ctx, 'Word Rescue', total);
       let qi = 0;
@@ -2929,8 +2914,6 @@ window.RR = window.RR || {};
         title: 'Word Rescue',
         lines: hadTrouble
           ? ['Some words got stuck — let’s save them!', 'Hear the word, then tap how it’s written.']
-          : hadReview
-            ? ['Time to review words you already know!', 'Hear the word, then tap how it’s written.']
           : ['No stuck words right now! 🎉', 'Let’s practice so they stick even harder.'],
         buttonText: '🛟 Start the rescue!',
         onStart: next
@@ -2942,8 +2925,6 @@ window.RR = window.RR || {};
           shell.die();
           const line1 = hadTrouble
             ? `You rescued ${firstTryCount} of ${total} words!`
-            : hadReview
-              ? `You reviewed ${firstTryCount} of ${total} words!`
             : 'No stuck words — practice makes them stick even harder!';
           const r = quizResult(firstTryCount, total, line1, comboBonus);
           r.outcomes = outcomes;
@@ -3008,6 +2989,129 @@ window.RR = window.RR || {};
               shell.after(1100, () => f.remove());
               qi++;
               speakAdvance(shell, `You saved ${sayWord}!`, next, { rate: 0.9 });
+            } else {
+              firstTry = false;
+              comboMiss(shell);
+              btn.classList.add('wrong');
+              A.sfx.buzz();
+              haptic(false);
+            }
+          });
+        });
+      }
+    }
+  };
+
+  /* =========================================================
+     GAME — Daily Review (spaced mastery review)
+     ========================================================= */
+  const REVIEW_TOTAL = 5;
+
+  const reviewGame = {
+    title: 'Daily Review',
+    icon: '↻',
+    desc: 'Check what still sticks',
+    available(profile) {
+      return RR.progress.reviewDue(profile).some(masteryItem);
+    },
+    start(container, ctx) {
+      const round = RR.progress.reviewDue(ctx.profile)
+        .map(masteryItem)
+        .filter(Boolean)
+        .slice(0, REVIEW_TOTAL);
+
+      if (!round.length) {
+        container.innerHTML = `
+          <div class="card intro">
+            <div class="intro-emoji">↻</div>
+            <h2>Daily Review</h2>
+            <p>Nothing needs a check today. You are all caught up!</p>
+            <button class="btn big" data-act="back">Back to games</button>
+          </div>`;
+        container.querySelector('[data-act="back"]').addEventListener('click', ctx.quit);
+        return;
+      }
+
+      const total = round.length;
+      const shell = roundShell(container, ctx, 'Daily Review', total);
+      let qi = 0;
+      let firstTryCount = 0;
+      let comboBonus = 0;
+      const outcomes = [];
+
+      introCard(shell, {
+        emoji: '↻',
+        title: 'Daily Review',
+        lines: ['These are things you already learned.', 'A quick check helps them stay strong!'],
+        buttonText: 'Start review',
+        onStart: next
+      });
+
+      function next() {
+        if (!shell.live) return;
+        if (qi >= total) {
+          shell.die();
+          const r = quizResult(firstTryCount, total, `You remembered ${firstTryCount} of ${total}!`, comboBonus);
+          r.outcomes = outcomes;
+          ctx.finish(r);
+          return;
+        }
+        shell.nowDot(qi);
+        ask(round[qi]);
+      }
+
+      function ask(item) {
+        const dc = diffChoices(ctx);
+        let correct, choices, labelOf, say, heading;
+        if (item.kind === 'letter') {
+          correct = item.letter;
+          const letters = D.LETTERS.concat(D.DIGRAPHS);
+          choices = withDistractors(correct, letters, dc.n, x => x.l, dc.hard ? letterSim : null);
+          labelOf = choice => choice.l;
+          say = () => A.speak(correct.s, { rate: 0.75 });
+          heading = 'Which letter makes this sound?';
+        } else if (item.kind === 'word') {
+          correct = item.word;
+          choices = withDistractors(correct, D.WORDS[item.grade], dc.n, x => x.w, dc.hard ? wordSim : null);
+          labelOf = choice => choice.w;
+          say = () => A.speak(correct.w, { rate: 0.85 });
+          heading = 'Which word did you hear?';
+        } else {
+          correct = item.word;
+          choices = withDistractors(correct, D.SIGHT[item.grade], dc.n, x => x, null);
+          labelOf = choice => choice;
+          say = () => A.speak(correct, { rate: 0.85 });
+          heading = 'Which word did you hear?';
+        }
+
+        let firstTry = true;
+        let answered = false;
+        shell.area.innerHTML = `
+          <div class="prompt">
+            <button class="btn" data-act="replay">Listen</button>
+            <h2>${heading}</h2>
+          </div>
+          <div class="choices words">
+            ${choices.map((choice, i) => `<button class="choice wordpick" data-i="${i}">${labelOf(choice)}</button>`).join('')}
+          </div>`;
+
+        shell.area.querySelector('[data-act="replay"]').addEventListener('click', say);
+        shell.after(350, say);
+        shell.area.querySelectorAll('.choice').forEach(btn => {
+          btn.addEventListener('click', () => {
+            if (answered) return;
+            const choice = choices[+btn.dataset.i];
+            if (choice === correct) {
+              answered = true;
+              btn.classList.add('correct');
+              shell.area.querySelectorAll('.choice').forEach(x => x.disabled = true);
+              A.sfx.ding();
+              haptic(true);
+              if (firstTry) { firstTryCount++; comboBonus += comboHit(shell); }
+              outcomes.push({ k: item.key, ok: firstTry });
+              shell.markDot(qi);
+              qi++;
+              speakAdvance(shell, 'Still strong!', next, { rate: 0.9 });
             } else {
               firstTry = false;
               comboMiss(shell);
@@ -3137,6 +3241,7 @@ window.RR = window.RR || {};
     memory: memoryGame,
     sentence: sentenceGame,
     rescue: rescueGame,
+    review: reviewGame,
     rhyme: rhymeGame,
     flash: flashGame,
     sight: sightGame
@@ -3162,7 +3267,7 @@ window.RR = window.RR || {};
   RR.games.homophones = homophonesGame;
   RR.games.deepdive = deepdiveGame;
 
-  RR.gameOrder = ['trace', 'safari', 'drums', 'casematch', 'books', 'sounds', 'blend', 'build', 'chains', 'spell', 'memory', 'sentence', 'morph', 'twins', 'rescue', 'silly', 'riddle', 'scramble', 'rhyme', 'sight', 'flash', 'nonsense', 'analogy', 'cloze', 'fixit', 'mainidea', 'factop', 'homophones', 'deepdive'];
+  RR.gameOrder = ['trace', 'safari', 'drums', 'casematch', 'books', 'sounds', 'blend', 'build', 'chains', 'spell', 'memory', 'sentence', 'morph', 'twins', 'rescue', 'review', 'silly', 'riddle', 'scramble', 'rhyme', 'sight', 'flash', 'nonsense', 'analogy', 'cloze', 'fixit', 'mainidea', 'factop', 'homophones', 'deepdive'];
 
   /* Ollie's how-to-play lines — spoken on demand from the 🦉 button. */
   const GAME_HELP = {
@@ -3177,6 +3282,7 @@ window.RR = window.RR || {};
     morph: 'Build the big word from its two parts, then pick what it means!',
     twins: 'Find the word that means the same — or the opposite!',
     rescue: 'These are your tricky words! Listen, then tap the right one to rescue it!',
+    review: 'Listen carefully, then choose the letter or word you remember!',
     silly: 'Read the sentence. If it could really happen, tap Makes sense. If it could not, tap Silly!',
     riddle: 'Read the riddle carefully. The clues tell you the answer!',
     scramble: 'Tap what happened first, then next, until the story is back in order!',

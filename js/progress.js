@@ -294,16 +294,15 @@ RR.progress = (function () {
   function nextActivity(p) {
     const d = D();
     const grade = p.grade;
-    const dueReview = reviewDue(p).filter(k => k.startsWith('w:') || k.startsWith('s:'));
     const available = id => {
       const g = RR.games[id];
-      return g && (!g.grades || g.grades.includes(grade));
+      return g && (!g.grades || g.grades.includes(grade)) && (!g.available || g.available(p));
     };
     const unmastered = (list, prefix, keyFn) =>
       list.filter(it => !isMastered(p, prefix + keyFn(it))).length;
 
     const trainingPick = () => {
-      if (dueReview.length && available('rescue')) return 'rescue';
+      if (available('review')) return 'review';
       const cand = [];
       if (available('blend')) cand.push({ id: 'blend', n: unmastered(d.WORDS[grade], 'w:', w => w.w) });
       if (available('build')) cand.push({ id: 'build', n: unmastered(d.WORDS[grade], 'w:', w => w.w) - 1 });
@@ -318,7 +317,7 @@ RR.progress = (function () {
     };
 
     /* short spoken reason so the big PLAY button never feels random */
-    const why = id => id === 'rescue' && dueReview.length ? 'Time to review words you already know!'
+    const why = id => id === 'review' ? 'A quick check will keep old skills strong!'
       : id === 'rescue' ? 'You have tricky words to rescue!'
       : id === 'books' ? 'A story is waiting for you!'
       : 'Lots of new things to learn in this one!';

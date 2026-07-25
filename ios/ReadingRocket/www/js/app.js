@@ -607,7 +607,7 @@ RR.nav = RR.nav || {};
   const GAME_SECTIONS = [
     { label: '🐣 Little Learners', ids: ['trace', 'safari', 'drums', 'casematch'] },
     { label: '🔤 Sounds & letters', ids: ['sounds', 'blend', 'build', 'chains', 'rhyme'] },
-    { label: '📝 Words & spelling', ids: ['spell', 'memory', 'morph', 'twins', 'rescue', 'sight'] },
+    { label: '📝 Words & spelling', ids: ['review', 'spell', 'memory', 'morph', 'twins', 'rescue', 'sight'] },
     { label: '🤔 Meaning & thinking', ids: ['books', 'sentence', 'silly', 'riddle', 'scramble'] },
     { label: '⚡ Speed rounds', ids: ['flash', 'nonsense'] },
     { label: '🎓 Challenge Zone', ids: ['analogy', 'cloze', 'fixit', 'mainidea', 'factop', 'homophones', 'deepdive'] }
@@ -620,7 +620,7 @@ RR.nav = RR.nav || {};
     for (const c of seedStr) h = (h * 31 + c.charCodeAt(0)) | 0;
     const rng = () => { h = (h * 1103515245 + 12345) & 0x7fffffff; return h / 0x7fffffff; };
     const secs = GAME_SECTIONS.filter(s => s.ids.some(available));
-    const picks = [];
+    const picks = available('review') ? ['review'] : [];
     const start = Math.abs(h) % Math.max(1, secs.length);
     for (let k = 0; k < secs.length && picks.length < 3; k++) {
       const ids = secs[(start + k) % secs.length].ids.filter(available).filter(id => !picks.includes(id));
@@ -635,7 +635,7 @@ RR.nav = RR.nav || {};
     petHide();
     const available = id => {
       const g = RR.games[id];
-      return g && (!g.grades || g.grades.includes(p.grade));
+      return g && (!g.grades || g.grades.includes(p.grade)) && (!g.available || g.available(p));
     };
     const card = id => {
       const g = RR.games[id];
