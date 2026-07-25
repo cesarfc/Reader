@@ -279,12 +279,12 @@ RR.DATA = {
   ],
 
   SIGHT: {
-    K: ['the','a','I','see','my','like','to','and','go','is','in','it','you','we','can','at','me','up','look','play','said','here','this','for','on'],
-    1: ['of','was','are','they','have','from','had','but','what','all','when','your','there','out','then','them','some','her','would','make','him','time','could','were','who'],
-    2: ['because','always','around','been','before','both','buy','call','cold','does','fast','first','found','gave','goes','green','made','many','off','pull','read','right','sing','sleep','tell','their','these','those','upon','which'],
-    3: ['about','better','bring','carry','clean','done','draw','drink','eight','fall','full','grow','hold','hurt','keep','kind','laugh','light','long','much','myself','never','only','own','pick','seven','shall','show','small','start','today','together','try','warm'],
-    4: ['although','answer','beautiful','believe','breakfast','brought','building','business','caught','certain','complete','decide','during','early','enough','example','favorite','finally','important','island','language','machine','measure','minute','mountain','notice','ocean','perhaps','picture','probably','question','remember','science','special','straight','strong','suddenly','thought','through','toward','usually','weather'],
-    5: ['achievement','ancient','anxious','athlete','attention','average','character','community','curious','definitely','describe','development','different','difficult','disappear','environment','especially','excellent','experience','familiar','foreign','fragile','frequently','government','height','immediately','independent','interrupt','knowledge','lightning','medicine','necessary','neighbor','opposite','patience','receive','recognize','rhythm','separate','strength','succeed','surprise','tomorrow','vehicle','weird']
+    K: ['the','a','I','see','my','like','to','and','go','is','in','it','you','we','can','at','me','up','look','play','said','here','this','for','on','am','be','come','do','he','no','not','one','she','with'],
+    1: ['of','was','are','they','have','from','had','but','what','all','when','your','there','out','then','them','some','her','would','make','him','time','could','were','who','an','as','by','has','his','how','if','or','that','will'],
+    2: ['because','always','around','been','before','both','buy','call','cold','does','fast','first','found','gave','goes','green','made','many','off','pull','read','right','sing','sleep','tell','their','these','those','upon','which','after','again','away','day','did','get','give','into','now','very'],
+    3: ['about','better','bring','carry','clean','done','draw','drink','eight','fall','full','grow','hold','hurt','keep','kind','laugh','light','long','much','myself','never','only','own','pick','seven','shall','show','small','start','today','together','try','warm','also','every','help','house','know','must','new','should','take','work'],
+    4: ['although','answer','beautiful','believe','breakfast','brought','building','business','caught','certain','complete','decide','during','early','enough','example','favorite','finally','important','island','language','machine','measure','minute','mountain','notice','ocean','perhaps','picture','probably','question','remember','science','special','straight','strong','suddenly','thought','through','toward','usually','weather','across','among','become','country','course','family','group','however','often','since'],
+    5: ['achievement','ancient','anxious','athlete','attention','average','character','community','curious','definitely','describe','development','different','difficult','disappear','environment','especially','excellent','experience','familiar','foreign','fragile','frequently','government','height','immediately','independent','interrupt','knowledge','lightning','medicine','necessary','neighbor','opposite','patience','receive','recognize','rhythm','separate','strength','succeed','surprise','tomorrow','vehicle','weird','available','category','communicate','consider','continue','determine','evidence','information','possible','therefore']
   },
 
   SENTENCES: {
@@ -1223,14 +1223,21 @@ RR.DATA = {
     'Out of this world', 'Fantastic', 'Nice reading', 'You worked hard on that one',
     'Look at you go', 'Your brain is growing', 'Strong reading', 'That was brave trying',
     'High five', 'You kept going and it worked', 'Rocket power', 'So proud of you',
-    'You are getting faster', 'Sharp eyes', 'Great listening', 'You never gave up'
+    'You are getting faster', 'Sharp eyes', 'Great listening', 'You never gave up',
+    'You figured it out', 'That was careful reading', 'You are on a roll',
+    'Your practice is paying off', 'Excellent focus', 'You made that look easy',
+    'Keep up the great work', 'Mission accomplished', 'That was great thinking',
+    'Keep flying'
   ],
   /* extra-shiny lines saved for 3-star rounds */
   PRAISE_BIG: [
     'Perfect flying', 'Three stars — unstoppable', 'Champion reading',
     'That was amazing', 'Galaxy-level reading', 'Wow, just wow',
     'You crushed it', 'A superstar round', 'Absolutely brilliant',
-    'The bosses should be worried', 'Best round ever', 'Ollie is doing a happy dance'
+    'The bosses should be worried', 'Best round ever', 'Ollie is doing a happy dance',
+    'What an incredible round', 'Every star is yours', 'A perfect rocket mission',
+    'You lit up the whole galaxy', 'Flawless reading', 'Nothing could stop you',
+    'Three stars, all yours', 'You read like a champion'
   ],
 
   TIPS: [
