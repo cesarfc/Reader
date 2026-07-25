@@ -1155,10 +1155,21 @@ RR.nav = RR.nav || {};
         <div class="parentcard">
           <h3 class="famh">🎙️ Family Voice</h3>
           <p class="muted">Record the letter sounds in YOUR voice — every phonics game swaps the robot for you. Kids learn sounds better from a familiar voice.</p>
-          <div class="pstatsrow">🔊 <b>${RR.rec ? RR.rec.soundCount() : 0}</b> of ${soundInventory().length} sounds recorded on this device</div>
+          <div class="pstatsrow">🔊 <b class="soundcount">${RR.rec ? RR.rec.soundCount() : 0}</b> of ${soundInventory().length} sounds recorded on this device</div>
           ${RR.rec && RR.rec.supported()
             ? '<div class="modalbtns"><button class="btn" data-act="soundstudio">🎙️ Open the studio</button></div>'
             : '<p class="pstatsrow muted">This device can’t record — open Reading Rocket on one with a microphone. Recordings stay on the device they’re made on.</p>'}
+        </div>
+
+        <div class="parentcard">
+          <h3 class="famh">📁 Family Voice pack</h3>
+          <p class="muted">Save your recorded letter sounds to a file, then load them on another device.</p>
+          <input class="voicepackin" type="file" accept=".json,application/json" hidden>
+          <div class="modalbtns">
+            <button class="btn ghost" data-act="savevoicepack">Save pack</button>
+            <button class="btn" data-act="loadvoicepack">Load pack</button>
+          </div>
+          <p class="pstatsrow muted voicepackstatus" role="status" aria-live="polite"></p>
         </div>
 
         <div class="parentcard">
@@ -1211,6 +1222,51 @@ RR.nav = RR.nav || {};
     const clear = app.querySelector('[data-act="cleargoal"]');
     if (clear) clear.addEventListener('click', () => { S.setFamilyGoal(null); renderHome(); });
     app.querySelector('[data-act="voice"]').addEventListener('click', openSettings);
+
+    /* ----- Family Voice pack ----- */
+    const packIn = app.querySelector('.voicepackin');
+    const packStatus = app.querySelector('.voicepackstatus');
+    const savePackBtn = app.querySelector('[data-act="savevoicepack"]');
+    const loadPackBtn = app.querySelector('[data-act="loadvoicepack"]');
+    savePackBtn.addEventListener('click', () => {
+      savePackBtn.disabled = true;
+      packStatus.textContent = 'Preparing your Family Voice pack…';
+      RR.rec.exportSounds().then(pack => {
+        const blob = new Blob([JSON.stringify(pack)], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = 'reading-rocket-family-voice.json';
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        setTimeout(() => URL.revokeObjectURL(url), 1000);
+        packStatus.textContent = `Saved ${pack.clips.length} ${pack.clips.length === 1 ? 'clip' : 'clips'}.`;
+      }).catch(() => {
+        packStatus.textContent = 'Could not save the Family Voice pack.';
+      }).then(() => { savePackBtn.disabled = false; });
+    });
+    loadPackBtn.addEventListener('click', () => packIn.click());
+    packIn.addEventListener('change', () => {
+      const file = packIn.files[0];
+      if (!file) return;
+      loadPackBtn.disabled = true;
+      packStatus.textContent = 'Loading your Family Voice pack…';
+      file.text()
+        .then(text => RR.rec.importSounds(JSON.parse(text)))
+        .then(count => {
+          app.querySelector('.soundcount').textContent = RR.rec.soundCount();
+          packStatus.textContent = `Loaded ${count} ${count === 1 ? 'clip' : 'clips'}.`;
+          A.sfx.fanfare();
+        })
+        .catch(() => {
+          packStatus.textContent = 'That file doesn’t look like a Family Voice pack.';
+        })
+        .then(() => {
+          packIn.value = '';
+          loadPackBtn.disabled = false;
+        });
+    });
 
     /* ----- Backup & transfer ----- */
     const backupOut = app.querySelector('.backupout');
