@@ -20,6 +20,7 @@ RR.progress = (function () {
 
   /* ---------------- mastery ---------------- */
   const MASTER_AT = 3;
+  const REVIEW_DAYS = 7;
 
   function rec(p, key) { return p.mastery[key] || { c: 0, w: 0 }; }
   function isMastered(p, key) { return rec(p, key).c >= MASTER_AT; }
@@ -30,6 +31,16 @@ RR.progress = (function () {
       if (k.startsWith(prefix) && p.mastery[k].c >= MASTER_AT) n++;
     }
     return n;
+  }
+
+  function reviewDue(p) {
+    const cutoff = new Date();
+    cutoff.setDate(cutoff.getDate() - REVIEW_DAYS);
+    const cutoffDate = localDate(cutoff);
+    return Object.entries(p.mastery)
+      .filter(([, r]) => r.c >= MASTER_AT && (!r.last || r.last <= cutoffDate))
+      .sort((a, b) => (a[1].last || '').localeCompare(b[1].last || ''))
+      .map(([k]) => k);
   }
 
   /* Words the kid keeps missing (for the grown-up corner). */
@@ -283,6 +294,7 @@ RR.progress = (function () {
   function nextActivity(p) {
     const d = D();
     const grade = p.grade;
+    const dueReview = reviewDue(p).filter(k => k.startsWith('w:') || k.startsWith('s:'));
     const available = id => {
       const g = RR.games[id];
       return g && (!g.grades || g.grades.includes(grade));
@@ -291,6 +303,7 @@ RR.progress = (function () {
       list.filter(it => !isMastered(p, prefix + keyFn(it))).length;
 
     const trainingPick = () => {
+      if (dueReview.length && available('rescue')) return 'rescue';
       const cand = [];
       if (available('blend')) cand.push({ id: 'blend', n: unmastered(d.WORDS[grade], 'w:', w => w.w) });
       if (available('build')) cand.push({ id: 'build', n: unmastered(d.WORDS[grade], 'w:', w => w.w) - 1 });
@@ -305,7 +318,8 @@ RR.progress = (function () {
     };
 
     /* short spoken reason so the big PLAY button never feels random */
-    const why = id => id === 'rescue' ? 'You have tricky words to rescue!'
+    const why = id => id === 'rescue' && dueReview.length ? 'Time to review words you already know!'
+      : id === 'rescue' ? 'You have tricky words to rescue!'
       : id === 'books' ? 'A story is waiting for you!'
       : 'Lots of new things to learn in this one!';
     ensureQuests(p);
@@ -370,8 +384,8 @@ RR.progress = (function () {
   }
 
   return {
-    MASTER_AT, localDate, weekKey,
-    rec, isMastered, countMastered, troubleWords,
+    MASTER_AT, REVIEW_DAYS, localDate, weekKey,
+    rec, isMastered, countMastered, reviewDue, troubleWords,
     gradeProgress, nextGrade, readyToGraduate,
     levelOf, titleOf,
     ensureQuests, questDef, applyEvent,

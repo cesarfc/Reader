@@ -2877,17 +2877,32 @@ window.RR = window.RR || {};
       const mastery = ctx.profile.mastery || {};
       const MASTER_AT = RR.progress.MASTER_AT;
       const used = new Set();
-      const items = [];
+      const troubleItems = [];
       /* worst-missed first, drop keys that no longer resolve */
       Object.entries(mastery)
         .filter(([k, r]) => r.w >= 2 && r.c < MASTER_AT && (k.startsWith('w:') || k.startsWith('s:')))
         .sort((a, b) => b[1].w - a[1].w)
         .forEach(([k]) => {
           const resolved = k.startsWith('w:') ? findWord(k.slice(2)) : findSight(k.slice(2));
-          if (resolved && !used.has(k)) { used.add(k); items.push(resolved); }
+          if (resolved && !used.has(k)) { used.add(k); troubleItems.push(resolved); }
         });
 
-      const troubleCount = items.length;
+      const reviewItems = [];
+      RR.progress.reviewDue(ctx.profile).forEach(k => {
+        const resolved = k.startsWith('w:') ? findWord(k.slice(2))
+          : k.startsWith('s:') ? findSight(k.slice(2))
+          : null;
+        if (resolved && !used.has(k)) { used.add(k); reviewItems.push(resolved); }
+      });
+
+      const items = [];
+      const candidateCount = Math.max(troubleItems.length, reviewItems.length);
+      for (let i = 0; i < candidateCount && items.length < RESCUE_TOTAL; i++) {
+        if (troubleItems[i]) items.push(troubleItems[i]);
+        if (reviewItems[i] && items.length < RESCUE_TOTAL) items.push(reviewItems[i]);
+      }
+      const troubleCount = troubleItems.length;
+      const reviewCount = reviewItems.length;
       /* top up with least-mastered words from this grade (smartSample weights
          struggled/unseen words to the front) */
       if (items.length < RESCUE_TOTAL) {
@@ -2901,6 +2916,7 @@ window.RR = window.RR || {};
       const round = shuffle(items).slice(0, RESCUE_TOTAL);
       const total = round.length || 1;
       const hadTrouble = troubleCount > 0;
+      const hadReview = reviewCount > 0;
 
       const shell = roundShell(container, ctx, 'Word Rescue', total);
       let qi = 0;
@@ -2913,6 +2929,8 @@ window.RR = window.RR || {};
         title: 'Word Rescue',
         lines: hadTrouble
           ? ['Some words got stuck — let’s save them!', 'Hear the word, then tap how it’s written.']
+          : hadReview
+            ? ['Time to review words you already know!', 'Hear the word, then tap how it’s written.']
           : ['No stuck words right now! 🎉', 'Let’s practice so they stick even harder.'],
         buttonText: '🛟 Start the rescue!',
         onStart: next
@@ -2924,6 +2942,8 @@ window.RR = window.RR || {};
           shell.die();
           const line1 = hadTrouble
             ? `You rescued ${firstTryCount} of ${total} words!`
+            : hadReview
+              ? `You reviewed ${firstTryCount} of ${total} words!`
             : 'No stuck words — practice makes them stick even harder!';
           const r = quizResult(firstTryCount, total, line1, comboBonus);
           r.outcomes = outcomes;
