@@ -44,7 +44,13 @@ RR.DATA = {
       { w: 'cap', e: '🧢', t: ['c','a','p'], s: ['kuh','ah','puh'] },
       { w: 'bag', e: '👜', t: ['b','a','g'], s: ['buh','ah','guh'] },
       { w: 'log', e: '🪵', t: ['l','o','g'], s: ['luh','aw','guh'] },
-      { w: 'tub', e: '🛁', t: ['t','u','b'], s: ['tuh','uh','buh'] }
+      { w: 'tub', e: '🛁', t: ['t','u','b'], s: ['tuh','uh','buh'] },
+      { w: 'kid', e: '🧒', t: ['k','i','d'], s: ['kuh','ih','duh'] },
+      { w: 'dad', e: '👨', t: ['d','a','d'], s: ['duh','ah','duh'] },
+      { w: 'mom', e: '👩', t: ['m','o','m'], s: ['muh','aw','muh'] },
+      { w: 'pan', e: '🍳', t: ['p','a','n'], s: ['puh','ah','nuh'] },
+      { w: 'vet', e: '🧑‍⚕️', t: ['v','e','t'], s: ['vuh','eh','tuh'] },
+      { w: 'sad', e: '😢', t: ['s','a','d'], s: ['suh','ah','duh'] }
     ],
 
     1: [
@@ -74,7 +80,16 @@ RR.DATA = {
       { w: 'clock', e: '⏰', t: ['c','l','o','ck'], s: ['kuh','luh','aw','kuh'] },
       { w: 'brush', e: '🪥', t: ['b','r','u','sh'], s: ['buh','ruh','uh','shh'] },
       { w: 'shell', e: '🐚', t: ['sh','e','ll'],  s: ['shh','eh','luh'] },
-      { w: 'drop',  e: '💧', t: ['d','r','o','p'], s: ['duh','ruh','aw','puh'] }
+      { w: 'drop',  e: '💧', t: ['d','r','o','p'], s: ['duh','ruh','aw','puh'] },
+      { w: 'dish',  e: '🍽️', t: ['d','i','sh'],   s: ['duh','ih','shh'] },
+      { w: 'wish',  e: '🌟', t: ['w','i','sh'],   s: ['wuh','ih','shh'] },
+      { w: 'shop',  e: '🛒', t: ['sh','o','p'],   s: ['shh','aw','puh'] },
+      { w: 'path',  e: '🛣️', t: ['p','a','th'],   s: ['puh','ah','thuh'] },
+      { w: 'wing',  e: '🪽', t: ['w','i','ng'],   s: ['wuh','ih','ing'] },
+      { w: 'song',  e: '🎵', t: ['s','o','ng'],   s: ['suh','aw','ing'] },
+      { w: 'chain', e: '🔗', t: ['ch','ai','n'],  s: ['chuh','ay','nuh'] },
+      { w: 'thud',  e: '💥', t: ['th','u','d'],   s: ['thuh','uh','duh'] },
+      { w: 'whiz',  e: '💨', t: ['wh','i','z'],   s: ['wuh','ih','zuh'] }
     ],
 
     2: [
@@ -1688,6 +1703,17 @@ RR.DATA = {
       ], quiz: [
         { q: 'Who went on the ship?', choices: [ { t: 'Chip and Mom', e: '👩' }, { t: 'Chip and Dad', e: '👨' }, { t: 'Chip and a cat', e: '🐱' } ], a: 1 },
         { q: 'What did Chip see on the deck?', choices: [ { t: 'a crab', e: '🦀' }, { t: 'a frog', e: '🐸' }, { t: 'a shark', e: '🦈' } ], a: 0 }
+      ]},
+      { id: 'g1-fish-shop', title: 'The Fish Shop', cover: '🐟', pages: [
+        { t: 'Chip is at the fish shop.', a: '🧒🛒' },
+        { t: 'Chip can see a fish in a dish.', a: '🐟🍽️' },
+        { t: 'The fish can swish and flip.', a: '🐟💦' },
+        { t: 'Chip can make a wish.', a: '🌟' },
+        { t: 'The fish can swim!', a: '🐟💦' },
+        { t: 'Chip and the fish grin.', a: '🧒🐟' }
+      ], quiz: [
+        { q: 'Where is Chip?', choices: [ { t: 'at the shop', e: '🛒' }, { t: 'on a ship', e: '🚢' }, { t: 'on a path', e: '🛣️' } ], a: 0 },
+        { q: 'What can the fish do?', choices: [ { t: 'swim', e: '🏊' }, { t: 'nap', e: '😴' }, { t: 'hop', e: '🐸' } ], a: 0 }
       ]}
     ],
     2: [
