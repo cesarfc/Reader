@@ -1239,6 +1239,9 @@ RR.DATA = {
     'You lit up the whole galaxy', 'Flawless reading', 'Nothing could stop you',
     'Three stars, all yours', 'You read like a champion'
   ],
+  REVIEW_CHEERS: [
+    'Still strong!', 'You remembered!', 'That one stuck!', 'Memory confirmed!'
+  ],
 
   TIPS: [
     'Ask your reader to say each sound out loud — then squish the sounds together!',

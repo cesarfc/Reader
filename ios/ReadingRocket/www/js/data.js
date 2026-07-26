@@ -1217,6 +1217,9 @@ RR.DATA = {
     'You crushed it', 'A superstar round', 'Absolutely brilliant',
     'The bosses should be worried', 'Best round ever', 'Ollie is doing a happy dance'
   ],
+  REVIEW_CHEERS: [
+    'Still strong!', 'You remembered!', 'That one stuck!', 'Memory confirmed!'
+  ],
 
   TIPS: [
     'Ask your reader to say each sound out loud — then squish the sounds together!',

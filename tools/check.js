@@ -76,6 +76,54 @@ for (const [grade, words] of Object.entries(data.WORDS)) {
   });
 }
 
+invariant(
+  Array.isArray(data.REVIEW_CHEERS) && data.REVIEW_CHEERS.length > 0,
+  'REVIEW_CHEERS must contain at least one celebration'
+);
+
+const reviewSandbox = {
+  RR: {
+    DATA: data,
+    audio: {},
+    state: {}
+  }
+};
+reviewSandbox.window = reviewSandbox;
+const progressSource = fs.readFileSync(path.join(root, 'js', 'progress.js'), 'utf8');
+vm.runInNewContext(progressSource, reviewSandbox, { filename: 'js/progress.js' });
+const gamesSource = fs.readFileSync(path.join(root, 'js', 'games.js'), 'utf8');
+vm.runInNewContext(gamesSource, reviewSandbox, { filename: 'js/games.js' });
+
+invariant(reviewSandbox.RR.games.review, 'Daily Review must be registered with the review game id');
+invariant(reviewSandbox.RR.gameOrder.includes('review'), 'Daily Review must be included in game order');
+
+const dueReviewProfile = {
+  grade: 'K',
+  mastery: {
+    'w:cat': { c: 3, w: 0, last: '2000-01-01' },
+    'l:a': { c: 3, w: 0, last: '2000-01-01' }
+  }
+};
+invariant(
+  reviewSandbox.RR.games.review.available(dueReviewProfile),
+  'Daily Review must be available for due words and letters'
+);
+invariant(
+  reviewSandbox.RR.progress.nextActivity(dueReviewProfile).id === 'review',
+  'PLAY must route to Daily Review when a review is due'
+);
+
+const currentReviewProfile = {
+  grade: 'K',
+  mastery: {
+    'w:cat': { c: 3, w: 0, last: '2999-01-01' }
+  }
+};
+invariant(
+  !reviewSandbox.RR.games.review.available(currentReviewProfile),
+  'Daily Review must stay hidden when nothing is due'
+);
+
 const savedProgress = {
   currentId: 'reader',
   customBooks: [],
