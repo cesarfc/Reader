@@ -2950,14 +2950,14 @@ window.RR = window.RR || {};
           sayValue = item.word;
           choices = withDistractors(item.word, D.SIGHT[item.grade], dc.n, x => x, null);
           labelOf = c => c;
-          picHtml = '<button class="speaker" data-act="replay" aria-label="Hear the word">🔊</button>';
+          picHtml = '<button class="speaker" data-act="replay" aria-label="Hear the word">Hear</button>';
         } else {
           const letters = D.LETTERS.concat(D.DIGRAPHS);
           correct = item.letter;
           sayValue = item.letter.s;
           choices = withDistractors(item.letter, letters, dc.n, x => x.l, dc.hard ? letterSim : null);
           labelOf = c => c.l;
-          picHtml = '<button class="speaker" data-act="replay" aria-label="Hear the sound">🔊</button>';
+          picHtml = '<button class="speaker" data-act="replay" aria-label="Hear the sound">Hear</button>';
         }
 
         shell.area.innerHTML = `
