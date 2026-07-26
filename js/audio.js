@@ -75,20 +75,34 @@ RR.audio = (function () {
     if (interrupt) stop();
     if (!clipEl) clipEl = new Audio();
     const el = clipEl;
+    const bed = localStorage.getItem('rr.bedtime') === '1' ? 0.88 : 1;
+    el.playbackRate = bed;
+    el.volume = bed;
     let done = false;
+    let safety = null;
     const fin = () => {
       if (done) return;
       done = true;
+      clearTimeout(safety);
       if (el._fin === fin) el._fin = null;
       if (onend) onend();
+    };
+    const safetyFin = () => {
+      if (!el.paused) el.pause();
+      fin();
     };
     el._fin = fin;
     el.onended = fin;
     el.onerror = fin;
+    el.onloadedmetadata = () => {
+      if (!Number.isFinite(el.duration)) return;
+      clearTimeout(safety);
+      safety = setTimeout(safetyFin, el.duration / el.playbackRate * 1000 + 150);
+    };
+    safety = setTimeout(safetyFin, 4000);
     el.src = url;
     const p = el.play();
     if (p && p.catch) p.catch(fin);
-    setTimeout(fin, 6000); /* safety net — sound clips are seconds long */
   }
 
   /* pitch defaults to 1.0 — raising it makes every voice sound more synthetic */
@@ -162,7 +176,10 @@ RR.audio = (function () {
       : [];
     const pool = recorded.length ? recorded : phrases;
     const phrase = pool[(Math.random() * pool.length) | 0];
-    return speak(recorded.length ? phrase : `${phrase}, ${name}!`);
+    if (!recorded.length) return speak(`${phrase}, ${name}!`);
+    return speak(phrase, {
+      onend: () => speak(`${name}!`, { interrupt: false, noClip: true })
+    });
   }
 
   /* Speak a list of items one after another with a small gap.
