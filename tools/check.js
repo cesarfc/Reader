@@ -76,4 +76,70 @@ for (const [grade, words] of Object.entries(data.WORDS)) {
   });
 }
 
+const savedProgress = {
+  currentId: 'reader',
+  customBooks: [],
+  profiles: [
+    {
+      id: 'reader',
+      name: 'Reader',
+      grade: 'K',
+      weekKey: '2026-07-13',
+      weekStars: 14,
+      weekMastered: 3,
+      weekHistory: [
+        { week: '2026-05-18', stars: 2, mastered: 0 },
+        { week: '2026-05-25', stars: 4, mastered: 1 },
+        { week: '2026-06-01', stars: 6, mastered: 1 },
+        { week: '2026-06-08', stars: 8, mastered: 2 },
+        { week: '2026-06-15', stars: 10, mastered: 2 },
+        { week: '2026-06-22', stars: 12, mastered: 3 },
+        { week: '2026-06-29', stars: 9, mastered: 2 },
+        { week: '2026-07-06', stars: 11, mastered: 3 }
+      ]
+    },
+    {
+      id: 'new-reader',
+      name: 'New Reader',
+      grade: 'K'
+    }
+  ]
+};
+const stateWrites = [];
+const stateSandbox = {
+  RR: {
+    progress: {
+      MASTER_AT: 3,
+      weekKey: () => '2026-07-20'
+    }
+  },
+  localStorage: {
+    getItem: key => key === 'rr.save.v1' ? JSON.stringify(savedProgress) : null,
+    setItem: (key, value) => stateWrites.push({ key, value })
+  }
+};
+stateSandbox.window = stateSandbox;
+const stateSource = fs.readFileSync(path.join(root, 'js', 'state.js'), 'utf8');
+vm.runInNewContext(stateSource, stateSandbox, { filename: 'js/state.js' });
+
+const returningReader = stateSandbox.RR.state.profiles[0];
+stateSandbox.RR.state.rollWeek(returningReader);
+invariant(returningReader.weekKey === '2026-07-20', 'rollWeek must advance the week key');
+invariant(returningReader.weekStars === 0, 'rollWeek must reset weekly stars');
+invariant(returningReader.weekMastered === 0, 'rollWeek must reset weekly mastery');
+invariant(returningReader.weekHistory.length === 8, 'weekly history must remain capped at eight entries');
+invariant(returningReader.weekHistory[0].week === '2026-05-25', 'weekly history must discard the oldest entry');
+invariant(
+  JSON.stringify(returningReader.weekHistory[7]) ===
+    JSON.stringify({ week: '2026-07-13', stars: 14, mastered: 3 }),
+  'rollWeek must snapshot the completed week'
+);
+stateSandbox.RR.state.rollWeek(returningReader);
+invariant(returningReader.weekHistory.length === 8, 'rollWeek must not duplicate the current week');
+invariant(stateWrites.length === 1, 'rollWeek must persist one rollover once');
+
+const newReader = stateSandbox.RR.state.profiles[1];
+stateSandbox.RR.state.rollWeek(newReader);
+invariant(newReader.weekHistory.length === 0, 'rollWeek must not snapshot an unstarted week');
+
 console.log('Static-site invariants passed.');
