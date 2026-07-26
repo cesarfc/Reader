@@ -76,6 +76,54 @@ for (const [grade, words] of Object.entries(data.WORDS)) {
   });
 }
 
+invariant(
+  Array.isArray(data.REVIEW_CHEERS) && data.REVIEW_CHEERS.length > 0,
+  'REVIEW_CHEERS must contain at least one celebration'
+);
+
+const reviewSandbox = {
+  RR: {
+    DATA: data,
+    audio: {},
+    state: {}
+  }
+};
+reviewSandbox.window = reviewSandbox;
+const progressSource = fs.readFileSync(path.join(root, 'js', 'progress.js'), 'utf8');
+vm.runInNewContext(progressSource, reviewSandbox, { filename: 'js/progress.js' });
+const gamesSource = fs.readFileSync(path.join(root, 'js', 'games.js'), 'utf8');
+vm.runInNewContext(gamesSource, reviewSandbox, { filename: 'js/games.js' });
+
+invariant(reviewSandbox.RR.games.review, 'Daily Review must be registered with the review game id');
+invariant(reviewSandbox.RR.gameOrder.includes('review'), 'Daily Review must be included in game order');
+
+const dueReviewProfile = {
+  grade: 'K',
+  mastery: {
+    'w:cat': { c: 3, w: 0, last: '2000-01-01' },
+    'l:a': { c: 3, w: 0, last: '2000-01-01' }
+  }
+};
+invariant(
+  reviewSandbox.RR.games.review.available(dueReviewProfile),
+  'Daily Review must be available for due words and letters'
+);
+invariant(
+  reviewSandbox.RR.progress.nextActivity(dueReviewProfile).id === 'review',
+  'PLAY must route to Daily Review when a review is due'
+);
+
+const currentReviewProfile = {
+  grade: 'K',
+  mastery: {
+    'w:cat': { c: 3, w: 0, last: '2999-01-01' }
+  }
+};
+invariant(
+  !reviewSandbox.RR.games.review.available(currentReviewProfile),
+  'Daily Review must stay hidden when nothing is due'
+);
+
 const savedProgress = {
   currentId: 'reader',
   customBooks: [],
@@ -108,9 +156,21 @@ const savedProgress = {
 const stateWrites = [];
 const stateSandbox = {
   RR: {
+    DATA: {
+      STAGES: [],
+      SHOP: []
+    },
     progress: {
       MASTER_AT: 3,
-      weekKey: () => '2026-07-20'
+      weekKey: () => '2026-07-20',
+      localDate: () => '2026-07-25',
+      diffCfg: () => ({ reward: 1 }),
+      tuneDifficulty: () => null,
+      weeklyEvent: () => ({}),
+      levelOf: () => ({ level: 1 }),
+      applyEvent: () => [],
+      rollSticker: () => null,
+      readyToGraduate: () => false
     }
   },
   localStorage: {
@@ -141,5 +201,22 @@ invariant(stateWrites.length === 1, 'rollWeek must persist one rollover once');
 const newReader = stateSandbox.RR.state.profiles[1];
 stateSandbox.RR.state.rollWeek(newReader);
 invariant(newReader.weekHistory.length === 0, 'rollWeek must not snapshot an unstarted week');
+
+returningReader.mastery = {
+  'w:cat': { c: 3, w: 0, last: '2000-01-01' }
+};
+stateSandbox.RR.state.recordRound(returningReader, 'review', 'K', {
+  stars: 3,
+  correct: 1,
+  total: 1,
+  coins: 7,
+  outcomes: [{ k: 'w:cat', ok: true }]
+});
+invariant(returningReader.stats['review-K'].plays === 1, 'Daily Review must use normal round stats');
+invariant(returningReader.mastery['w:cat'].c === 4, 'Daily Review must reconfirm mastery');
+invariant(
+  returningReader.mastery['w:cat'].last === '2026-07-25',
+  'Daily Review must refresh the review date through recordRound'
+);
 
 console.log('Static-site invariants passed.');
