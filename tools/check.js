@@ -156,9 +156,21 @@ const savedProgress = {
 const stateWrites = [];
 const stateSandbox = {
   RR: {
+    DATA: {
+      STAGES: [],
+      SHOP: []
+    },
     progress: {
       MASTER_AT: 3,
-      weekKey: () => '2026-07-20'
+      weekKey: () => '2026-07-20',
+      localDate: () => '2026-07-25',
+      diffCfg: () => ({ reward: 1 }),
+      tuneDifficulty: () => null,
+      weeklyEvent: () => ({}),
+      levelOf: () => ({ level: 1 }),
+      applyEvent: () => [],
+      rollSticker: () => null,
+      readyToGraduate: () => false
     }
   },
   localStorage: {
@@ -189,5 +201,22 @@ invariant(stateWrites.length === 1, 'rollWeek must persist one rollover once');
 const newReader = stateSandbox.RR.state.profiles[1];
 stateSandbox.RR.state.rollWeek(newReader);
 invariant(newReader.weekHistory.length === 0, 'rollWeek must not snapshot an unstarted week');
+
+returningReader.mastery = {
+  'w:cat': { c: 3, w: 0, last: '2000-01-01' }
+};
+stateSandbox.RR.state.recordRound(returningReader, 'review', 'K', {
+  stars: 3,
+  correct: 1,
+  total: 1,
+  coins: 7,
+  outcomes: [{ k: 'w:cat', ok: true }]
+});
+invariant(returningReader.stats['review-K'].plays === 1, 'Daily Review must use normal round stats');
+invariant(returningReader.mastery['w:cat'].c === 4, 'Daily Review must reconfirm mastery');
+invariant(
+  returningReader.mastery['w:cat'].last === '2026-07-25',
+  'Daily Review must refresh the review date through recordRound'
+);
 
 console.log('Static-site invariants passed.');
