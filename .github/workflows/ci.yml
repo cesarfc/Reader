@@ -1,8 +1,11 @@
 name: CI
 
+# Hosted Actions are off (billing) — the gate runs locally: AgentOS's swarm
+# automerge sweep runs the same syntax + invariant checks via autonomy
+# localChecks and posts the `agentos/ci` commit status. Re-enable by restoring
+# the triggers and switching requiredStatuses back in AgentOS config/swarm.json.
 on:
-  push:
-  pull_request:
+  workflow_dispatch:
 
 permissions:
   contents: read
